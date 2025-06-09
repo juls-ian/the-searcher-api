@@ -168,6 +168,16 @@ class ArticleController extends Controller
      */
     public function destroy(Article $article)
     {
-        //
+        // Delete associated files before deleting article 
+        if ($article->cover_photo && Storage::disk('public')->exists($article->cover_photo)) {
+            Storage::disk('public')->delete($article->cover_photo);
+        }
+
+        if ($article->thumbnail && Storage::disk('public')->exists($article->thumbnail)) {
+            Storage::disk('public')->delete($article->thumbnail);
+        }
+
+        $article->delete();
+        return response()->json(['message' => 'Article deleted successfully'], 200);
     }
 }
