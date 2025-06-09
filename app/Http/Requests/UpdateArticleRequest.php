@@ -37,7 +37,6 @@ class UpdateArticleRequest extends FormRequest
             'thumbnail_same_as_cover' => ['sometimes', 'boolean'],
             'thumbnail' => ['sometimes', 'required_if:thumbnail_same_as_cover,false', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
             // 'thumbnail' => ['required_if:thumbnail_same_as_cover,false'],
-            'thumbnail_caption' => ['sometimes', 'required_if:thumbnail_same_as_cover,false', 'string'],
             'thumbnail_artist_id' => ['sometimes', 'exists:users,id', 'required_if:thumbnail_same_as_cover,false'],
             'is_archived' => ['sometimes', 'nullable', 'boolean'],
             'archived_at' => ['sometimes', 'nullable', 'date'],
