@@ -123,24 +123,18 @@ class ArticleController extends Controller
 
         }
 
-
         /**
          * Handler 2: thumbnail_same_as_cover logic 
-         * check thumbnail path and caption based on thumbnail_same_as_cover
+         * when thumbnail is the same as cover, copy all cover properties to thumbnail
          */
         if ($request->has('thumbnail_same_as_cover') && $request->thumbnail_same_as_cover) {
 
-            // if same as cover, thumbnail with adapt cover_photo  
+            // if same as cover, force thumbnail with adapt cover_photo  
             $validatedData['thumbnail'] = $validatedData['cover_photo'] ?? $article->cover_photo;
 
-            // adapt cover metadata if not provided
-            if (!$request->has('thumbnail_caption')) {
-                $validatedData['thumbnail_caption'] = $validatedData['cover_caption'] ?? $article->cover_caption;
-            }
-
-            // adapt cover artist 
+            // force adapt cover artist 
             if (!$request->has('thumbnail_artist_id')) {
-                $validatedData['thumbnail_artist_id'] = $validatedData['thumbnail_artist_id'] ?? $article->cover_artist_id;
+                $validatedData['thumbnail_artist_id'] = $validatedData['cover_artist_id'] ?? $article->cover_artist_id;
             }
 
         } else {
@@ -155,9 +149,7 @@ class ArticleController extends Controller
 
                 $validatedData['thumbnail'] = $request->file('thumbnail')->store('articles/covers', 'public');
             }
-            // if thumbnail is provided as URL or string, it's already in $validatedData
         }
-
 
         Log::info('Request method: ' . $request->method());
         Log::info('Request data: ', $request->all());

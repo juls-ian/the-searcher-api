@@ -40,7 +40,6 @@ class ArticleFactory extends Factory
             'cover_artist_id' => User::factory(),
             'thumbnail' => fake()->imageUrl(300, 200, 'news'),
             // 'thumbnail' => UploadedFile::fake()->image('thumbnail.jpg', 800, 600),
-            'thumbnail_caption' => fake()->optional(0.9)->sentence(),
             'thumbnail_artist_id' => User::factory(),
             'archived_at' => fake()->optional(0.2)->dateTimeBetween('-1 year', 'now'),
             'add_to_ticker' => fake()->boolean(10),
