@@ -37,7 +37,6 @@ return new class extends Migration {
                 ->constrained('users');
             $table->boolean('thumbnail_same_as_cover')->default(false);
             $table->string('thumbnail')->nullable(); // filename
-            $table->text('thumbnail_caption')->nullable();
             $table->foreignIdFor(User::class, 'thumbnail_artist_id')
                 ->constrained('users');
             $table->timestampTz('archived_at')->nullable();
