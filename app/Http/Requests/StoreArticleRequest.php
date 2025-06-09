@@ -37,7 +37,6 @@ class StoreArticleRequest extends FormRequest
             'thumbnail_same_as_cover' => ['nullable', 'boolean'],
             'thumbnail' => ['nullable', 'required_if:thumbnail_same_as_cover,false', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
             // 'thumbnail' => 'nullable|required_without:thumbnail_same_as_cover|file|image',
-            'thumbnail_caption' => ['nullable', 'string'],
             'thumbnail_artist_id' => ['nullable', 'exists:users,id'],
             'is_archived' => ['nullable', 'boolean'],
             'archived_at' => ['nullable', 'date'],
