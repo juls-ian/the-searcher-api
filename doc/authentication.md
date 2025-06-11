@@ -2,7 +2,7 @@
 
 ## Guide in handling the user authentication 
 
-### Pre-requisite
+### Prerequisite
 1. php artisan config:publish cors
 2. User model
    - set HasApiTokens
@@ -20,6 +20,8 @@
             pm.globals.set('csrf-token', cookies.get('XSRF-TOKEN'))
             }
         })
+6. make UserController 
+7. make LoginRequest
 
 ### Authentication shall consist these features:
 
@@ -33,3 +35,4 @@
 2. Logout 
 3. Reset Password 
 4. Forgot Password
+5. Get current authenticated user*
