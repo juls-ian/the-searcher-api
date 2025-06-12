@@ -68,4 +68,36 @@ class LoginRequest extends FormRequest
     {
         return Str::transliterate(Str::lower($this->input('login')).'|'.$this->ip());
     }
+
+
+        public function currentUser(Request $request)
+    {
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'user' => $request->user()
+            ]
+        ]);
+    }
+
+       public function refreshToken(Request $request)
+    {
+        $user = $request->user();
+
+        // Revoke current token
+        $request->user()->currentAccessToken()->delete();
+
+        // Create new token 
+        $token = $user->createToken('auth-token')->plainTextToken;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Token refreshed successfully',
+            'data' => [
+                'user' => $user,
+                'token' => $token,
+                'token_type' => 'Bearer'
+            ]
+        ]);
+    }
 }
