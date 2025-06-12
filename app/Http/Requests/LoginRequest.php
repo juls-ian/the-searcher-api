@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
@@ -29,11 +30,15 @@ class LoginRequest extends FormRequest
     {
         return [
             'login' => ['required', 'string'],
-            'password' => ['required', 'string']
+            'password' => ['required', 'string'],
+            'remember' => ['nullable', 'boolean']
         ];
     }
 
-
+    /**
+     * Authenticate user upon login
+     * @return User
+     */
     public function authenticate()
     {
 
@@ -42,13 +47,13 @@ class LoginRequest extends FormRequest
         $login = $this->input('login');
         $password = $this->input('password');
 
-        // determine if login is email or staff id 
+        // Determine if login is email or staff id 
         $field = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'staff_id';
 
         // check user existence 
         $user = User::where($field, $login)->first();
 
-        // authenticate login 
+        // Authenticate login 
         if (!$user) {
             RateLimiter::hit($this->throttleKey());
 
@@ -57,7 +62,7 @@ class LoginRequest extends FormRequest
             ]);
         }
 
-        // authenticate password 
+        // Authenticate password 
         if (!Hash::check($password, $user->password)) {
 
             // record failed attempt & increment rate limiter count 
@@ -69,13 +74,16 @@ class LoginRequest extends FormRequest
         }
 
         Auth::login($user);
-        // if successful clear the rate limiter attempts 
+
+        // If successful clear the rate limiter attempts 
         RateLimiter::clear($this->throttleKey());
         return $user; // return current auth user 
 
     }
 
-    // Ensure that the user/request is not rate-limited; otherwise, throw a ValidationException 
+    /**
+     * Ensure that the user/request is not rate-limited; otherwise, throw a ValidationException 
+     */
     public function ensureIsNotRateLimited()
     {
         if (!RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
@@ -92,9 +100,15 @@ class LoginRequest extends FormRequest
         ]);
     }
 
-    // Generate throttle key 
+    /**
+     * Generate throttle key
+     * @return string
+     */
     public function throttleKey()
     {
         return Str::transliterate(Str::lower($this->string('login')) . '|' . $this->ip());
     }
+
+
+
 }
