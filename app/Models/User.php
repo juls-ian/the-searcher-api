@@ -3,7 +3,10 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Notifications\ResetPasswordNotification;
 use Carbon\Carbon;
+use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -12,7 +15,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens, CanResetPassword;
 
     /**
      * The attributes that are mass assignable.
@@ -60,7 +63,10 @@ class User extends Authenticatable
         ];
     }
 
-    // relationship to Article
+    /**
+     * Relationships to Article
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Article, User>
+     */
     public function writtenArticles()
     {
         return $this->hasMany(Article::class, 'writer_id');
@@ -76,7 +82,19 @@ class User extends Authenticatable
         return $this->hasMany(Article::class, 'thumbnail_artist_id');
     }
 
-    // getting all contributions 
+    /**
+     * Register ResetPassword notification in the model
+     * 
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new ResetPasswordNotification($token));
+    }
+
+    /**
+     * Getting all contributions 
+     * @return Article
+     */
     public function allContributions()
     {
         return Article::where('writer_id', $this->id)
@@ -84,6 +102,11 @@ class User extends Authenticatable
             ->orWhere('thumbnail_artist_id', $this->id);
     }
 
+
+    /**
+     * Assemble the first and last name
+     * @return string
+     */
     public function getFullNameAttribute(): string
     {
         return "{$this->first_name} {$this->last_name}";
@@ -93,7 +116,6 @@ class User extends Authenticatable
      * Generating Staff Id 
      * Format: [first 3 letters of surname]-[joining year]-[fName 1st letter]-[4 digit increment]
      */
-
     public static function generateStaffId($firstName, $lastName, $joiningDate = null)
     {
         // current year if joining date not provided 
@@ -136,7 +158,6 @@ class User extends Authenticatable
     /**
      * Auto-generate the id with Boot method when creating user 
      */
-
     protected static function boot()
     {
         parent::boot();

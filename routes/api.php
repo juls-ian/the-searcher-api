@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Middleware\HandleExpiredTokens;
 
 
@@ -13,14 +15,14 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-
 // User Auth routes
 Route::prefix('auth')->group(function () {
 
     // Login 
     Route::post('/login', [AuthController::class, 'login'])->middleware('guest');
-
     // Password recovery 
+    Route::post('/forgot-password', ForgotPasswordController::class)->middleware('throttle:5,1');
+    Route::post('/reset-password', ResetPasswordController::class)->middleware('throttle:5,1');
 
 
     Route::middleware(['auth:sanctum', HandleExpiredTokens::class])->group(function () {
