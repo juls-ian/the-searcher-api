@@ -2,10 +2,11 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Middleware\HandleExpiredTokens;
+
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -16,7 +17,11 @@ Route::get('/user', function (Request $request) {
 // User Auth routes
 Route::prefix('auth')->group(function () {
 
-    Route::post('/login', [AuthController::class, 'login']);
+    // Login 
+    Route::post('/login', [AuthController::class, 'login'])->middleware('guest');
+
+    // Password recovery 
+
 
     Route::middleware(['auth:sanctum', HandleExpiredTokens::class])->group(function () {
 
