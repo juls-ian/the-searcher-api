@@ -68,7 +68,7 @@ Initiate **php artisan install:api**
 ## Account Recovery 
 
  1.  handle forgot password & reset password
-     1.  ensure User model has **Notifiable** and **CanResetPassword**
+     1.  ensure User model has **Notifiable** and **CanResetPassword** trait
      2.  create Forgot Password & Reset Password Controllers (invokable or not)
      4.  declare controllers in api route
           - add rate limiter     
@@ -77,12 +77,13 @@ Initiate **php artisan install:api**
          1.  without email: 
             - MAIL_MAILER=log (.env)
             - php artisan queue:work
+  
          2. with email: 
             - pick an email tester like mailtrap
             - create a mailbox in mailtrap 
             - setup the .env
             - set dummy reset-password route in web route to avoid password.reset route error
             - php artisan make:notification ResetPasswordNotification (optional) [to override the default mail notification with out  own version that points to your frontend or app's reset page]
-              - tell User model to use custom notification
+              - register custom notification to User model to
 
 
