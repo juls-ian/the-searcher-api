@@ -31,10 +31,10 @@ class ResetPasswordController extends Controller
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function (User $user, string $password) {
-                $user->forceFill([
+                $user->forceFill([ # allows to mass assign w/o checking $fillable
                     'password' => Hash::make($password)
-                ])->setRememberToken(Str::random(60));
-
+                ])->setRememberToken(Str::random(60)); # resets remember token
+    
                 $user->save();
 
                 event(new PasswordReset($user));
@@ -51,7 +51,7 @@ class ResetPasswordController extends Controller
     private function getErrorMessage($status)
     {
 
-        return match ($status) {
+        return match ($status) { # match is similar to switch expression
             Password::INVALID_TOKEN => 'Token is invalid or expired',
             default => 'Unable to reset password'
         };
