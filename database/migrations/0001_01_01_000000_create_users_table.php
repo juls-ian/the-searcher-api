@@ -22,14 +22,14 @@ return new class extends Migration {
             $table->string('course');
             $table->string('phone');
             $table->string('board_position');
-            $table->enum('role', ['admin', 'editor', 'staff'])->default('staff');
+            $table->enum('role', ['admin', 'editor'])->default('admin');
             $table->string('term');
             $table->enum('status', ['active', 'inactive', 'alumni'])->default('active');
             $table->date('joined_at');
             $table->date('left_at')->nullable();
             $table->string('profile_pic');
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
