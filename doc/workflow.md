@@ -86,4 +86,15 @@ Initiate **php artisan install:api**
             - php artisan make:notification ResetPasswordNotification (optional) [to override the default mail notification with out  own version that points to your frontend or app's reset page]
               - register custom notification to User model to
 
+## Registration
+
+1. create requests for:
+   1. Store User Request
+   2. Update User Request
+2. php artisan make:policy UserPolicy --model=User
+3. composer require propaganistas/laravel-phone
+4. make the password in the user migration nullable
+5. register User Controller to api routes
+6. configure the store and update user request 
+7. configure user registration in the User Controller made earlier
 
