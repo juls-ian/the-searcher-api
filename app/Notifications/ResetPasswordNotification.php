@@ -19,8 +19,8 @@ class ResetPasswordNotification extends Notification
      */
     public function __construct($token, $resetUrl = null)
     {
-        $this->token = $token;
-        #     ? if not null or not falsy : fallback if null or falsy
+        $this->token = $token; # reset password token 
+        //     ? if not null or not falsy use $resetUrl: fallback if null or falsy
         $this->resetUrl = $resetUrl ?: config('app.frontend_url') . '/reset-password';
     }
 
