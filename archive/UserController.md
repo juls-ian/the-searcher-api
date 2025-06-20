@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
-use App\Notifications\SetPasswordNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 
@@ -46,12 +45,17 @@ class UserController extends Controller
         }
 
         $user = User::create($validatedData);
+        $status = Password::broker()->sendResetLink(['email' => $user->email]);
 
-        // Password reset token manual generation because we no longer use Password::sendResetLink()
-        $token = Password::broker()->createToken($user); #createToken requires CanResetPassword in user Model 
+        if ($status !== Password::RESET_LINK_SENT) {
+            //rollback 
+            $user->delete();
 
-        //Send custom set password notification 
-        $user->notify(new SetPasswordNotification($token));
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send password setup email'
+            ], 500);
+        }
 
         return response()->json([
             'success' => true,
@@ -59,35 +63,4 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
 }
