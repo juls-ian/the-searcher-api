@@ -13,6 +13,7 @@ use Illuminate\Validation\Rules\Password as RulesPassword;
 
 class SetPasswordController extends Controller
 {
+    private $token;
     /**
      * Handle the incoming request.
      */
@@ -39,7 +40,6 @@ class SetPasswordController extends Controller
                 $user->save();
 
                 event(new PasswordReset($user));
-
 
                 // Send email verification link if user unverified 
                 if (!$user->hasVerifiedEmail()) {
