@@ -22,7 +22,7 @@ return new class extends Migration {
             $table->string('course');
             $table->string('phone');
             $table->string('board_position');
-            $table->enum('role', ['admin', 'editor'])->default('admin');
+            $table->enum('role', ['admin', 'editor', 'staff'])->default('staff');
             $table->string('term');
             $table->enum('status', ['active', 'inactive', 'alumni'])->default('active');
             $table->date('joined_at');
@@ -32,6 +32,8 @@ return new class extends Migration {
             $table->string('password')->nullable();
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes(); // soft delete feature deleted_at column
+
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

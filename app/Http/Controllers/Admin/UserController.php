@@ -107,8 +107,17 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(User $user)
     {
-        //
+        // Delete profile pic before deleting user 
+        $storage = Storage::disk('public');
+
+        if ($user->profile_pic && $storage->exists($user->profile_pic)) {
+            $storage->delete($user->profile_pic);
+        }
+
+        $user->delete();
+        return response()->json(['message' => 'User was deleted']);
+
     }
 }
