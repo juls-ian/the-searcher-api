@@ -50,12 +50,12 @@ class UserController extends Controller
         // Password reset token manual generation because we no longer use Password::sendResetLink()
         $token = Password::broker()->createToken($user); #createToken requires CanResetPassword in user Model 
 
-        //Send custom set password notification 
+        // Send custom set password notification 
         $user->notify(new SetPasswordNotification($token));
 
         return response()->json([
             'success' => true,
-            'message' => 'Successfully registered the staff. An email has been sent to them to set their password. '
+            'message' => 'Successfully registered the staff. An email has been sent to set your password. '
         ]);
     }
 
