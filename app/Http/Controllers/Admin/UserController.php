@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Notifications\SetPasswordNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -41,7 +43,7 @@ class UserController extends Controller
 
         // Handler 1: profile pic upload
         if ($request->hasFile('profile_pic')) {
-            $profilePicPath = $request->file('profile_pic')->store('users/profile-pic', 'public');
+            $profilePicPath = $request->file('profile_pic')->store('users/id-pics', 'public');
             $validatedData['profile_pic'] = $profilePicPath;
         }
 
@@ -62,9 +64,9 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(User $user)
     {
-        //
+        return UserResource::make($user);
     }
 
     /**
@@ -78,9 +80,28 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateUserRequest $request, User $user)
     {
-        //
+        $validatedData = $request->validated();
+        $storage = Storage::disk('public');
+
+        // Handler: profile pic upload 
+        if ($request->hasFile('profile_pic')) {
+
+            # delete previous pic if it exists 
+            if ($user->profile_pic && $storage->exists($user->profile_pic)) {
+                $storage->delete($user->profile_pic);
+            }
+
+            # upload new pic 
+            $validatedData['profile_pic'] = $request->file('profile_pic')->store('users/id-pics');
+
+        }
+
+        $user->update($validatedData); # update user 
+        return UserResource::make($user); # return updated data
+
+
     }
 
     /**
