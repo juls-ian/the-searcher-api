@@ -55,7 +55,7 @@ class UserController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Successfully registered the staff. An email has been sent to set your password. '
+            'message' => 'Successfully registered the staff. An email has been sent to them to set their password. '
         ]);
     }
 
