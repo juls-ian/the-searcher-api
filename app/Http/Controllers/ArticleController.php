@@ -49,15 +49,15 @@ class ArticleController extends Controller
         // Handler 2: thumbnail_same_as_cover logic 
         if ($request->has('thumbnail_same_as_cover') && $request->thumbnail_same_as_cover) {
 
-            // use same file as cover_photo for thumbnail
+            # use same file as cover_photo for thumbnail
             $validatedData['thumbnail'] = $validatedData['cover_photo'] ?? null;
 
-            // copy cover_photo metadata to thumbnail if not provided 
+            # copy cover_photo metadata to thumbnail if not provided 
             if (!$request->has('thumbnail_caption') && $request->has('cover_caption')) {
                 $validatedData['thumbnail_caption'] = $validatedData['cover_caption'];
             }
 
-            // copy cover_artist_id to thumbnail_artist_id if not provided 
+            # copy cover_artist_id to thumbnail_artist_id if not provided 
             if (!$request->has('thumbnail_artist_id') && $request->has('cover_artist_id')) {
                 $validatedData['thumbnail_artist_id'] = $validatedData['cover_artist_id'];
             }
@@ -73,7 +73,7 @@ class ArticleController extends Controller
         // Handler 4: date/time for published_at
         if (isset($validatedData['published_at']) && $validatedData['published_at']) {
 
-            // date provided (either now or past)
+            # date provided (either now or past)
             $validatedData['published_at'] = Carbon::parse($validatedData['published_at']);
         } else {
 
@@ -82,6 +82,8 @@ class ArticleController extends Controller
 
         // $validatedData['published_at'] = Carbon::now();
         $article = Article::create($validatedData);
+        // Eager load Article relationships to User (n+1 problem fix)
+        $article->load(['writer', 'coverArtist', 'thumbnailArtist']);
         return ArticleResource::make($article);
 
     }
@@ -91,7 +93,7 @@ class ArticleController extends Controller
      */
     public function show(Article $article)
     {
-        // eager load Article relationships to User (n+1 problem fix)
+        // Eager load Article relationships to User (n+1 problem fix)
         $article->load(['writer', 'coverArtist', 'thumbnailArtist']);
         return ArticleResource::make($article);
     }
@@ -110,13 +112,15 @@ class ArticleController extends Controller
     public function update(UpdateArticleRequest $request, Article $article)
     {
         $validatedData = $request->validated();
+        $storage = Storage::disk('public');
+
 
         // Handler 1: cover photo upload or URL
         if ($request->hasFile('cover_photo')) {
 
-            // delete old cover if it exists
-            if ($article->cover_photo && Storage::disk('public')->exists($article->cover_photo)) {
-                Storage::disk('public')->delete($article->cover_photo);
+            # delete old cover if it exists
+            if ($article->cover_photo && $storage->exists($article->cover_photo)) {
+                $storage->delete($article->cover_photo);
             }
 
             $validatedData['cover_photo'] = $request->file('cover_photo')->store('articles/covers', 'public');
@@ -129,10 +133,10 @@ class ArticleController extends Controller
          */
         if ($request->has('thumbnail_same_as_cover') && $request->thumbnail_same_as_cover) {
 
-            // if same as cover, force thumbnail with adapt cover_photo  
+            # if same as cover, force thumbnail with adapt cover_photo  
             $validatedData['thumbnail'] = $validatedData['cover_photo'] ?? $article->cover_photo;
 
-            // force adapt cover artist 
+            # force adapt cover artist 
             if (!$request->has('thumbnail_artist_id')) {
                 $validatedData['thumbnail_artist_id'] = $validatedData['cover_artist_id'] ?? $article->cover_artist_id;
             }
@@ -142,9 +146,9 @@ class ArticleController extends Controller
             // Handler 3: thumbnail upload (only if not using same as cover)
             if ($request->hasFile('thumbnail')) {
 
-                // delete old thumbnail if it exists and it's not same as cover
-                if ($article->thumbnail && Storage::disk('public')->exists($article->thumbnail)) {
-                    Storage::disk('public')->delete($article->thumbnail);
+                # delete old thumbnail if it exists and it's not same as cover
+                if ($article->thumbnail && $storage->exists($article->thumbnail)) {
+                    $storage->delete($article->thumbnail);
                 }
 
                 $validatedData['thumbnail'] = $request->file('thumbnail')->store('articles/covers', 'public');
