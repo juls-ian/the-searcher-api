@@ -95,6 +95,20 @@ Initiate **php artisan install:api**
 3. composer require propaganistas/laravel-phone
 4. make the password in the user migration nullable
 5. register User Controller to api routes
-6. configure the store and update user request 
-7. configure user registration in the User Controller made earlier
+6. configure the store and update user request
+7. make a Set Password Controller (invokable)
+8. register the controller in api route  
+9. php artisan make:notification SetPasswordNotification
+10. configure the custom notification
+11. configure store method in the User Controller made earlier
 
+### Email Verification
+
+1.  User model must implement MustVerifyEmail
+2.  handle email verification in Set Password Controller
+    1.  login directly the user and generate token in the set password controller
+3. make a Email Verification Controller and handle here the ff: (refactored)
+   1. email verification notice 
+   2. email verification handler
+   3. resending email verification
+4. set the routes for these three
