@@ -15,31 +15,43 @@ class ArticleObserver
         //
     }
 
+    /**
+     * Runs before a new article is saved in database
+     */
     public function creating(Article $article)
     {
-        $slug = Str::slug($article->title);
-        $originalSlug = $slug;
+        $slug = Str::slug($article->title); # convert into slug
+        $originalSlug = $slug; # store orig slug
         $count = 1;
+
+        // Check if slug already exists in db 
         while (Article::where('slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $count++;
+            $slug = $originalSlug . '-' . $count++; # if it exist, appends the number 
         }
-        $article->slug = $slug;
+
+        $article->slug = $slug; # final value 
     }
 
+    /**
+     * Runs before a new article is updated in database
+     */
     public function updating(Article $article)
     {
-        if ($article->isDirty('title')) {
+        if ($article->isDirty('title')) { # Check if title has been modified
             $slug = Str::slug($article->title);
             $originalSlug = $slug;
             $count = 1;
+
+            // Check if any OTHER article has this slug
             while (
-                Article::where('slug', $slug)
-                    ->where('id', '!=', $article->id)
+                Article::where('slug', $slug) # check if slug exists
+                    ->where('id', '!=', $article->id) # ensure not to compare slug to itself
                     ->exists()
             ) {
                 $slug = $originalSlug . '-' . $count++;
             }
-            $article->slug = $slug;
+
+            $article->slug = $slug; # final value 
         }
     }
 
