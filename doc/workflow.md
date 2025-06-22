@@ -111,7 +111,6 @@ Initiate **php artisan install:api**
 
 1.  User model must implement MustVerifyEmail
 2.  handle email verification in Set Password Controller
-    1.  login directly the user and generate token in the set password controller
 3. make a Email Verification Controller and handle here the ff: (refactored)
    1. email verification notice 
    2. email verification handler

@@ -41,11 +41,6 @@ class SetPasswordController extends Controller
 
                 event(new PasswordReset($user));
 
-                // Send email verification link if user unverified 
-                if (!$user->hasVerifiedEmail()) {
-                    $user->sendEmailVerificationNotification();
-                }
-
                 // Issue sanctum token 
                 $this->token = $user->createToken('set-password-token')->plainTextToken;
             }
