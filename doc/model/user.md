@@ -31,7 +31,9 @@ This contains these properties:
 - $table->string('first_name')
 - $table->string('last_name')
 - $table->string('full_name', 200)->storedAs("first_name || ' ' || last_name")->nullable()
+- $table->string('full_name_slug')->unique();
 - $table->string('pen_name')
+- $table->string('pen_name_slug')->unique();
 - $table->string('staff_id', 100)->unique()
 - $table->string('email')->unique()
 - $table->string('year_level')
