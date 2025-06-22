@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
@@ -9,7 +8,7 @@ use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\SetPasswordController;
-use App\Http\Controllers\EmailVerificationController;
+use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Middleware\HandleExpiredTokens;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
