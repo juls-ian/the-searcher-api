@@ -82,13 +82,6 @@ Initiate **php artisan install:api**
             - php artisan make:notification ResetPasswordNotification (optional) [to override the default mail notification with out  own version that points to your frontend or app's reset page]
               - register custom notification to User model to
 
-## User 
-
-1. make User Resource
-2. declare the user route
-3. create observer for slugs generation
-   1. register observer in app/Providers/AppServiceProvider.php in the boot method
-
 ### Registration 
 *can only be done by admin* 
 
@@ -125,3 +118,12 @@ Initiate **php artisan install:api**
    1. showing user
    2. updating user
    3. deleting user & soft delete 
+
+## Article Category 
+
+1. make article category resource 
+2. handle crud in the article category controller
+3. implement soft delete
+4. handle slug generation in the observer 
+   1. register the observer
+5. declare in api routes
