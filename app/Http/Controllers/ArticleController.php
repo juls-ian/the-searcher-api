@@ -117,7 +117,7 @@ class ArticleController extends Controller
      */
     public function update(UpdateArticleRequest $request, Article $article)
     {
-        $this->authorize('update', Article::class);
+        $this->authorize('update', $article);
 
         $validatedData = $request->validated();
         $storage = Storage::disk('public');
@@ -180,7 +180,7 @@ class ArticleController extends Controller
      */
     public function destroy(Article $article)
     {
-        $this->authorize('delete', Article::class);
+        $this->authorize('delete', $article);
         // Delete associated files before deleting article 
         if ($article->cover_photo && Storage::disk('public')->exists($article->cover_photo)) {
             Storage::disk('public')->delete($article->cover_photo);
