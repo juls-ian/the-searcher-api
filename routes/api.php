@@ -23,7 +23,7 @@ Route::get('/user', function (Request $request) {
 Route::prefix('auth')->group(function () {
 
     // Login 
-    Route::post('/login', [AuthController::class, 'login'])->middleware('guest');
+    Route::post('/login', [AuthController::class, 'login'])->middleware('guest')->name('login');
     // Password recovery 
     Route::post('/forgot-password', ForgotPasswordController::class)->middleware('throttle:5,1');
     Route::post('/reset-password', ResetPasswordController::class)->middleware('throttle:5,1');
@@ -44,7 +44,7 @@ Route::prefix('auth')->group(function () {
 /**
  * Article routes 
  */
-Route::apiResource('articles', ArticleController::class)->middleware('guest'); # change to auth:sanctum later
+Route::apiResource('articles', ArticleController::class)->middleware('auth:sanctum'); # change to auth:sanctum later
 
 /**
  * User routes

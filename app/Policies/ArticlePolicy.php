@@ -2,18 +2,32 @@
 
 namespace App\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Auth\Access\Response;
 use App\Models\Article;
 use App\Models\User;
 
 class ArticlePolicy
 {
+    use HandlesAuthorization;
+
+    // Override abilities 
+    public function before(User $user, string $ability)
+    {
+        if ($user->role === 'admin') {
+            return true;
+        }
+
+        return null; # continue to other policy methods
+    }
+
+
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(?User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -21,7 +35,7 @@ class ArticlePolicy
      */
     public function view(User $user, Article $article): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -29,7 +43,7 @@ class ArticlePolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->role === 'editor';
     }
 
     /**
@@ -37,7 +51,7 @@ class ArticlePolicy
      */
     public function update(User $user, Article $article): bool
     {
-        return false;
+        return $user->role === 'editor';
     }
 
     /**
@@ -45,7 +59,8 @@ class ArticlePolicy
      */
     public function delete(User $user, Article $article): bool
     {
-        return false;
+        return $user->role === 'editor';
+
     }
 
     /**
@@ -53,7 +68,7 @@ class ArticlePolicy
      */
     public function restore(User $user, Article $article): bool
     {
-        return false;
+        return $user->role === 'editor';
     }
 
     /**

@@ -8,16 +8,19 @@ use App\Http\Requests\StoreArticleRequest;
 use App\Http\Requests\UpdateArticleRequest;
 use App\Http\Resources\ArticleResource;
 use Carbon\Carbon;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ArticleController extends Controller
 {
+    use AuthorizesRequests;
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
+        $this->authorize('viewAny', Article::class);
         // eager load Article relationships to User (n+1 problem fix)
         $articles = Article::with(['writer', 'coverArtist', 'thumbnailArtist'])->get();
         return ArticleResource::collection($articles);
@@ -38,6 +41,7 @@ class ArticleController extends Controller
      */
     public function store(StoreArticleRequest $request)
     {
+        $this->authorize('create', Article::class);
         $validatedData = $request->validated();
 
         // Handler 1: cover photo upload 
@@ -93,6 +97,8 @@ class ArticleController extends Controller
      */
     public function show(Article $article)
     {
+        $this->authorize('view', $article);
+
         // Eager load Article relationships to User (n+1 problem fix)
         $article->load(['writer', 'coverArtist', 'thumbnailArtist']);
         return ArticleResource::make($article);
@@ -111,6 +117,8 @@ class ArticleController extends Controller
      */
     public function update(UpdateArticleRequest $request, Article $article)
     {
+        $this->authorize('update', Article::class);
+
         $validatedData = $request->validated();
         $storage = Storage::disk('public');
 
@@ -172,6 +180,7 @@ class ArticleController extends Controller
      */
     public function destroy(Article $article)
     {
+        $this->authorize('delete', Article::class);
         // Delete associated files before deleting article 
         if ($article->cover_photo && Storage::disk('public')->exists($article->cover_photo)) {
             Storage::disk('public')->delete($article->cover_photo);
