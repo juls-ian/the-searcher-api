@@ -24,7 +24,7 @@ class UpdateArticleRequest extends FormRequest
         return [
 
             'title' => ['sometimes', 'string'],
-            'category_id' => ['sometimes', 'exists:article_categories,id'],
+            'article_category_id' => ['sometimes', 'exists:article_categories,id'],
             'writer_id' => ['sometimes', 'exists:users,id'],
             'body' => ['sometimes', 'string'],
             'published_at' => ['sometimes', 'nullable', 'date'],
