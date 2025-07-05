@@ -13,7 +13,7 @@ class Article extends Model
 
     protected $fillable = [
         'title',
-        'category_id',
+        'article_category_id',
         'writer_id',
         'body',
         'published_at',
@@ -25,7 +25,6 @@ class Article extends Model
         'cover_artist_id',
         'thumbnail_same_as_cover',
         'thumbnail',
-        'thumbnail_caption',
         'thumbnail_artist_id',
         'archived_at',
         'add_to_ticker',
@@ -47,7 +46,7 @@ class Article extends Model
     // relation to ArticleCategory
     public function category()
     {
-        return $this->belongsTo(ArticleCategory::class, 'category_id');
+        return $this->belongsTo(ArticleCategory::class);
     }
 
     // relationship to User (writer)

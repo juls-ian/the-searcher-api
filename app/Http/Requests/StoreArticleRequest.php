@@ -23,7 +23,7 @@ class StoreArticleRequest extends FormRequest
     {
         return [
             'title' => ['required', 'string'],
-            'category_id' => ['required', 'exists:article_categories,id'],
+            'article_category_id' => ['required', 'exists:article_categories,id'],
             'writer_id' => ['required', 'exists:users,id'],
             'body' => ['required', 'string'],
             'published_at' => ['nullable', 'date'],
