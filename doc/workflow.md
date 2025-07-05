@@ -127,3 +127,9 @@ Initiate **php artisan install:api**
 4. handle slug generation in the observer 
    1. register the observer
 5. declare in api routes
+
+## Authorization 
+
+1. handle the Article Policy 
+2. implement custom error handling or global exception handler 
+   1. if global exception handler do it in the bootstrap/app.php
