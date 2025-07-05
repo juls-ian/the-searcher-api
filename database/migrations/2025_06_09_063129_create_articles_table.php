@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->string('slug')->unique();
             $table->foreignIdFor(User::class, 'writer_id')
                 ->constrained('users');
-            $table->foreignIdFor(ArticleCategory::class, 'category_id')
+            $table->foreignIdFor(ArticleCategory::class)
                 ->constrained('article_categories')
                 ->onDelete('cascade');
             $table->longText('body');

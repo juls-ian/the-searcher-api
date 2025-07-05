@@ -21,6 +21,7 @@ return new class extends Migration {
                 ->constrained('article_categories')
                 ->onDelete('set null'); // set parent_id to NULL if the parent category is deleted
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
