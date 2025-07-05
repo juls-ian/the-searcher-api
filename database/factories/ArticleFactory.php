@@ -26,7 +26,7 @@ class ArticleFactory extends Factory
         return [
             'title' => $title,
             'slug' => Str::slug($title),
-            'category_id' => ArticleCategory::inRandomOrder()->first()->id, // assign to existing category
+            'article_category_id' => ArticleCategory::inRandomOrder()->first()->id, // assign to existing category
             'writer_id' => User::factory(),
             'body' => fake()->paragraphs(rand(3, 8), true),
             'published_at' => fake()->dateTimeBetween('-1 year', 'now'),

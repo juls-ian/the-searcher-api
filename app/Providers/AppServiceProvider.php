@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Models\User;
 use App\Models\Article;
+use App\Models\ArticleCategory;
+use App\Observers\ArticleCategoryObserver;
 use App\Observers\UserObserver;
 use App\Observers\ArticleObserver;
 use Illuminate\Support\ServiceProvider;
@@ -25,5 +27,6 @@ class AppServiceProvider extends ServiceProvider
     {
         Article::observe(ArticleObserver::class);
         User::observe(UserObserver::class);
+        ArticleCategory::observe(ArticleCategoryObserver::class);
     }
 }

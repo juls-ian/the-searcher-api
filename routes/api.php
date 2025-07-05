@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\UserController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\ArticleCategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\ArticleController;
@@ -10,7 +10,6 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\SetPasswordController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Middleware\HandleExpiredTokens;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 /*
 Route::get('/user', function (Request $request) {
@@ -51,6 +50,11 @@ Route::apiResource('articles', ArticleController::class)->middleware('guest'); #
  * User routes
  */
 Route::apiResource('users', UserController::class)->middleware('guest'); # change to auth:sanctum later
+
+/**
+ * Article Category routes 
+ */
+Route::apiResource('article-categories', ArticleCategoryController::class)->middleware('guest'); # change to auth:sanctum later
 
 
 /**
