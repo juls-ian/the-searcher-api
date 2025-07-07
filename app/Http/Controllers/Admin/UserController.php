@@ -2,23 +2,27 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreUserRequest;
-use App\Http\Requests\UpdateUserRequest;
-use App\Http\Resources\UserResource;
 use App\Models\User;
-use App\Notifications\SetPasswordNotification;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
+use App\Http\Requests\StoreUserRequest;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\UpdateUserRequest;
+use Illuminate\Support\Facades\Password;
+use App\Notifications\SetPasswordNotification;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class UserController extends Controller
 {
+    use AuthorizesRequests;
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
+        $this->authorize('viewAny', User::class);
         $staffs = User::with(['writtenArticles', 'coverContributions', 'thumbnailContributions'])->get();
         return UserResource::collection($staffs);
     }
@@ -36,6 +40,7 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request)
     {
+        $this->authorize('create', User::class);
         $validatedData = $request->validated();
 
         // Ensuring password is unset in $validatedData when creating user at first 
@@ -66,6 +71,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
+        $this->authorize('view', $user);
         return UserResource::make($user);
     }
 
@@ -82,6 +88,7 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user)
     {
+        $this->authorize('update', $user);
         $validatedData = $request->validated();
         $storage = Storage::disk('public');
 
@@ -109,6 +116,7 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
+        $this->authorize('delete', $user);
         // Delete profile pic before deleting user 
         $storage = Storage::disk('public');
 
@@ -117,7 +125,7 @@ class UserController extends Controller
         }
 
         $user->delete();
-        return response()->json(['message' => 'User was deleted']);
+        return response()->json(['message' => 'User was deleted'], 200);
 
     }
 }
