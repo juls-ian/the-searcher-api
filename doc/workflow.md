@@ -130,6 +130,7 @@ Initiate **php artisan install:api**
 
 ## Authorization 
 
-1. handle the Article Policy 
+1. handle Article Policies 
 2. implement custom error handling or global exception handler 
    1. if global exception handler do it in the bootstrap/app.php
+3. handle User Policies

@@ -49,7 +49,7 @@ Route::apiResource('articles', ArticleController::class)->middleware('auth:sanct
 /**
  * User routes
  */
-Route::apiResource('users', UserController::class)->middleware('guest'); # change to auth:sanctum later
+Route::apiResource('users', UserController::class)->middleware('auth:sanctum'); # change to auth:sanctum later
 
 /**
  * Article Category routes 
