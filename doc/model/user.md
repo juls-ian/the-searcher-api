@@ -1,6 +1,6 @@
 # User 
 
-Documentation shall consist User model's properties, migrations, and factory?
+Documentation shall consist User model's properties, resource and migrations
 
 ## Relationships 
 1. writtenArticles <-hasMany-> Article 
