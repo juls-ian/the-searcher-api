@@ -6,15 +6,18 @@ use App\Models\ArticleCategory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateArticleCategoryRequest;
 use App\Http\Resources\ArticleCategoryResource;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 
 class ArticleCategoryController extends Controller
 {
+    use AuthorizesRequests;
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
+        $this->authorize('viewAny', ArticleCategory::class);
         // eager load relationship to Article 
         $articleCategories = ArticleCategory::with(['articles'])->get();
         return ArticleCategoryResource::collection($articleCategories);
@@ -34,13 +37,15 @@ class ArticleCategoryController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', ArticleCategory::class);
         $validatedData = $request->validate([
             'name' => ['required'],
-            'parent_id' => ['exists:article_category,id']
+            'parent_id' => ['exists:article_categories,id']
         ]);
 
         $category = ArticleCategory::create($validatedData);
         $category->load(['articles']); # relationship
+        return ArticleCategoryResource::make($category);
     }
 
     /**
@@ -48,6 +53,7 @@ class ArticleCategoryController extends Controller
      */
     public function show(ArticleCategory $articleCategory)
     {
+        $this->authorize('view', $articleCategory);
         return ArticleCategoryResource::make($articleCategory);
     }
 
@@ -64,6 +70,7 @@ class ArticleCategoryController extends Controller
      */
     public function update(Request $request, ArticleCategory $articleCategory)
     {
+        $this->authorize('update', $articleCategory);
         $validatedData = $request->validate([
             'name' => ['required'],
             'parent_id' => ['exists:article_category,id']
@@ -78,6 +85,7 @@ class ArticleCategoryController extends Controller
      */
     public function destroy(ArticleCategory $articleCategory)
     {
+        $this->authorize('delete', $articleCategory);
         $articleCategory->delete();
         return response()->json(['message' => 'Article deleted successfully'], 200);
     }

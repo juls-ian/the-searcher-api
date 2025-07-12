@@ -20,10 +20,14 @@ The authorization hierarchy of the api is:
 
 ### Article Policy
 
-1. handles the article policies 
+1. implement the article policies 
 2. handle in the bootstrap/app the authorization exceptions for custom exceptions
 
 ### User Policy 
-1. handle the user management authorization
+1. implement the user management authorization
 2. only admin can perform this
 
+
+### Article Category Policy 
+1. implement policies
+2. only the admin and editor can perform this
