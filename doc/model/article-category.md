@@ -1,6 +1,6 @@
 # Article Category 
 
-Documentation shall consist Article model's properties, migrations, and factory?
+Documentation shall consist Article Category model's properties, resource and migrations
 
 ## Relationships 
 1. articles <-belongsToMany-> Article 
