@@ -10,16 +10,19 @@ use App\Http\Resources\CommunitySegmentResource;
 use App\Models\SegmentsArticle;
 use App\Models\SegmentsPoll;
 use Carbon\Carbon;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class CommunitySegmentController extends Controller
 {
+    use AuthorizesRequests;
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
+        $this->authorize('viewAny', CommunitySegment::class);
         $segments = CommunitySegment::with(['writer', 'coverArtist', 'series', 'segmentArticles', 'segmentPolls'])->get();
         return CommunitySegmentResource::collection($segments);
     }
@@ -37,6 +40,7 @@ class CommunitySegmentController extends Controller
      */
     public function store(StoreCommunitySegmentRequest $request)
     {
+        $this->authorize('create', CommunitySegment::class);
         $validatedSegment = $request->validated();
 
         // Handler 1: segment_cover upload 
@@ -82,6 +86,7 @@ class CommunitySegmentController extends Controller
      */
     public function show(CommunitySegment $communitySegment)
     {
+        $this->authorize('view', CommunitySegment::class);
         $communitySegment->load(['writer', 'coverArtist', 'series', 'segmentPolls', 'segmentArticles'])->get();
         return CommunitySegmentResource::make($communitySegment);
     }
@@ -99,6 +104,8 @@ class CommunitySegmentController extends Controller
      */
     public function update(UpdateCommunitySegmentRequest $request, CommunitySegment $communitySegment)
     {
+        $this->authorize('update', $communitySegment);
+        
         $validatedSegment = $request->validated();
         $storage = Storage::disk('public');
 
@@ -146,6 +153,8 @@ class CommunitySegmentController extends Controller
      */
     public function destroy(CommunitySegment $communitySegment)
     {
+        $this->authorize('delete', $communitySegment);
+        
         $storage = Storage::disk('public');
         if ($communitySegment->segment_cover && $storage->exists($communitySegment->segment_cover)) {
             $storage->delete($communitySegment->segment_cover);

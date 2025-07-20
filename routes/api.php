@@ -58,7 +58,10 @@ Route::apiResource('users', UserController::class)->middleware('auth:sanctum'); 
  */
 Route::apiResource('article-categories', ArticleCategoryController::class)->middleware('auth:sanctum'); # change to auth:sanctum later
 
-Route::apiResource('community-segments', CommunitySegmentController::class)->middleware('guest'); # change to auth:sanctum later
+/**
+ * Community Segment routes 
+ */
+Route::apiResource('community-segments', CommunitySegmentController::class)->middleware('auth:sanctum'); # change to auth:sanctum later
 
 /**
  * Email verification routes
