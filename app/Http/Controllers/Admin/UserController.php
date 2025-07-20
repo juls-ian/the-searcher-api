@@ -103,6 +103,9 @@ class UserController extends Controller
             # upload new pic 
             $validatedData['profile_pic'] = $request->file('profile_pic')->store('users/id-pics');
 
+        } else {
+            // Exclude profile pic in any subsequent db operation
+            unset($validatedData['profile_pic']);
         }
 
         $user->update($validatedData); # update user 
