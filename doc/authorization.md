@@ -31,3 +31,7 @@ The authorization hierarchy of the api is:
 ### Article Category Policy 
 1. implement policies
 2. only the admin and editor can perform this
+
+### Community Segment Policy 
+1. implement the policies 
+2. only admin and editor can manage segments
