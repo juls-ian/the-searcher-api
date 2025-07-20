@@ -9,7 +9,9 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\SetPasswordController;
 use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\CommunitySegmentController;
 use App\Http\Middleware\HandleExpiredTokens;
+use App\Models\CommunitySegment;
 
 /*
 Route::get('/user', function (Request $request) {
@@ -56,6 +58,7 @@ Route::apiResource('users', UserController::class)->middleware('auth:sanctum'); 
  */
 Route::apiResource('article-categories', ArticleCategoryController::class)->middleware('auth:sanctum'); # change to auth:sanctum later
 
+Route::apiResource('community-segments', CommunitySegmentController::class)->middleware('guest'); # change to auth:sanctum later
 
 /**
  * Email verification routes
