@@ -135,3 +135,31 @@ Initiate **php artisan install:api**
    1. if global exception handler do it in the bootstrap/app.php
 3. implement User Policies
 4. implement Article Category Policies
+
+
+## Community Segments
+*this shall have other two dependent tables: segments_poll and segment_article* 
+
+1. make these components:
+   - migration
+   - controller
+   - model 
+   - resource 
+   - policy 
+   - request
+   - factory
+   - observer
+2. declare the api route 
+3. handle the relations to Segments Poll/Article 
+4. handle slug generation in the observer
+5. register observer in app/Providers/AppServiceProvider.php in the boot method
+6. implement crud
+
+### Segments Poll & Segments Article
+1. the components shall be:
+   - migrations
+   - models
+   - resource
+   - factory
+   - policies
+2. handle the relationship to Community Segments

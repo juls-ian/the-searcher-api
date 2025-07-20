@@ -74,15 +74,30 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Article::class, 'writer_id');
     }
 
-    public function coverContributions()
+    public function articleCoverContributions()
     {
         return $this->hasMany(Article::class, 'cover_artist_id');
     }
 
-    public function thumbnailContributions()
+    public function articleThumbnailContributions()
     {
         return $this->hasMany(Article::class, 'thumbnail_artist_id');
     }
+
+
+    public function writtenSegments()
+    {
+        return $this->hasMany(CommunitySegment::class, 'writer_id');
+    }
+
+    public function segmentCoverContributions()
+    {
+        return $this->hasMany(CommunitySegment::class, 'cover_artist_id');
+    }
+
+
+    // ---------------------------------------------
+
 
     /**
      * Register ResetPassword notification in the model
