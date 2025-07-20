@@ -35,7 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 // Role specific messages 
                 if ($user) {
                     $message = match ($user->role) {
-                        'staff' => 'Staff writers have limited permissions. Contact an admin or editor for assistance.',
+                        'staff' => 'Staffs have limited permissions. Contact an admin or editor for assistance.',
                         'editor' => 'This action requires admin permissions.',
                         'admin' => 'Access denied.', # shouldn't happen but just in case 
                         default => 'You do not have permission to perform this action. '
