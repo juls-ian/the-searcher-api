@@ -42,50 +42,50 @@ class ArticleController extends Controller
     public function store(StoreArticleRequest $request)
     {
         $this->authorize('create', Article::class);
-        $validatedData = $request->validated();
+        $validatedArticle = $request->validated();
 
         // Handler 1: cover photo upload 
         if ($request->hasFile('cover_photo')) {
             $coverPath = $request->file('cover_photo')->store('articles/covers', 'public');
-            $validatedData['cover_photo'] = $coverPath;
+            $validatedArticle['cover_photo'] = $coverPath;
         }
 
         // Handler 2: thumbnail_same_as_cover logic 
         if ($request->has('thumbnail_same_as_cover') && $request->thumbnail_same_as_cover) {
 
             # use same file as cover_photo for thumbnail
-            $validatedData['thumbnail'] = $validatedData['cover_photo'] ?? null;
+            $validatedArticle['thumbnail'] = $validatedArticle['cover_photo'] ?? null;
 
             # copy cover_photo metadata to thumbnail if not provided 
             if (!$request->has('thumbnail_caption') && $request->has('cover_caption')) {
-                $validatedData['thumbnail_caption'] = $validatedData['cover_caption'];
+                $validatedArticle['thumbnail_caption'] = $validatedArticle['cover_caption'];
             }
 
             # copy cover_artist_id to thumbnail_artist_id if not provided 
             if (!$request->has('thumbnail_artist_id') && $request->has('cover_artist_id')) {
-                $validatedData['thumbnail_artist_id'] = $validatedData['cover_artist_id'];
+                $validatedArticle['thumbnail_artist_id'] = $validatedArticle['cover_artist_id'];
             }
         } else {
 
             // Handler 3: thumbnail upload
             if ($request->hasFile('thumbnail')) {
                 $thumbnailPath = $request->file('thumbnail')->store('articles/thumbnail', 'public');
-                $validatedData['thumbnail'] = $thumbnailPath;
+                $validatedArticle['thumbnail'] = $thumbnailPath;
             }
         }
 
         // Handler 4: date/time for published_at
-        if (isset($validatedData['published_at']) && $validatedData['published_at']) {
+        if (isset($validatedArticle['published_at']) && $validatedArticle['published_at']) {
 
             # date provided (either now or past)
-            $validatedData['published_at'] = Carbon::parse($validatedData['published_at']);
+            $validatedArticle['published_at'] = Carbon::parse($validatedArticle['published_at']);
         } else {
 
-            $validatedData['published_at'] = Carbon::now();
+            $validatedArticle['published_at'] = Carbon::now();
         }
 
-        // $validatedData['published_at'] = Carbon::now();
-        $article = Article::create($validatedData);
+        // $validatedArticle['published_at'] = Carbon::now();
+        $article = Article::create($validatedArticle);
         // Eager load Article relationships to User (n+1 problem fix)
         $article->load(['writer', 'coverArtist', 'thumbnailArtist']);
         return ArticleResource::make($article);
@@ -119,7 +119,7 @@ class ArticleController extends Controller
     {
         $this->authorize('update', $article);
 
-        $validatedData = $request->validated();
+        $validatedArticle = $request->validated();
         $storage = Storage::disk('public');
 
 
@@ -131,8 +131,11 @@ class ArticleController extends Controller
                 $storage->delete($article->cover_photo);
             }
 
-            $validatedData['cover_photo'] = $request->file('cover_photo')->store('articles/covers', 'public');
+            $validatedArticle['cover_photo'] = $request->file('cover_photo')->store('articles/covers', 'public');
 
+        } else {
+            // Exclude cover in any subsequent db operation
+            unset($validatedArticle['cover_photo']);
         }
 
         /**
@@ -142,11 +145,11 @@ class ArticleController extends Controller
         if ($request->has('thumbnail_same_as_cover') && $request->thumbnail_same_as_cover) {
 
             # if same as cover, force thumbnail with adapt cover_photo  
-            $validatedData['thumbnail'] = $validatedData['cover_photo'] ?? $article->cover_photo;
+            $validatedArticle['thumbnail'] = $validatedArticle['cover_photo'] ?? $article->cover_photo;
 
             # force adapt cover artist 
             if (!$request->has('thumbnail_artist_id')) {
-                $validatedData['thumbnail_artist_id'] = $validatedData['cover_artist_id'] ?? $article->cover_artist_id;
+                $validatedArticle['thumbnail_artist_id'] = $validatedArticle['cover_artist_id'] ?? $article->cover_artist_id;
             }
 
         } else {
@@ -159,7 +162,11 @@ class ArticleController extends Controller
                     $storage->delete($article->thumbnail);
                 }
 
-                $validatedData['thumbnail'] = $request->file('thumbnail')->store('articles/covers', 'public');
+                $validatedArticle['thumbnail'] = $request->file('thumbnail')->store('articles/covers', 'public');
+            } else {
+                // Exclude cover in any subsequent db operation
+                unset($validatedArticle['thumbnail']);
+
             }
         }
 
@@ -169,7 +176,7 @@ class ArticleController extends Controller
         Log::info('Has cover_photo file: ' . ($request->hasFile('cover_photo') ? 'yes' : 'no'));
         Log::info('Has thumbnail file: ' . ($request->hasFile('thumbnail') ? 'yes' : 'no'));
 
-        $article->update($validatedData);
+        $article->update($validatedArticle);
         // reload relationships
         $article->load('writer', 'coverArtist', 'thumbnailArtist');
         return ArticleResource::make($article);
