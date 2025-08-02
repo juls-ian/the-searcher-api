@@ -25,9 +25,9 @@ class StoreCommunitySegmentRequest extends FormRequest
         $rules = [
             'title' => ['required', 'string'],
             'segment_type' => ['required', 'in:article,poll'],
-            'writer_id' => ['required', 'exists:users,id'],
+            'writer_id' => ['required', 'integer', 'integer', 'exists:users,id'],
             'series_of' => ['nullable', 'exists:community_segments,id'],
-            'published_at' => ['required', 'date'],
+            'published_at' => ['nullable', 'date'],
             'series_order' => ['nullable', 'integer', 'min:1'],
             'segment_cover' => ['required', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
             'cover_artist_id' => ['required', 'exists:users,id'],
@@ -40,7 +40,6 @@ class StoreCommunitySegmentRequest extends FormRequest
                 'exists:community_segments,id'
             ];
             $rules['body'] = ['required', 'string'];
-
         } else if ($this->segment_type === 'poll') {
             $rules['series_order'] = [
                 Rule::prohibitedIf($this->segment_type === 'poll'),
@@ -57,16 +56,14 @@ class StoreCommunitySegmentRequest extends FormRequest
     public function messages()
     {
         return [
+            'segment_type.in' => 'Segment type should only be article or poll',
             'series_order.prohibited' => 'Series order is not allowed for polls',
             'segment_cover.image' => 'Cover photo must be a valid image file.',
-            'segment_cover.mimes' => 'Cover photo must be jpeg, png, gif, or webp format',
+            'segment_cover.mimes' => 'Cover photo must be jpeg, png, or webp format',
             'segment_cover.max' => 'Cover photo must not exceed 5MB',
             'thumbnail.image' => 'Thumbnail must be a valid image file.',
-            'thumbnail.mimes' => 'Thumbnail must be jpeg, png, gif, or webp format',
+            'thumbnail.mimes' => 'Thumbnail must be jpeg, png, or webp format',
             'thumbnail.max' => 'Thumbnail must not exceed 5MB',
         ];
     }
-
-
-
 }

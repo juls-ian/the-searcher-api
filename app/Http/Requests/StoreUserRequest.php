@@ -36,7 +36,16 @@ class StoreUserRequest extends FormRequest
             'status' => ['required', 'string'],
             'joined_at' => ['required', 'date'],
             'left_at' => ['nullable', 'date'],
-            'profile_pic' => ['nullable', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000']
+            'profile_pic' => ['required', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000']
+        ];
+    }
+    
+    public function messages()
+    {
+        return [
+            'profile_pic.image' => 'Profile Pic must be a valid image file.',
+            'profile_pic.mimes' => 'Profile Pic must be jpeg, png, or webp format',
+     
         ];
     }
 }
