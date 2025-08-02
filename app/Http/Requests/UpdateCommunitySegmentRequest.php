@@ -24,8 +24,8 @@ class UpdateCommunitySegmentRequest extends FormRequest
     {
         $rules = [
             'title' => ['sometimes', 'string'],
-            'writer_id' => ['sometimes', 'exists:users,id'],
-            'series_of' => ['sometimes', 'nullable', 'exists:community_segments,id'],
+            'writer_id' => ['sometimes', 'integer', 'exists:users,id'],
+            'series_of' => ['sometimes', 'nullable', 'integer', 'exists:community_segments,id'],
             'published_at' => ['sometimes', 'date'],
             'segment_cover' => ['sometimes', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
             'cover_artist_id' => ['sometimes', 'exists:users,id'],
@@ -39,7 +39,6 @@ class UpdateCommunitySegmentRequest extends FormRequest
                 'exists:community_segments,id'
             ];
             $rules['body'] = ['sometimes', 'string'];
-
         } else if ($this->segment_type === 'poll') {
             $rules['series_order'] = [
                 Rule::prohibitedIf($this->segment_type === 'poll'),
@@ -57,7 +56,7 @@ class UpdateCommunitySegmentRequest extends FormRequest
     {
         return [
             'segment_cover.image' => 'Cover photo must be a valid image file.',
-            'segment_cover.mimes' => 'Cover photo must be jpeg, png, gif, or webp format',
+            'segment_cover.mimes' => 'Cover photo must be jpeg, png, or webp format',
             'segment_cover.max' => 'Cover photo must not exceed 5MB',
             'thumbnail.image' => 'Thumbnail must be a valid image file.',
             'thumbnail.mimes' => 'Thumbnail must be jpeg, png, gif, or webp format',

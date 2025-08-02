@@ -38,4 +38,13 @@ class UpdateUserRequest extends FormRequest
             'profile_pic' => ['sometimes', 'nullable', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000']
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'profile_pic.image' => 'Profile Pic must be a valid image file.',
+            'profile_pic.mimes' => 'Profile Pic must be jpeg, png, or webp format',
+     
+        ];
+    }
 }
