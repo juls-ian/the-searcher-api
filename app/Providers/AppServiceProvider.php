@@ -6,10 +6,12 @@ use App\Models\User;
 use App\Models\Article;
 use App\Models\ArticleCategory;
 use App\Models\CommunitySegment;
+use App\Models\Multimedia;
 use App\Observers\ArticleCategoryObserver;
 use App\Observers\UserObserver;
 use App\Observers\ArticleObserver;
 use App\Observers\CommunitySegmentObserver;
+use App\Observers\MultimediaObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -31,5 +33,6 @@ class AppServiceProvider extends ServiceProvider
         User::observe(UserObserver::class);
         ArticleCategory::observe(ArticleCategoryObserver::class);
         CommunitySegment::observe(CommunitySegmentObserver::class);
+        Multimedia::observe(MultimediaObserver::class);
     }
 }

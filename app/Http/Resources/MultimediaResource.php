@@ -1,0 +1,30 @@
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class MultimediaResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'slug' => $this->slug,
+            'category' => $this->category,
+            'caption' => $this->caption,
+            'published_at' => $this->published_at,
+            'files' => $this->files,
+            'multimedia_artists' => $this->multimediaArtists->pluck('full_name'), # array of names
+            'thumbnail' => $this->thumbnail,
+            'thumbnail_artist' => $this->thumbnailArtist->full_name
+        ];
+    }
+}

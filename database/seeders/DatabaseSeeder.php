@@ -8,6 +8,7 @@ use App\Models\Article;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\ArticleCategory;
 use App\Models\CommunitySegment;
+use App\Models\Multimedia;
 use App\Models\SegmentsArticle;
 use App\Models\SegmentsPoll;
 use Illuminate\Database\Seeder;
@@ -45,7 +46,19 @@ class DatabaseSeeder extends Seeder
             Article::factory(2)->create([
                 'writer_id' => $user->id
             ]);
+
+            // Multimedia::factory(3)->create([
+            //     'multimedia_artist_id' => $user->id
+            // ]);
         }
+
+        Multimedia::factory()
+        ->count(10)
+        ->create()
+        ->each(function ($multimedia) {
+            $users = User::inRandomOrder()->take(rand(1,3))->get();
+            $multimedia->multimediaArtists()->attach($users);
+        });
 
         // Seeding community segments 
         $this->seedCommunitySegments($users);

@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\SetPasswordController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\CommunitySegmentController;
+use App\Http\Controllers\MultimediaController;
 use App\Http\Middleware\HandleExpiredTokens;
 use App\Models\CommunitySegment;
 
@@ -18,6 +19,48 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 */
+
+/**
+ * Article routes 
+ */
+Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('articles', ArticleController::class)->only(['store', 'update', 'destroy']);
+});
+Route::apiResource('articles', ArticleController::class)->only(['index', 'show']); # public route
+
+/**
+ * User routes
+ */
+Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('users', UserController::class)->only(['store', 'update', 'destroy']);
+});
+Route::apiResource('users', UserController::class)->only(['index', 'show']);
+
+/**
+ * Article Category routes 
+ */
+Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('article-categories', ArticleCategoryController::class)->only(['store', 'update', 'destroy']);
+});
+Route::apiResource('article-categories', ArticleCategoryController::class)->only(['index', 'show']);
+
+
+/**
+ * Community Segment routes 
+ */
+Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('community-segments', CommunitySegmentController::class)->only(['store', 'update', 'destroy']);
+});
+Route::apiResource('community-segments', CommunitySegmentController::class)->only(['index', 'show']); # public segment routes 
+
+
+/**
+ * Multimedia routes 
+ */
+Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('multimedia', MultimediaController::class)->only(['store', 'update', 'destroy']);
+});
+Route::apiResource('multimedia', MultimediaController::class)->only(['index', 'show']); # public multimedia route
 
 /**
  * User Auth routes
@@ -38,30 +81,8 @@ Route::prefix('auth')->group(function () {
 
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/current-user', [AuthController::class, 'currentUser']);
-
     });
-
 });
-
-/**
- * Article routes 
- */
-Route::apiResource('articles', ArticleController::class)->middleware('auth:sanctum'); # change to auth:sanctum later
-
-/**
- * User routes
- */
-Route::apiResource('users', UserController::class)->middleware('auth:sanctum'); # change to auth:sanctum later
-
-/**
- * Article Category routes 
- */
-Route::apiResource('article-categories', ArticleCategoryController::class)->middleware('auth:sanctum'); # change to auth:sanctum later
-
-/**
- * Community Segment routes 
- */
-Route::apiResource('community-segments', CommunitySegmentController::class)->middleware('auth:sanctum'); # change to auth:sanctum later
 
 /**
  * Email verification routes
@@ -82,5 +103,4 @@ Route::prefix('email')->middleware('auth:sanctum')->group(function () {
     Route::post('/verification-notification', [EmailVerificationController::class, 'resend'])
         ->middleware('throttle:6,1')
         ->name('verification.send');
-
 });

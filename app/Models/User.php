@@ -67,7 +67,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Relationships to Article
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<Article, User>
      */
     public function writtenArticles()
     {
@@ -84,7 +83,9 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Article::class, 'thumbnail_artist_id');
     }
 
-
+    /**
+     * Relationships to CommunitySegment
+     */
     public function writtenSegments()
     {
         return $this->hasMany(CommunitySegment::class, 'writer_id');
@@ -93,6 +94,19 @@ class User extends Authenticatable implements MustVerifyEmail
     public function segmentCoverContributions()
     {
         return $this->hasMany(CommunitySegment::class, 'cover_artist_id');
+    }
+
+    /**
+     * Relationships to Multimedia 
+     */
+    public function multimediaContributions()
+    {
+        return $this->hasMany(Multimedia::class, 'multimedia_artists_id');
+    }
+
+    public function multimediaThumbnailContributions()
+    {
+        return $this->hasMany(Multimedia::class, 'thumbnail_artist_id');
     }
 
 
