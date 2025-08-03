@@ -150,7 +150,7 @@ Initiate **php artisan install:api**
    - factory
    - observer
 2. declare the api route 
-3. handle the relations to Segments Poll/Article 
+3. handle the relations to Segments Poll/Article and User 
 4. handle slug generation in the observer
 5. register observer in app/Providers/AppServiceProvider.php in the boot method
 6. implement crud
@@ -163,3 +163,19 @@ Initiate **php artisan install:api**
    - factory
    - policies
 2. handle the relationship to Community Segments
+
+## Multimedia 
+1. make these components:
+   - model 
+   - migration 
+   - resource 
+   - policy 
+   - request 
+   - factory 
+   - observer
+2. declare the api route 
+3. handle the relations to User  
+4. handle slug generation in the observer
+5. register observer in app/Providers/AppServiceProvider.php in the boot method
+6. implement crud
+7. create a pivot table for the m:m relationship between User and Multimedia 
