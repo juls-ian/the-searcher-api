@@ -86,7 +86,7 @@ class CommunitySegmentController extends Controller
      */
     public function show(CommunitySegment $communitySegment)
     {
-        $this->authorize('view', CommunitySegment::class);
+        $this->authorize('view', $communitySegment);
         $communitySegment->load(['writer', 'coverArtist', 'series', 'segmentPolls', 'segmentArticles'])->get();
         return CommunitySegmentResource::make($communitySegment);
     }
@@ -105,7 +105,7 @@ class CommunitySegmentController extends Controller
     public function update(UpdateCommunitySegmentRequest $request, CommunitySegment $communitySegment)
     {
         $this->authorize('update', $communitySegment);
-        
+
         $validatedSegment = $request->validated();
         $storage = Storage::disk('public');
 
@@ -154,7 +154,7 @@ class CommunitySegmentController extends Controller
     public function destroy(CommunitySegment $communitySegment)
     {
         $this->authorize('delete', $communitySegment);
-        
+
         $storage = Storage::disk('public');
         if ($communitySegment->segment_cover && $storage->exists($communitySegment->segment_cover)) {
             $storage->delete($communitySegment->segment_cover);
