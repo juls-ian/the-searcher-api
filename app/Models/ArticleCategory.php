@@ -15,9 +15,20 @@ class ArticleCategory extends Model
         'name'
     ];
 
+    // Self-referencing: parent categories 
+    public function parent()
+    {
+        return $this->belongsTo(ArticleCategory::class, 'parent_id');
+    }
+
+    // Self-referencing: children categories 
+    public function children()
+    {
+        return $this->hasMany(ArticleCategory::class, 'parent_id');
+    }
+
     public function articles()
     {
         return $this->hasMany(Article::class);
     }
-
 }
