@@ -33,6 +33,11 @@ Route::apiResource('articles', ArticleController::class)->only(['index', 'show']
  */
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('users', UserController::class)->only(['store', 'update', 'destroy']);
+
+    // Term/EdBoard management routes 
+    Route::post('users/{user}/add-term', [UserController::class, 'addTerm'])->name('users.add-term');
+    Route::patch('users/{user}/set-active-term', [UserController::class, 'setCurrentTerm'])->name('users.set-active-term');
+    Route::delete('users/{user}/delete-term', [UserController::class, 'deleteTerm'])->name('users.delete-term');
 });
 Route::apiResource('users', UserController::class)->only(['index', 'show']);
 

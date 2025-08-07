@@ -8,6 +8,7 @@ use App\Models\Article;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\ArticleCategory;
 use App\Models\CommunitySegment;
+use App\Models\EditorialBoard;
 use App\Models\Multimedia;
 use App\Models\SegmentsArticle;
 use App\Models\SegmentsPoll;
@@ -43,6 +44,28 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($users as $user) {
+
+            // At least one current active term for each user 
+            EditorialBoard::factory()->create([
+                'user_id' => $user->id,
+                'term' => '2025-2026',
+                'is_current' => true
+            ]);
+
+            // Optional: additional 1-2 previous terms 
+            $additionalTerms = rand(0, 2);
+            for ($i = 0; $i < $additionalTerms; $i++) {
+                $startYear = 2020 + $i;
+                $endYear = $startYear + 1;
+
+                EditorialBoard::factory()->create([
+                    'user_id' => $user->id,
+                    'term' => "{$startYear}-{$endYear}",
+                    'is_current' => false
+                ]);
+            }
+
+
             Article::factory(2)->create([
                 'writer_id' => $user->id
             ]);
@@ -53,12 +76,12 @@ class DatabaseSeeder extends Seeder
         }
 
         Multimedia::factory()
-        ->count(10)
-        ->create()
-        ->each(function ($multimedia) {
-            $users = User::inRandomOrder()->take(rand(1,3))->get();
-            $multimedia->multimediaArtists()->attach($users);
-        });
+            ->count(10)
+            ->create()
+            ->each(function ($multimedia) {
+                $users = User::inRandomOrder()->take(rand(1, 3))->get();
+                $multimedia->multimediaArtists()->attach($users);
+            });
 
         // Seeding community segments 
         $this->seedCommunitySegments($users);
@@ -128,7 +151,6 @@ class DatabaseSeeder extends Seeder
                     'writer_id' => $user->id,
                     'cover_artist_id' => $user->id
                 ]);
-
         }
     }
 }

@@ -25,7 +25,6 @@ return new class extends Migration {
             $table->string('phone');
             $table->string('board_position');
             $table->enum('role', ['admin', 'editor', 'staff'])->default('staff');
-            $table->string('term');
             $table->enum('status', ['active', 'inactive', 'alumni'])->default('active');
             $table->date('joined_at');
             $table->date('left_at')->nullable();
@@ -35,6 +34,12 @@ return new class extends Migration {
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes(); // soft delete feature deleted_at column
+
+            /**
+             * needs to dropped for normalization 
+             * 'term' will be present in the ed board table instead
+             */
+            // $table->string('term');
 
         });
 
