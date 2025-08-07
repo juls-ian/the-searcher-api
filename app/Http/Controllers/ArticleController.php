@@ -22,7 +22,7 @@ class ArticleController extends Controller
     {
         $this->authorize('viewAny', Article::class);
         // eager load Article relationships to User (n+1 problem fix)
-        $articles = Article::with(['writer', 'coverArtist', 'thumbnailArtist'])->get();
+        $articles = Article::with(['category', 'writer', 'coverArtist', 'thumbnailArtist'])->get();
         return ArticleResource::collection($articles);
 
         // return ArticleResource::collection(Article::all());
@@ -87,7 +87,7 @@ class ArticleController extends Controller
         // $validatedArticle['published_at'] = Carbon::now();
         $article = Article::create($validatedArticle);
         // Eager load Article relationships to User (n+1 problem fix)
-        $article->load(['writer', 'coverArtist', 'thumbnailArtist']);
+        $article->load(['category', 'writer', 'coverArtist', 'thumbnailArtist']);
         return ArticleResource::make($article);
     }
 
@@ -99,7 +99,7 @@ class ArticleController extends Controller
         $this->authorize('view', $article);
 
         // Eager load Article relationships to User (n+1 problem fix)
-        $article->load(['writer', 'coverArtist', 'thumbnailArtist']);
+        $article->load(['category', 'writer', 'coverArtist', 'thumbnailArtist']);
         return ArticleResource::make($article);
     }
 
@@ -174,7 +174,7 @@ class ArticleController extends Controller
 
         $article->update($validatedArticle);
         // reload relationships
-        $article->load(['writer', 'coverArtist', 'thumbnailArtist']);
+        $article->load(['category', 'writer', 'coverArtist', 'thumbnailArtist']);
         return ArticleResource::make($article);
     }
 
