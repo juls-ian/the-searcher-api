@@ -89,7 +89,6 @@ class ArticleController extends Controller
         // Eager load Article relationships to User (n+1 problem fix)
         $article->load(['writer', 'coverArtist', 'thumbnailArtist']);
         return ArticleResource::make($article);
-
     }
 
     /**
@@ -132,7 +131,6 @@ class ArticleController extends Controller
             }
 
             $validatedArticle['cover_photo'] = $request->file('cover_photo')->store('articles/covers', 'public');
-
         } else {
             // Exclude cover in any subsequent db operation
             unset($validatedArticle['cover_photo']);
@@ -151,7 +149,6 @@ class ArticleController extends Controller
             if (!$request->has('thumbnail_artist_id')) {
                 $validatedArticle['thumbnail_artist_id'] = $validatedArticle['cover_artist_id'] ?? $article->cover_artist_id;
             }
-
         } else {
 
             // Handler 3: thumbnail upload (only if not using same as cover)
@@ -166,7 +163,6 @@ class ArticleController extends Controller
             } else {
                 // Exclude cover in any subsequent db operation
                 unset($validatedArticle['thumbnail']);
-
             }
         }
 
@@ -178,7 +174,7 @@ class ArticleController extends Controller
 
         $article->update($validatedArticle);
         // reload relationships
-        $article->load('writer', 'coverArtist', 'thumbnailArtist');
+        $article->load(['writer', 'coverArtist', 'thumbnailArtist']);
         return ArticleResource::make($article);
     }
 
