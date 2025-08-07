@@ -173,9 +173,19 @@ Initiate **php artisan install:api**
    - request 
    - factory 
    - observer
-2. declare the api route 
+2. declare it in the api route 
 3. handle the relations to User  
 4. handle slug generation in the observer
 5. register observer in app/Providers/AppServiceProvider.php in the boot method
 6. implement crud
 7. create a pivot table for the m:m relationship between User and Multimedia 
+
+## Editorial Board 
+1. make these components:
+   - model 
+   - migration 
+2. update the UserController's store method to add term/ed board to the editorial_board table 
+3. create three additional methods to manage the term of the user 
+4. define the relationship its relationship to the User model 
+5. implement a feature to get the current_term and all_term of the user 
+6. declare in the api route the three additional methods

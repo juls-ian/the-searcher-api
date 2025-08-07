@@ -4,9 +4,9 @@ Documentation shall consist Article model's properties, resource and migrations
 
 ## Relationships 
 1. category <-belongsTo-> ArticleCategory 
-2. writer -> User  
-3. coverArtist -> User
-4. thumbnailArtist -> User
+2. writer <-belongsTo-> User  
+3. coverArtist <-belongsTo-> User
+4. thumbnailArtist <-belongsTo-> User
 5. self reference for live news:
    1. series -> Article 
    2. seriesArticles <-hasMany-> Articles 
