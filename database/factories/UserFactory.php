@@ -36,7 +36,7 @@ class UserFactory extends Factory
             'phone' => fake()->phoneNumber(),
             'board_position' => fake()->jobTitle(),
             'role' => fake()->randomElement(['admin', 'editor', 'staff']),
-            'term' => fake()->word(),
+            // 'term' => fake()->word(),
             'status' => fake()->randomElement(['active', 'inactive', 'alumni']),
             'joined_at' => fake()->dateTimeBetween('-2 years', 'now'),
             'left_at' => fake()->boolean(20) ? fake()->dateTimeBetween('-1 year', 'now') : null,

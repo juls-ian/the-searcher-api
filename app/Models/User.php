@@ -35,7 +35,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'phone',
         'board_position',
         'role',
-        'term',
         'status',
         'joined_at',
         'left_at',
@@ -63,6 +62,43 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Relationship to EditorialBoard 
+     */
+    public function editorialBoards()
+    {
+        return $this->hasMany(EditorialBoard::class);
+    }
+
+    public function currentEditorialBoard()
+    {
+        return $this->hasOne(EditorialBoard::class)->where('is_current', true);
+    }
+
+    public function currentTerm()
+    {
+        if (!$this->relationLoaded('currentEditorialBoard')) {
+            $this->load('currentEditorialBoard');
+        }
+        return $this->currentEditorialBoard?->term;
+    }
+
+    // Alternatives
+    public function getCurrentTermAttribute()
+    {
+        return $this->editorialBoards()->latest()->value('term');
+    }
+
+    public function getAllTerms()
+    {
+        return $this->editorialBoards->pluck('term')->toArray();
+    }
+
+    public function getAllTermsCollection()
+    {
+        return $this->editorialBoards->pluck('term');
     }
 
     /**

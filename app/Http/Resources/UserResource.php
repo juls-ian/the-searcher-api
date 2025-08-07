@@ -25,11 +25,15 @@ class UserResource extends JsonResource
             'course' => $this->course,
             'phone' => $this->phone,
             'role' => $this->role,
-            'term' => $this->term,
+            'current_term' => $this->currentTerm(),
+            // editorialBoards relation must be loaded first in the controller
+            'all_terms' => $this->whenLoaded('editorialBoards', function () {
+                return $this->editorialBoards->pluck('term');
+            }, []),
             'status' => $this->status,
             'joined_at' => $this->joined_at,
             'left_at' => $this->left_at,
-            'profile_pic' => $this->profile_pic
+            'profile_pic' => $this->profile_pic,
         ];
     }
 }
