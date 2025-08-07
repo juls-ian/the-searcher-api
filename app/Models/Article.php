@@ -46,7 +46,7 @@ class Article extends Model
     // relation to ArticleCategory
     public function category()
     {
-        return $this->belongsTo(ArticleCategory::class);
+        return $this->belongsTo(ArticleCategory::class, 'article_category_id');
     }
 
     // relationship to User (writer)
@@ -76,7 +76,4 @@ class Article extends Model
     {
         return $this->hasMany(Article::class, 'series_id');
     }
-
-
-
 }
