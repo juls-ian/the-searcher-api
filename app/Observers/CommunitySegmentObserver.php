@@ -20,13 +20,14 @@ class CommunitySegmentObserver
      */
     public function creating(CommunitySegment $communitySegment)
     {
-        $slug = Str::slug($communitySegment->title); # convert title to slug 
-        $originalSlug = $slug; # orig slug 
-        $count = 1;
+        $baseSlug = Str::slug($communitySegment->title); # convert title to slug 
+        $slugDate = now()->format('Y-m-d'); # orig slug 
+        $slug = "{$baseSlug}-{$slugDate}";
 
         // Check if the same slug exists in db 
         while (CommunitySegment::where('slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $count++; # append count it slug exists
+            $randomId = Str::lower(Str::random(8));
+            $slug = "{$slug}-{$randomId}"; # append count it slug exists
         }
 
         $communitySegment->slug = $slug; # final value 
@@ -35,19 +36,20 @@ class CommunitySegmentObserver
     public function updating(CommunitySegment $communitySegment)
     {
         if ($communitySegment->isDirty('title')) {
-            $slug = Str::slug($communitySegment->title);
-            $originalSlug = $slug;
-            $count = 1;
+            $baseSlug = Str::slug($communitySegment->title);
+            $slugDate = now()->format('Y-m-d'); # orig slug 
+            $slug = "{$baseSlug}-{$slugDate}";
 
             // Check other segments if they have this slug 
             while (
                 CommunitySegment::where('slug', $slug) # check slug existence 
-                    ->where('id', '!=', $communitySegment->id) # ensure not to compare slug to itself 
-                    ->exists()
+                ->where('id', '!=', $communitySegment->id) # ensure not to compare slug to itself 
+                ->exists()
             ) {
-                $slug = $originalSlug . '-' . $count++;
+                $randomId = Str::lower(Str::random(8));
+                $slug = "{$slug}-{$randomId}";
             }
-            $communitySegment->slug = $slug; # final value 
+            $communitySegment->slug = $slug; # final base value 
         }
     }
 
