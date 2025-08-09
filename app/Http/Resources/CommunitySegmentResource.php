@@ -17,6 +17,7 @@ class CommunitySegmentResource extends JsonResource
         return [
             'id' => $this->id,
             'title' => $this->title,
+            'slug' => $this->slug,
             'segment_type' => $this->segment_type,
             'writer' => $this->writer->fullname,
             'series_of' => $this->series_of,
@@ -32,6 +33,5 @@ class CommunitySegmentResource extends JsonResource
 
 
         ];
-
     }
 }

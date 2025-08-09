@@ -21,16 +21,16 @@ class MultimediaObserver
     public function creating(Multimedia $multimedia)
     {
 
-        $slug = Str::slug($multimedia->title); # convert title into slug 
-        $originalSlug = $slug;
-        $count = 1;
+        $baseSlug = Str::slug($multimedia->title); # convert title into slug 
+        $slugDate = now()->format('Y-m-d');
+        $slug = "{$baseSlug}-{$slugDate}";
 
         // Check if slug exists in db 
         while (Multimedia::where('slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $count++; # append count if slug exists
+            $randomId = Str::lower(Str::random(8));
+            $slug = "{$slug}-{$randomId}";
         }
-
-        $multimedia->slug = $slug; # final value 
+        $multimedia->slug = $slug;
     }
 
     /**
@@ -39,19 +39,20 @@ class MultimediaObserver
     public function updating(Multimedia $multimedia)
     {
         if ($multimedia->isDirty('title')) { # check of media is modified 
-            $slug = Str::slug($multimedia->title);
-            $originalSlug = $slug;
-            $count = 1;
+            $baseSlug = Str::slug($multimedia->title);
+            $slugDate = now()->format('Y-m-d');
+            $slug = "{$baseSlug}-{$slugDate}";
 
             // Check if any other multimedia has the slug 
             while (
                 Multimedia::where('slug', $slug) # check if slug exists
-                ->where('id', '!=', $multimedia->id) # ensure not to compare to itself
+                ->where('id', '!=', $multimedia->id) # ensure not to compare slug to itself
                 ->exists()
             ) {
-                $slug = $originalSlug . '-' . $count++;
+                $randomId = Str::lower(Str::random(8));
+                $slug =  "{$slug}-{$randomId}";
             }
-            $multimedia->slug = $slug; # final value 
+            $multimedia->slug = $slug; # final base value 
         }
     }
 

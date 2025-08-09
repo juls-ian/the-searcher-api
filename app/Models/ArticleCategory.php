@@ -15,6 +15,11 @@ class ArticleCategory extends Model
         'name'
     ];
 
+    public function articles()
+    {
+        return $this->hasMany(Article::class);
+    }
+
     // Self-referencing: parent categories 
     public function parent()
     {
@@ -25,10 +30,5 @@ class ArticleCategory extends Model
     public function children()
     {
         return $this->hasMany(ArticleCategory::class, 'parent_id');
-    }
-
-    public function articles()
-    {
-        return $this->hasMany(Article::class);
     }
 }

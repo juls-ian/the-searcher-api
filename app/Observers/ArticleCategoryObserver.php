@@ -21,13 +21,17 @@ class ArticleCategoryObserver
         $originalSlug = $slug;
         $count = 1;
 
+        /**
+         * This block of code is optional since I added unique name validator in 
+         * the request of the controller 
+         * still a good thing to have just in case 
+         */
         $query = ArticleCategory::where('slug', $slug); # base query 
 
         // SCOPE 1: if category has a parent, only check for duplicates under same parent 
         if ($category->parent_id !== null) {
             // Check if slug exists among siblings in the same parent category 
             $query->where('parent_id', $category->parent_id);
-
         } else {
             // SCOPE 2: if parent_id === null, check among other top-level category
             $query->whereNull('parent_id'); # uniqueness in parents
@@ -36,17 +40,17 @@ class ArticleCategoryObserver
         // Keep looping until a unique slug is found
         while (
             ArticleCategory::where('slug', $slug)
-                // Scope 1: if parent_id exists, check siblings
-                ->when($category->parent_id !== null, fn($q) =>
-                    $q->where('parent_id', $category->parent_id))
-                // Scope 2: if parent_id = null, check other parent 
-                ->when($category->parent_id === null, fn($q) =>
-                    $q->whereNull('parent_id'))
-                // Scope 3: if updating existing category, exclude itself from check 
-                ->when(isset($category->id), fn($q) =>
-                    $q->where('id', '!=', $category->id))
-                // Check if a record with this slug exists within the determined scope 
-                ->exists()
+            // Scope 1: if parent_id exists, check siblings
+            ->when($category->parent_id !== null, fn($q) =>
+            $q->where('parent_id', $category->parent_id))
+            // Scope 2: if parent_id = null, check other parent 
+            ->when($category->parent_id === null, fn($q) =>
+            $q->whereNull('parent_id'))
+            // Scope 3: if updating existing category, exclude itself from check 
+            ->when(isset($category->id), fn($q) =>
+            $q->where('id', '!=', $category->id))
+            // Check if a record with this slug exists within the determined scope 
+            ->exists()
         ) {
             $slug = $originalSlug . '-' . $count++;
         }
@@ -65,6 +69,11 @@ class ArticleCategoryObserver
             $originalSlug = $slug;
             $count = 1;
 
+            /**
+             * This block of code is optional since I added unique name validator in 
+             * the request of the controller 
+             * still a good thing to have just in case 
+             */
             // Base query 
             $query = ArticleCategory::where('slug', $slug)
                 ->where('id', '!=', $category->id); # exclude self 
@@ -79,17 +88,17 @@ class ArticleCategoryObserver
             // Keep looping until a unique slug is found
             while (
                 ArticleCategory::where('slug', $slug)
-                    // Scope 1: if parent_id exists, check siblings
-                    ->when($category->parent_id !== null, fn($q) =>
-                        $q->where('parent_id', $category->parent_id))
-                    // Scope 2: if parent_id = null, check other parent 
-                    ->when($category->parent_id === null, fn($q) =>
-                        $q->whereNull('parent_id'))
-                    // Scope 3: if updating existing category, exclude itself from check 
-                    ->when(isset($category->id), fn($q) =>
-                        $q->where('id', '!=', $category->id))
-                    // Check if a record with this slug exists within the determined scope 
-                    ->exists()
+                // Scope 1: if parent_id exists, check siblings
+                ->when($category->parent_id !== null, fn($q) =>
+                $q->where('parent_id', $category->parent_id))
+                // Scope 2: if parent_id = null, check other parent 
+                ->when($category->parent_id === null, fn($q) =>
+                $q->whereNull('parent_id'))
+                // Scope 3: if updating existing category, exclude itself from check 
+                ->when(isset($category->id), fn($q) =>
+                $q->where('id', '!=', $category->id))
+                // Check if a record with this slug exists within the determined scope 
+                ->exists()
             ) {
                 $slug = $originalSlug . '-' . $count++;
             }

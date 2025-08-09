@@ -39,7 +39,7 @@ class ArticleCategoryController extends Controller
     {
         $this->authorize('create', ArticleCategory::class);
         $validatedData = $request->validate([
-            'name' => ['required'],
+            'name' => ['required', 'unique:article_categories'],
             'parent_id' => ['exists:article_categories,id']
         ]);
 
