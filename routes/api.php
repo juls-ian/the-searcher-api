@@ -10,9 +10,11 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\SetPasswordController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\CommunitySegmentController;
+use App\Http\Controllers\IssueController;
 use App\Http\Controllers\MultimediaController;
 use App\Http\Middleware\HandleExpiredTokens;
 use App\Models\CommunitySegment;
+use App\Models\Issue;
 
 /*
 Route::get('/user', function (Request $request) {
@@ -66,6 +68,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('multimedia', MultimediaController::class)->only(['store', 'update', 'destroy']);
 });
 Route::apiResource('multimedia', MultimediaController::class)->only(['index', 'show']); # public multimedia route
+
+/**
+ * Issue routes 
+ */
+Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('issues', IssueController::class)->only(['store', 'update', 'destroy']);
+});
+Route::apiResource('issues', IssueController::class)->only(['index', 'show']);
+
 
 /**
  * User Auth routes

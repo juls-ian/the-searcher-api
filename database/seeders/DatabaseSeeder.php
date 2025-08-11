@@ -9,6 +9,7 @@ use App\Models\Article;
 use App\Models\ArticleCategory;
 use App\Models\CommunitySegment;
 use App\Models\EditorialBoard;
+use App\Models\Issue;
 use App\Models\Multimedia;
 use App\Models\SegmentsArticle;
 use App\Models\SegmentsPoll;
@@ -25,7 +26,7 @@ class DatabaseSeeder extends Seeder
 
         // $this->call(ArticleCategorySeeder::class);
         ArticleCategory::factory()->createCompleteStructure();
-
+        Issue::factory()->count(10)->create();
 
         $users = [
             User::factory()->create([
@@ -39,7 +40,7 @@ class DatabaseSeeder extends Seeder
                 'first_name' => 'Rod',
                 'last_name' => 'Bacason',
                 'email' => 'rod@email.com',
-                'role' => 'editor'
+                'role' => 'staff'
             ])
         ];
 
