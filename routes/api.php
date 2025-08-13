@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\SetPasswordController;
 use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\BulletinController;
 use App\Http\Controllers\CommunitySegmentController;
 use App\Http\Controllers\IssueController;
 use App\Http\Controllers\MultimediaController;
@@ -77,6 +78,13 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 Route::apiResource('issues', IssueController::class)->only(['index', 'show']);
 
+/**
+ * Bulletin routes 
+ */
+Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('bulletins', BulletinController::class)->only(['store', 'update', 'destroy']);
+});
+Route::apiResource('bulletins', BulletinController::class)->only(['index', 'show']);
 
 /**
  * User Auth routes

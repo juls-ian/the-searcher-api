@@ -72,6 +72,7 @@ The data that will be returned:
 
 - 'id' => $this->id
 - 'title' => $this->title
+- 'slug' => $this->slug,
 - 'writer' => $this->writer->full_name
 - 'category' => $this->category_id
 - 'body' => $this->body

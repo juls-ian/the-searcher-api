@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Article;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\ArticleCategory;
+use App\Models\Bulletin;
 use App\Models\CommunitySegment;
 use App\Models\EditorialBoard;
 use App\Models\Issue;
@@ -68,6 +69,10 @@ class DatabaseSeeder extends Seeder
 
 
             Article::factory(2)->create([
+                'writer_id' => $user->id
+            ]);
+
+            Bulletin::factory(2)->create([
                 'writer_id' => $user->id
             ]);
 
