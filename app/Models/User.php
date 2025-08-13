@@ -60,6 +60,8 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
+            'joined_at' => 'datetime',
+            'left_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
@@ -145,6 +147,19 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Multimedia::class, 'thumbnail_artist_id');
     }
 
+    /**
+     * Relationships to Bulletin 
+     */
+
+    public function writtenBulletin()
+    {
+        return $this->hasMany(Bulletin::class, 'writer_id');
+    }
+
+    public function bulletinCoverContributions()
+    {
+        return $this->hasMany(Bulletin::class, 'cover_artist_id');
+    }
 
     // ---------------------------------------------
 

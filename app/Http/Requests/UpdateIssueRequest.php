@@ -48,4 +48,13 @@ class UpdateIssueRequest extends FormRequest
 
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'thumbnail.image' => 'Cover photo must be a valid image file.',
+            'thumbnail.mimes' => 'Cover photo must be jpeg, png, or webp format',
+            'thumbnail.max' => 'Cover photo must not exceed 5MB',
+        ];
+    }
 }

@@ -31,7 +31,7 @@ class StoreUserRequest extends FormRequest
             // 'phone' => ['required', 'regex:/^(\+63|0)\d{10}$/'],
             'phone' => ['required', 'phone:PH'], # needs proganista/laravel-phone
             'board_position' => ['required', 'string'],
-            'role' => ['required', 'string'],
+            'role' => ['required', 'in:admin,editor,staff'],
             'term' => ['required', 'string'],
             'status' => ['required', 'string'],
             'joined_at' => ['required', 'date'],
@@ -39,13 +39,13 @@ class StoreUserRequest extends FormRequest
             'profile_pic' => ['required', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000']
         ];
     }
-    
+
     public function messages()
     {
         return [
             'profile_pic.image' => 'Profile Pic must be a valid image file.',
             'profile_pic.mimes' => 'Profile Pic must be jpeg, png, or webp format',
-     
+
         ];
     }
 }
