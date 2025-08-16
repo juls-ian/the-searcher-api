@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Archive;
 use App\Models\User;
 use App\Models\Article;
 use App\Models\ArticleCategory;
@@ -9,6 +10,7 @@ use App\Models\Bulletin;
 use App\Models\CommunitySegment;
 use App\Models\Issue;
 use App\Models\Multimedia;
+use App\Observers\ArchiveObserver;
 use App\Observers\ArticleCategoryObserver;
 use App\Observers\UserObserver;
 use App\Observers\ArticleObserver;
@@ -16,6 +18,7 @@ use App\Observers\BulletinObserver;
 use App\Observers\CommunitySegmentObserver;
 use App\Observers\IssueObserver;
 use App\Observers\MultimediaObserver;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -40,5 +43,18 @@ class AppServiceProvider extends ServiceProvider
         Multimedia::observe(MultimediaObserver::class);
         Issue::observe(IssueObserver::class);
         Bulletin::observe(BulletinObserver::class);
+        Archive::observe(ArchiveObserver::class);
+
+
+        // Shorten the name of the archivable_type 
+        Relation::enforceMorphMap([
+            'article' => 'App\Models\Article',
+            'user' => 'App\Models\User',
+            'community-segment' => 'App\Models\CommunitySegment',
+            'bulletin' => 'App\Models\Bulletin',
+            'editorial-board' => 'App\Models\EditorialBoard',
+            'issue' => 'App\Models\Issue',
+            'multimedia' => 'App\Models\Multimedia'
+        ]);
     }
 }
