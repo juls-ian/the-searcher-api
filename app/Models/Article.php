@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Archivable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Article extends Model
 {
     /** @use HasFactory<\Database\Factories\ArticleFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, Archivable;
 
     protected $fillable = [
         'title',
@@ -40,6 +41,8 @@ class Article extends Model
         'thumbnail_same_as_cover' => 'boolean',
         'add_to_ticker' => 'boolean'
     ];
+
+    protected $dates = ['archived_at'];
 
     // protected 
 
