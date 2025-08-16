@@ -1,53 +1,58 @@
-# Scrapped codes in api route
-
-## v.1
-<?php
-
-use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\ArticleCategoryController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\AuthController;
-use App\Http\Controllers\ArticleController;
-use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\Auth\SetPasswordController;
-use App\Http\Controllers\Auth\EmailVerificationController;
-use App\Http\Controllers\CommunitySegmentController;
-use App\Http\Controllers\MultimediaController;
-use App\Http\Middleware\HandleExpiredTokens;
-use App\Models\CommunitySegment;
-
-/*
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-*/
-
-/**
- * Article routes 
- */
-Route::apiResource('articles', ArticleController::class)->middleware('auth:sanctum'); # change to auth:sanctum later
-
-/**
- * User routes
- */
-Route::apiResource('users', UserController::class)->middleware('auth:sanctum'); # change to auth:sanctum later
-
-/**
- * Article Category routes 
- */
-Route::apiResource('article-categories', ArticleCategoryController::class)->middleware('auth:sanctum'); # change to auth:sanctum later
-
-/**
- * Community Segment routes 
- */
-Route::apiResource('community-segments', CommunitySegmentController::class)->middleware('auth:sanctum'); # change to auth:sanctum later
-
-/**
- * Multimedia routes 
- */
-Route::apiResource('multimedia', MultimediaController::class)->only(['store', 'update', 'update'])->middleware('auth:sanctum');
-Route::apiResource('multimedia', MultimediaController::class);
+# Unused codes in the api route
 
 
+## Auth routes
+Route::prefix('auth')->group(function () {
 
+    Route::post('/login', [AuthController::class, 'login']);
+
+    Route::middleware(['auth:sanctum', HandleExpiredTokens::class])->group(function () {
+
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/me', [AuthController::class, 'currentUser']);
+
+    });
+
+## Article routes 
+// Article routes Add commentMore actions
+Route::controller(ArticleController::class)->group(function () {
+    Route::apiResource('articles', ArticleController::class);
+})->middleware('guest');
+
+// User routes
+Route::controller(UserController::class)->group(function () {
+    Route::apiResource('users', UserController::class);
+});
+
+
+## Email Verification route
+Route::prefix('email')->middleware('auth:sanctum')->group(function () {
+
+    // Email verification notice 
+    Route::post('/verify', function (Request $request) {
+        if ($request->user()->hasVerifiedEmail()) {
+            return response()->json(['message' => 'User is already verified'], 400);
+        }
+
+        $request->user()->sendEmailVerificationNotification();
+        return response()->json(['message' => 'A verification email was sent.']);
+
+    })->middleware(['throttle:5,1'])
+        ->name('verification.notice');
+
+    // Email verification handler
+    Route::get('/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+        $request->fulfill();
+
+        return response()->json(['message' => 'Email successfully verified']);
+    })->middleware(['signed', 'throttle:6,1'])
+        ->name('verification.verify');
+
+    // Resending verification email 
+    Route::post('/verification-notification', function (Request $request) {
+        $request->user()->sendEmailVerificationNotification();
+
+        return response()->json(['message' => 'Verification link resent']);
+    })->middleware('throttle:6,1')->name('verification.send');
+
+});
