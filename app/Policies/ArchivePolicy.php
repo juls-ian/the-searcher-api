@@ -3,10 +3,10 @@
 namespace App\Policies;
 
 use Illuminate\Auth\Access\Response;
-use App\Models\Bulletin;
+use App\Models\Archive;
 use App\Models\User;
 
-class BulletinPolicy
+class ArchivePolicy
 {
     public function before(User $user, string $ability)
     {
@@ -14,7 +14,7 @@ class BulletinPolicy
             return true;
         }
 
-        return null; # proceed to other policies 
+        return null;
     }
     /**
      * Determine whether the user can view any models.
@@ -27,7 +27,7 @@ class BulletinPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(?User $user, Bulletin $bulletin): bool
+    public function view(?User $user, Archive $archive): bool
     {
         return true;
     }
@@ -43,7 +43,7 @@ class BulletinPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Bulletin $bulletin): bool
+    public function update(User $user, Archive $archive): bool
     {
         return $user->role === 'editor';
     }
@@ -51,7 +51,7 @@ class BulletinPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Bulletin $bulletin): bool
+    public function delete(User $user, Archive $archive): bool
     {
         return $user->role === 'editor';
     }
@@ -59,7 +59,7 @@ class BulletinPolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Bulletin $bulletin): bool
+    public function restore(User $user, Archive $archive): bool
     {
         return $user->role === 'editor';
     }
@@ -67,7 +67,12 @@ class BulletinPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Bulletin $bulletin): bool
+    public function forceDelete(User $user, Archive $archive): bool
+    {
+        return $user->role === 'editor';
+    }
+
+    public function unarchive(User $user, Archive $archive)
     {
         return $user->role === 'editor';
     }

@@ -184,8 +184,41 @@ Initiate **php artisan install:api**
 1. make these components:
    - model 
    - migration 
+   - resources 
 2. update the UserController's store method to add term/ed board to the editorial_board table 
 3. create three additional methods to manage the term of the user 
 4. define the relationship its relationship to the User model 
 5. implement a feature to get the current_term and all_term of the user 
 6. declare in the api route the three additional methods
+
+## Issue 
+1. make these components of the Issue:
+   - model 
+   - migration 
+   - resources
+   - policies 
+   - requests
+2. implement crud features to manage issues 
+3. implement slug generation and register it in the AppServiceProvider
+4. define in the api routes
+
+## Bulletin 
+1. make these components of the Bulletin:
+   - model 
+   - migration 
+   - resources
+2. define the relationship on the Bulletin and User model 
+3. implement crud features to manage issues 
+4. implement slug generation and register it in the AppServiceProvider
+5. define in the api routes
+
+## Archives 
+1. make these components of the Archive:
+   - model 
+   - migration 
+2. implement polymorphic relationship 
+   - php artisan make:trait Archivable
+3. add archive functions in each of the models as well in the api route
+4. implement crud features to manage archives 
+5. define in the api of this controller
+6. enforceMorphMap in the AppServiceProvider 

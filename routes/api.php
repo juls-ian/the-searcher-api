@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\ArchiveController;
 use App\Http\Controllers\ArticleCategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
@@ -14,8 +15,6 @@ use App\Http\Controllers\CommunitySegmentController;
 use App\Http\Controllers\IssueController;
 use App\Http\Controllers\MultimediaController;
 use App\Http\Middleware\HandleExpiredTokens;
-use App\Models\CommunitySegment;
-use App\Models\Issue;
 
 /*
 Route::get('/user', function (Request $request) {
@@ -28,6 +27,11 @@ Route::get('/user', function (Request $request) {
  */
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('articles', ArticleController::class)->only(['store', 'update', 'destroy']);
+
+    // Archive routes 
+    Route::get('articles/archived', [ArticleController::class, 'archiveIndex'])->name('archived-articles');
+    Route::get('articles/{archive}/archived', [ArticleController::class, 'showArchived'])->name('archived-article');
+    Route::post('articles/{archive}/archive', [ArticleController::class, 'archive'])->name('articles.archive');
 });
 Route::apiResource('articles', ArticleController::class)->only(['index', 'show']); # public route
 
@@ -85,6 +89,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('bulletins', BulletinController::class)->only(['store', 'update', 'destroy']);
 });
 Route::apiResource('bulletins', BulletinController::class)->only(['index', 'show']);
+
+/**
+ * Archive routes 
+ */
+Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('archives', ArchiveController::class)->only(['store', 'update', 'destroy']);
+
+    // Additional routes 
+    Route::get('archives/trashed/index', [ArchiveController::class, 'showTrashed'])->name('archives.trashed');
+    Route::post('archives/{id}/restore', [ArchiveController::class, 'restore'])->name('archives.restore');
+    Route::delete('archives/{id}/forceDestroy', [ArchiveController::class, 'forceDestroy'])->name('archives.force-destroy');
+    Route::post('archives/{id}/unarchive', [ArchiveController::class, 'unarchive'])->name('archives.unarchive');
+});
+Route::apiResource('archives', ArchiveController::class)->only(['index', 'show']);
 
 /**
  * User Auth routes
