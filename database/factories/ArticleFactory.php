@@ -33,7 +33,7 @@ class ArticleFactory extends Factory
             'is_live' => fake()->boolean(30), // 30% chance of being live
             'is_header' => fake()->boolean(10), // 10% chance of being header
             'series_id' => null, // Will be set conditionally
-            'is_archived' => fake()->boolean(20), // 20% chance of being archived
+            // 'is_archived' => fake()->boolean(20), // 20% chance of being archived
             'cover_photo' => fake()->imageUrl(800, 600, 'news'),
             // 'cover_photo' => UploadedFile::fake()->image('cover.jpg', 800, 600),
             'cover_caption' => fake()->optional(0.9)->sentence(),
@@ -41,7 +41,7 @@ class ArticleFactory extends Factory
             'thumbnail' => fake()->imageUrl(300, 200, 'news'),
             // 'thumbnail' => UploadedFile::fake()->image('thumbnail.jpg', 800, 600),
             'thumbnail_artist_id' => User::factory(),
-            'archived_at' => fake()->optional(0.2)->dateTimeBetween('-1 year', 'now'),
+            // 'archived_at' => fake()->optional(0.2)->dateTimeBetween('-1 year', 'now'),
             'add_to_ticker' => fake()->boolean(10),
             'ticker_expires_at' => fake()->dateTimeBetween('now', '1 week'),
 

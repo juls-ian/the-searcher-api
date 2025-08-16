@@ -6,7 +6,9 @@ use App\Models\Article;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreArticleRequest;
 use App\Http\Requests\UpdateArticleRequest;
+use App\Http\Resources\ArchiveResource;
 use App\Http\Resources\ArticleResource;
+use App\Models\Archive;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Log;
@@ -195,5 +197,46 @@ class ArticleController extends Controller
 
         $article->delete();
         return response()->json(['message' => 'Article deleted successfully'], 200);
+    }
+
+    /**
+     * Show all archive articles 
+     */
+    public function archiveIndex()
+    {
+        $archivedArticles = Article::archived()->get(); # query scope
+        return response()->json($archivedArticles);
+        // return view('articles.archived', compact('articles'));
+    }
+
+    /**
+     * Show archive article
+     */
+
+    public function showArchived($id)
+    {
+        $archive = Archive::findOrFail($id);
+        return response()->json($archive);
+    }
+
+    /**
+     * Archive an article
+     */
+    public function archive($id)
+    {
+        $article = Article::findOrFail($id); # find article or fail 
+        $archive = $article->archive(); # calls the trait method to create archive | returns Archive or null 
+
+        // If trait didn’t create a new archive because the article was already archived
+        if (! $archive) { # if $archive is falsy (null)
+            return response()->json([
+                'message' => 'This article has already been archived'
+            ], 409);
+        }
+
+        return response()->json([
+            'message' => 'Article archived successfully',
+            'data' => new ArchiveResource($archive)
+        ]);
     }
 }
