@@ -31,7 +31,7 @@ class ArticleObserver
         // Keep generating slug if it's not unique 
         while (Article::where('slug', $slug)->exists()) {
             $randomId  = Str::lower(Str::random(8));
-            $slug = "{$slug}-$randomId";
+            $slug = "{$slug}-{$randomId}";
         }
         $article->slug = $slug; # base final value 
     }

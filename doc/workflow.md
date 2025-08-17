@@ -207,8 +207,10 @@ Initiate **php artisan install:api**
    - model 
    - migration 
    - resources
+   - policies
+   - request
 2. define the relationship on the Bulletin and User model 
-3. implement crud features to manage issues 
+3. implement crud features to manage bulletins 
 4. implement slug generation and register it in the AppServiceProvider
 5. define in the api routes
 
@@ -231,5 +233,18 @@ Initiate **php artisan install:api**
 3. implement own archiving on each models (separate from the archive model)
 
 ## Soft and Hard Deletion and Restore
-1. implement this feat on the Article, User, Multimedia, Community Segments, Bulletin, Calendar, Issue, and Archive
+1. implement this feat on the Article, User, Multimedia, Community Segments, Bulletin, Issue, and Archive
 2. declare route binding of each models through the AppServiceProvider if using a route model binding in the crud functions of the controllers
+
+
+## Calendar
+1. make these components of the Calendar:
+   - model 
+   - migration 
+   - resources
+   - policies
+   - request
+2. define the relationship on the Calendar and User model 
+3. implement crud features to manage calendar 
+4. implement slug generation and register it in the AppServiceProvider
+5. define in the api routes
