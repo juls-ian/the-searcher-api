@@ -19,6 +19,7 @@ use App\Observers\CommunitySegmentObserver;
 use App\Observers\IssueObserver;
 use App\Observers\MultimediaObserver;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -56,5 +57,10 @@ class AppServiceProvider extends ServiceProvider
             'issue' => 'App\Models\Issue',
             'multimedia' => 'App\Models\Multimedia'
         ]);
+
+        // By default route model binding does not work on soft deleted models, hence me must customize binding to include trashed models 
+        Route::bind('article', function (string $value) {
+            return Article::withTrashed()->where('id', $value)->firstOrFail();
+        });
     }
 }
