@@ -29,9 +29,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('articles', ArticleController::class)->only(['store', 'update', 'destroy']);
 
     // Archive routes 
-    Route::get('articles/archived', [ArticleController::class, 'archiveIndex'])->name('archived-articles');
-    Route::get('articles/{archive}/archived', [ArticleController::class, 'showArchived'])->name('archived-article');
-    Route::post('articles/{archive}/archive', [ArticleController::class, 'archive'])->name('articles.archive');
+    Route::get('articles/archived', [ArticleController::class, 'archiveIndex'])->name('articles.index-archived');
+    Route::get('articles/{id}/archived', [ArticleController::class, 'showArchived'])->name('articles.show-archived');
+    Route::post('articles/{id}/archive', [ArticleController::class, 'archive'])->name('articles.archive');
+    Route::delete('articles/{article}/forceDestroy', [ArticleController::class, 'forceDestroy'])->name('articles.forceDestroy');
+    Route::post('articles/{article}/restore', [ArticleController::class, 'restore'])->name('articles.restore');
 });
 Route::apiResource('articles', ArticleController::class)->only(['index', 'show']); # public route
 
@@ -98,6 +100,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Additional routes 
     Route::get('archives/trashed/index', [ArchiveController::class, 'showTrashed'])->name('archives.trashed');
+    # 'id' because we're not using route model binding
     Route::post('archives/{id}/restore', [ArchiveController::class, 'restore'])->name('archives.restore');
     Route::delete('archives/{id}/forceDestroy', [ArchiveController::class, 'forceDestroy'])->name('archives.force-destroy');
     Route::post('archives/{id}/unarchive', [ArchiveController::class, 'unarchive'])->name('archives.unarchive');

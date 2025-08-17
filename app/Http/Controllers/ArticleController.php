@@ -186,17 +186,93 @@ class ArticleController extends Controller
     public function destroy(Article $article)
     {
         $this->authorize('delete', $article);
-        // Delete associated files before deleting article 
-        if ($article->cover_photo && Storage::disk('public')->exists($article->cover_photo)) {
-            Storage::disk('public')->delete($article->cover_photo);
+        $storage = Storage::disk('public');
+
+        $trashDir = 'articles/trash/';
+
+        // Check if trash directory exists 
+        if (!$storage->exists($trashDir)) {
+            $storage->makeDirectory($trashDir);
         }
 
-        if ($article->thumbnail && Storage::disk('public')->exists($article->thumbnail)) {
-            Storage::disk('public')->delete($article->thumbnail);
+        // Delete associated file (cover & thumbnail) before deleting article 
+        if ($article->cover_photo && $storage->exists($article->cover_photo)) {
+            $filename = basename($article->cover_photo);
+            $storage->move($article->cover_photo, $trashDir . $filename);
+        }
+
+        if ($article->thumbnail && $storage->exists($article->thumbnail)) {
+            $filename = basename($article->thumbnail);
+            $storage->move($article->thumbnail, $trashDir . $filename);
         }
 
         $article->delete();
         return response()->json(['message' => 'Article deleted successfully'], 200);
+    }
+
+    public function forceDestroy(Article $article)
+    {
+        $storage = Storage::disk('public');
+        $trashDir = 'articles/trash/';
+
+        // Delete cover_photo from trash 
+        if ($article->cover_photo) {
+            $filename = basename($article->cover_photo);
+            $trashPath = $trashDir . $filename;
+
+            if ($storage->exists($trashPath)) {
+                $storage->delete($trashPath);
+            }
+        }
+
+        // Delete thumbnail 
+        if ($article->thumbnail) {
+            $filename = basename($article->thumbnail);
+            $trashPath = $trashDir . $filename;
+
+            if ($storage->exists($trashPath)) {
+                $storage->delete($trashPath);
+            }
+        }
+
+
+        $article->forceDelete();
+        return response()->json([
+            'message' => 'Article was permanently deleted'
+        ]);
+    }
+
+    public function restore(Article $article)
+    {
+
+        $storage = Storage::disk('public');
+        $trashDir = 'articles/trash/';
+
+        // Move back to the original path 
+        if ($article->cover_photo) {
+            $filename = basename($article->cover_photo);
+            $trashPath = $trashDir . $filename;
+
+            if ($storage->exists($trashPath)) {
+                $storage->move($trashPath, $article->cover_photo);
+            }
+        }
+
+        if ($article->thumbnail) {
+            $filename = basename($article->thumbnail);
+            $trashPath = $trashDir . $filename;
+
+            if ($storage->exists($trashPath)) {
+                $storage->move($trashPath, $article->thumbnail);
+            }
+        }
+
+        $article->restore();
+
+        return response()->json([
+            'message' => 'Article was restored',
+            'data' => ArticleResource::make($article)
+        ]);
     }
 
     /**

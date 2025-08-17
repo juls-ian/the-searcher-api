@@ -60,7 +60,6 @@ class ArticlePolicy
     public function delete(User $user, Article $article): bool
     {
         return $user->role === 'editor';
-
     }
 
     /**

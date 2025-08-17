@@ -220,5 +220,16 @@ Initiate **php artisan install:api**
    - php artisan make:trait Archivable
 3. add archive functions in each of the models as well in the api route
 4. implement crud features to manage archives 
-5. define in the api of this controller
-6. enforceMorphMap in the AppServiceProvider 
+5. implement soft and hard deletion
+6. impletion restoration
+7. define in the api of this controller
+8. enforceMorphMap in the AppServiceProvider 
+
+### Archiving Models 
+1. make a trait 
+2. use the trait on the respective models 
+3. implement own archiving on each models (separate from the archive model)
+
+## Soft and Hard Deletion and Restore
+1. implement this feat on the Article, User, Multimedia, Community Segments, Bulletin, Calendar, Issue, and Archive
+2. declare route binding of each models through the AppServiceProvider if using a route model binding in the crud functions of the controllers
