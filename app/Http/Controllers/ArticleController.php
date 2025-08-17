@@ -168,12 +168,6 @@ class ArticleController extends Controller
             }
         }
 
-        Log::info('Request method: ' . $request->method());
-        Log::info('Request data: ', $request->all());
-        Log::info('Files: ', $request->allFiles());
-        Log::info('Has cover_photo file: ' . ($request->hasFile('cover_photo') ? 'yes' : 'no'));
-        Log::info('Has thumbnail file: ' . ($request->hasFile('thumbnail') ? 'yes' : 'no'));
-
         $article->update($validatedArticle);
         // reload relationships
         $article->load(['category', 'writer', 'coverArtist', 'thumbnailArtist']);
@@ -187,24 +181,28 @@ class ArticleController extends Controller
     {
         $this->authorize('delete', $article);
         $storage = Storage::disk('public');
-
         $trashDir = 'articles/trash/';
+
+        $destroyFile = function ($filePath) use ($storage, $trashDir) {
+            // Check if is empty, null, falsy 
+            if (!$filePath) return;
+
+            $filename = basename($filePath); # cover123.jpg
+            $trashPath = $trashDir . $filename; # articles/covers/cover123.jpg
+
+            # if it exists in the original path 
+            if ($storage->exists($filePath)) {
+                $storage->move($filePath, $trashPath);
+            }
+        };
 
         // Check if trash directory exists 
         if (!$storage->exists($trashDir)) {
             $storage->makeDirectory($trashDir);
         }
 
-        // Delete associated file (cover & thumbnail) before deleting article 
-        if ($article->cover_photo && $storage->exists($article->cover_photo)) {
-            $filename = basename($article->cover_photo);
-            $storage->move($article->cover_photo, $trashDir . $filename);
-        }
-
-        if ($article->thumbnail && $storage->exists($article->thumbnail)) {
-            $filename = basename($article->thumbnail);
-            $storage->move($article->thumbnail, $trashDir . $filename);
-        }
+        $destroyFile($article->cover_photo);
+        $destroyFile($article->thumbnail);
 
         $article->delete();
         return response()->json(['message' => 'Article deleted successfully'], 200);
@@ -215,26 +213,20 @@ class ArticleController extends Controller
         $storage = Storage::disk('public');
         $trashDir = 'articles/trash/';
 
-        // Delete cover_photo from trash 
-        if ($article->cover_photo) {
-            $filename = basename($article->cover_photo);
+        $forceDestroyFile = function ($filePath) use ($storage, $trashDir) {
+            if (!$filePath) return;
+
+            $filename = basename($filePath);
             $trashPath = $trashDir . $filename;
 
+            # if it exists in the trash 
             if ($storage->exists($trashPath)) {
                 $storage->delete($trashPath);
             }
-        }
+        };
 
-        // Delete thumbnail 
-        if ($article->thumbnail) {
-            $filename = basename($article->thumbnail);
-            $trashPath = $trashDir . $filename;
-
-            if ($storage->exists($trashPath)) {
-                $storage->delete($trashPath);
-            }
-        }
-
+        $forceDestroyFile($article->cover_photo);
+        $forceDestroyFile($article->thumbnail);
 
         $article->forceDelete();
         return response()->json([
@@ -244,28 +236,23 @@ class ArticleController extends Controller
 
     public function restore(Article $article)
     {
-
         $storage = Storage::disk('public');
         $trashDir = 'articles/trash/';
 
-        // Move back to the original path 
-        if ($article->cover_photo) {
-            $filename = basename($article->cover_photo);
+        // Anonymous/closure helper function 
+        $restoreFile = function ($filePath) use ($storage, $trashDir) {
+            if (!$filePath) return;
+
+            $filename = basename($filePath);
             $trashPath = $trashDir . $filename;
 
             if ($storage->exists($trashPath)) {
-                $storage->move($trashPath, $article->cover_photo);
+                $storage->move($trashPath, $filePath);
             }
-        }
+        };
 
-        if ($article->thumbnail) {
-            $filename = basename($article->thumbnail);
-            $trashPath = $trashDir . $filename;
-
-            if ($storage->exists($trashPath)) {
-                $storage->move($trashPath, $article->thumbnail);
-            }
-        }
+        $restoreFile($article->cover_photo);
+        $restoreFile($article->thumbnail);
 
         $article->restore();
 
