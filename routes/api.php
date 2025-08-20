@@ -11,6 +11,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\SetPasswordController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\BulletinController;
+use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CommunitySegmentController;
 use App\Http\Controllers\IssueController;
 use App\Http\Controllers\MultimediaController;
@@ -106,6 +107,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('archives/{id}/unarchive', [ArchiveController::class, 'unarchive'])->name('archives.unarchive');
 });
 Route::apiResource('archives', ArchiveController::class)->only(['index', 'show']);
+
+/**
+ * Calendar routes 
+ */
+Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('calendars', CalendarController::class)->only(['store', 'update', 'destroy']);
+});
+Route::apiResource('calendars', CalendarController::class)->only(['index', 'show']);
 
 /**
  * User Auth routes

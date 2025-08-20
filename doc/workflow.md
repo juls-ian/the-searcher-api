@@ -20,6 +20,7 @@ Initiate **php artisan install:api**
 4. add relationships between Article, User, Article Category
 5. create staff_id algorithm in the User model 
 6. run migrations and seed db 
+7. set 'timezone' => 'ASIA/MANILA',  in the config/app.php
    
 ## Article 
 
