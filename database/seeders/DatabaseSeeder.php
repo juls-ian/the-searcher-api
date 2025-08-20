@@ -8,6 +8,7 @@ use App\Models\Article;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\ArticleCategory;
 use App\Models\Bulletin;
+use App\Models\Calendar;
 use App\Models\CommunitySegment;
 use App\Models\EditorialBoard;
 use App\Models\Issue;
@@ -28,6 +29,7 @@ class DatabaseSeeder extends Seeder
         // $this->call(ArticleCategorySeeder::class);
         ArticleCategory::factory()->createCompleteStructure();
         Issue::factory()->count(10)->create();
+        Calendar::factory()->count(8)->create();
 
         $users = [
             User::factory()->create([

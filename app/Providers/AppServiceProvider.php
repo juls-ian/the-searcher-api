@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Article;
 use App\Models\ArticleCategory;
 use App\Models\Bulletin;
+use App\Models\Calendar;
 use App\Models\CommunitySegment;
 use App\Models\Issue;
 use App\Models\Multimedia;
@@ -15,6 +16,7 @@ use App\Observers\ArticleCategoryObserver;
 use App\Observers\UserObserver;
 use App\Observers\ArticleObserver;
 use App\Observers\BulletinObserver;
+use App\Observers\CalendarObserver;
 use App\Observers\CommunitySegmentObserver;
 use App\Observers\IssueObserver;
 use App\Observers\MultimediaObserver;
@@ -45,6 +47,7 @@ class AppServiceProvider extends ServiceProvider
         Issue::observe(IssueObserver::class);
         Bulletin::observe(BulletinObserver::class);
         Archive::observe(ArchiveObserver::class);
+        Calendar::observe(CalendarObserver::class);
 
 
         // Shorten the name of the archivable_type 
