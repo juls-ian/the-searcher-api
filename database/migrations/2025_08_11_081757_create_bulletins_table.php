@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreignIdFor(User::class, 'writer_id')
                 ->constrained('users');
             $table->longText('details');
-            $table->timestampTz('published_at');
+            $table->dateTimeTz('published_at');
             $table->string('cover_photo');
             $table->foreignIdFor(User::class, 'cover_artist_id')
                 ->constrained('users');

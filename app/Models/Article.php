@@ -32,7 +32,7 @@ class Article extends Model
         'ticker_expires_at'
     ];
 
-    // convert incoming values automatically
+    // Convert incoming values automatically
     protected $casts = [
         'published_at' => 'datetime',
         'is_live' => 'boolean',
@@ -40,6 +40,14 @@ class Article extends Model
         'is_archived' => 'boolean',
         'thumbnail_same_as_cover' => 'boolean',
         'add_to_ticker' => 'boolean'
+    ];
+
+    // Default values 
+    protected $attributes = [
+        'is_live' => false,
+        'is_header' => false,
+        'thumbnail_same_as_cover' => false,
+        'add_to_ticker' => false
     ];
 
     protected $dates = ['archived_at'];

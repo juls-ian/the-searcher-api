@@ -23,7 +23,7 @@ return new class extends Migration {
                 ->constrained('article_categories')
                 ->onDelete('cascade');
             $table->longText('body');
-            $table->timestampTz('published_at');
+            $table->dateTimeTz('published_at');
             $table->boolean('is_live')->default(false);
             $table->boolean('is_header')->default(false); // only for live news
             $table->foreignIdFor(Article::class, 'series_id') // only for live news
@@ -41,7 +41,7 @@ return new class extends Migration {
                 ->constrained('users');
             $table->timestampTz('archived_at')->nullable();
             $table->boolean('add_to_ticker')->default(false);
-            $table->timestamp('ticker_expires_at')->nullable();
+            $table->dateTimeTz('ticker_expires_at')->nullable();
             $table->timestamps();
             $table->softDeletes(); // soft delete feature deleted_at column
         });
