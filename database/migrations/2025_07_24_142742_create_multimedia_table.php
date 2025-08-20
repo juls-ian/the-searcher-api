@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->enum('category', ['gallery', 'video', 'illustration', 'segment']);
             $table->string('caption');
-            $table->timestampTz('published_at');
+            $table->dateTimeTz('published_at');
             $table->string('files');
             $table->string('thumbnail');
             $table->foreignIdFor(User::class, 'thumbnail_artist_id')

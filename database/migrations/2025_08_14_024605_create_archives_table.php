@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('title');
             $table->string('slug');
             $table->json('data');
-            $table->timestampTz('archived_at');
+            $table->dateTimeTz('archived_at');
             $table->foreignIdFor(User::class, 'archiver_id')
                 ->constrained('users')
                 ->onDelete('restrict'); # prevent deletion of user if they have related records 

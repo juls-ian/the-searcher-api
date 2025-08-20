@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('title');
             $table->string('slug')->unique();
             $table->longText('description');
-            $table->timestampTz('published_at');
+            $table->dateTimeTz('published_at');
             $table->json('editors');
             $table->json('writers');
             $table->json('photojournalists');
