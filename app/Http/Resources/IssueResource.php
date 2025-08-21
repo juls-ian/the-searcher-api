@@ -28,6 +28,7 @@ class IssueResource extends JsonResource
             'contributors' => $this->contributors,
             'file' => $this->issue_file,
             'thumbnail' => $this->thumbnail,
+            'published_by' => $this->publisher->full_name ?? null
         ];
     }
 }

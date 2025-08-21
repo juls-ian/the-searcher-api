@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
 
 class Multimedia extends Model
 {
@@ -37,9 +38,22 @@ class Multimedia extends Model
         return $this->belongsToMany(User::class, 'multimedia_user', 'multimedia_id', 'user_id');
     }
 
-
     public function thumbnailArtist()
     {
         return $this->belongsTo(User::class, 'thumbnail_artist_id');
+    }
+
+    public function publisher()
+    {
+        return $this->belongsTo(User::class, 'publisher_id');
+    }
+
+    public static function booted()
+    {
+        static::creating(function ($multimedia) {
+            if (!$multimedia->publisher_id && Auth::id()) {
+                $multimedia->publisher_id = Auth::id();
+            }
+        });
     }
 }

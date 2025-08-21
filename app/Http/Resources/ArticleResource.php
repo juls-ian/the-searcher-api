@@ -29,7 +29,8 @@ class ArticleResource extends JsonResource
             'cover_artist' => $this->coverArtist->full_name ?? null,
             'thumbnail_same_as_cover' => $this->thumbnail_same_as_cover,
             'thumbnail' => $this->thumbnail,
-            'thumbnail_artist' => $this->thumbnailArtist->full_name ?? null
+            'thumbnail_artist' => $this->thumbnailArtist->full_name ?? null,
+            'published_by' => $this->publisher->full_name ?? null
         ];
     }
 }

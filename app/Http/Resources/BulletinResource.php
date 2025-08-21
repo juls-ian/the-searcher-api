@@ -24,6 +24,7 @@ class BulletinResource extends JsonResource
             'published_at' => $this->published_at,
             'cover_photo' => $this->cover_photo,
             'cover_artist' => $this->coverArtist->full_name ?? null,
+            'publisher_id' => $this->publisher->full_name ?? null
         ];
     }
 }

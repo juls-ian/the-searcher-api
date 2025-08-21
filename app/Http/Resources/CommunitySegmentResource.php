@@ -26,6 +26,7 @@ class CommunitySegmentResource extends JsonResource
             'segment_cover' => $this->segment_cover,
             'cover_artist' => $this->coverArtist->fullname ?? null,
             'cover_caption' => $this->cover_caption,
+            'published_by' => $this->publisher->fullname ?? null,
             // Poll segments if it exists
             'poll_segments' => $this->when($this->segmentPolls, new SegmentPollResource($this->segmentPolls)),
             // Article segments if it exists

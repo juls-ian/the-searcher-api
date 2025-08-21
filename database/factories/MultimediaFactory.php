@@ -30,6 +30,7 @@ class MultimediaFactory extends Factory
             // 'multimedia_artists_id' => User::factory(),
             'thumbnail' => fake()->imageUrl(300, 400, 'feature'),
             'thumbnail_artist_id' => User::factory(),
+            'publisher_id' => User::factory()
         ];
     }
 }

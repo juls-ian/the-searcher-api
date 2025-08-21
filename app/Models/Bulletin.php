@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 class Bulletin extends Model
 {
@@ -18,7 +19,8 @@ class Bulletin extends Model
         'details',
         'published_at',
         'cover_photo',
-        'cover_artist_id'
+        'cover_artist_id',
+        'publisher_id'
     ];
 
     public function casts()
@@ -38,5 +40,19 @@ class Bulletin extends Model
     public function coverArtist()
     {
         return $this->belongsTo(User::class, 'cover_artist_id');
+    }
+
+    public function publisher()
+    {
+        return $this->belongsTo(User::class, 'publisher_id');
+    }
+
+    public static function booted()
+    {
+        static::creating(function ($bulletin) {
+            if (!$bulletin->publisher_id && Auth::id()) {
+                $bulletin->publisher_id = Auth::id();
+            }
+        });
     }
 }

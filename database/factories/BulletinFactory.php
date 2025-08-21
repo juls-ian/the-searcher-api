@@ -28,8 +28,8 @@ class BulletinFactory extends Factory
             'writer_id' => User::factory(),
             'details' => fake()->paragraph(),
             'cover_photo' => fake()->imageUrl('300', '200', 'nature'),
-            'cover_artist_id' => User::factory()
-
+            'cover_artist_id' => User::factory(),
+            'publisher_id' => User::factory()
         ];
     }
 }

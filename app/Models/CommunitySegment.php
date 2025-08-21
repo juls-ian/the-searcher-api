@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 use InvalidArgumentException;
 
 class CommunitySegment extends Model
@@ -21,7 +22,9 @@ class CommunitySegment extends Model
         'series_order',
         'segment_cover',
         'cover_artist_id',
-        'cover_caption'
+        'cover_caption',
+        'publisher_id'
+
     ];
 
 
@@ -48,6 +51,10 @@ class CommunitySegment extends Model
         return $this->belongsTo(User::class, 'cover_artist_id');
     }
 
+    public function publisher()
+    {
+        return $this->belongsTo(User::class, 'publisher_id');
+    }
 
     public function segmentArticles()
     {
@@ -61,6 +68,12 @@ class CommunitySegment extends Model
 
     public static function booted()
     {
+        static::creating(function ($segment) {
+            if (!$segment->publisher_id && Auth::id()) {
+                $segment->publisher_id = Auth::id();
+            }
+        });
+
         static::deleting(function ($segment) {
             // Soft delete children table if parent is deleted
             if ($segment->segment_type === 'article') {

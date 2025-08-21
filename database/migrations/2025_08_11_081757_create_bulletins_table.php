@@ -24,6 +24,8 @@ return new class extends Migration
             $table->string('cover_photo');
             $table->foreignIdFor(User::class, 'cover_artist_id')
                 ->constrained('users');
+            $table->foreignIdFor(User::class, 'publisher_id')
+                ->constrained('users');
             $table->timestamps();
             $table->softDeletes();
         });
