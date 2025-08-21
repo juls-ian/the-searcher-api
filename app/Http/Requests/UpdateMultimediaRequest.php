@@ -25,7 +25,7 @@ class UpdateMultimediaRequest extends FormRequest
             'title' => ['sometimes', 'string'],
             'category' => ['sometimes', 'in:gallery,video,illustration,segment'],
             'caption' => ['sometimes', 'string'],
-            'published_at' => ['sometimes', 'nullable', 'date'],
+            'published_at' => ['sometimes',  'date'],
             'files' => ['sometimes'],
             'files.*' => ['image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
             'multimedia_artists_id.*' => ['sometimes', 'integer', 'exists:users,id'],

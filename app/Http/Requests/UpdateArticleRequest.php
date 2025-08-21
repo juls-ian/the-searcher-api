@@ -27,9 +27,9 @@ class UpdateArticleRequest extends FormRequest
             'article_category_id' => ['sometimes', 'integer', 'exists:article_categories,id'],
             'writer_id' => ['sometimes', 'integer', 'exists:users,id'],
             'body' => ['sometimes', 'string'],
-            'published_at' => ['sometimes', 'nullable', 'date'],
-            'is_live' => ['sometimes', 'nullable', 'boolean'],
-            'is_header' => ['sometimes', 'nullable', 'boolean'],
+            'published_at' => ['sometimes', 'date'],
+            'is_live' => ['sometimes', 'boolean'],
+            'is_header' => ['sometimes',  'boolean'],
             'series_id' => ['sometimes', 'integer', 'nullable', 'exists:articles,id'],
             'cover_photo' => ['sometimes', 'nullable', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
             'cover_caption' => ['sometimes', 'string'],
@@ -38,9 +38,8 @@ class UpdateArticleRequest extends FormRequest
             'thumbnail' => ['sometimes', 'required_if:thumbnail_same_as_cover,false', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
             // 'thumbnail' => ['required_if:thumbnail_same_as_cover,false'],
             'thumbnail_artist_id' => ['sometimes', 'integer', 'exists:users,id', 'required_if:thumbnail_same_as_cover,false'],
-            'is_archived' => ['sometimes', 'nullable', 'boolean'],
             'archived_at' => ['sometimes', 'nullable', 'date'],
-            'add_to_ticker' => ['sometimes', 'nullable', 'boolean'],
+            'add_to_ticker' => ['sometimes', 'boolean'],
             'ticker_expires_at' => ['sometimes', 'nullable', 'date', 'after:now,required_if:add_to_ticker,true']
 
         ];

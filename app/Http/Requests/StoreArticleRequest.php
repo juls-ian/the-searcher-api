@@ -26,22 +26,21 @@ class StoreArticleRequest extends FormRequest
             'article_category_id' => ['required', 'integer', 'exists:article_categories,id'],
             'writer_id' => ['required', 'integer', 'exists:users,id'],
             'body' => ['required', 'string'],
-            'published_at' => ['nullable', 'date'],
-            'is_live' => ['nullable', 'boolean'],
-            'is_header' => ['nullable', 'boolean'],
-            'series_id' => ['nullable', 'integer', 'exists:articles,id'],
-            'cover_photo' => ['nullable', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
+            'published_at' => ['sometimes', 'date'],
+            'is_live' => ['sometimes', 'boolean'],
+            'is_header' => ['sometimes', 'boolean'],
+            'series_id' => ['sometimes', 'integer', 'exists:articles,id'],
+            'cover_photo' => ['required', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
             // 'cover_photo' => 'required|file,image',
             'cover_caption' => ['required', 'string'],
             'cover_artist_id' => ['required', 'integer', 'exists:users,id'],
-            'thumbnail_same_as_cover' => ['nullable', 'boolean'],
-            'thumbnail' => ['nullable', 'required_if:thumbnail_same_as_cover,false', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
+            'thumbnail_same_as_cover' => ['sometimes', 'boolean'],
+            'thumbnail' => ['sometimes', 'required_if:thumbnail_same_as_cover,false', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
             // 'thumbnail' => 'nullable|required_without:thumbnail_same_as_cover|file|image',
             'thumbnail_artist_id' => ['nullable', 'integer', 'exists:users,id'],
-            'is_archived' => ['nullable', 'boolean'],
             'archived_at' => ['nullable', 'date'],
-            'add_to_ticker' => ['nullable', 'boolean'],
-            'ticker_expires_at' => ['nullable', 'date', 'after:now,required_if:add_to_ticker,true']
+            'add_to_ticker' => ['sometimes', 'boolean'],
+            'ticker_expires_at' => ['nullable', 'required_if:add_to_ticker,true', 'date', 'after:now']
         ];
     }
 

@@ -24,7 +24,7 @@ class StoreIssueRequest extends FormRequest
         return [
             'title' => ['required', 'string'],
             'description' => ['required', 'string'],
-            'published_at' => ['nullable', 'date'],
+            'published_at' => ['sometimes', 'date'],
             'editors' => ['required'],
             'editors.*' => ['string'],
             'writers' => ['required'],

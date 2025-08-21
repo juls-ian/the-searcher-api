@@ -27,7 +27,7 @@ class StoreCommunitySegmentRequest extends FormRequest
             'segment_type' => ['required', 'in:article,poll'],
             'writer_id' => ['required', 'integer', 'integer', 'exists:users,id'],
             'series_of' => ['nullable', 'exists:community_segments,id'],
-            'published_at' => ['nullable', 'date'],
+            'published_at' => ['sometimes', 'date'],
             'series_order' => ['nullable', 'integer', 'min:1'],
             'segment_cover' => ['required', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
             'cover_artist_id' => ['required', 'exists:users,id'],

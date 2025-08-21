@@ -26,7 +26,7 @@ class UpdateBulletinRequest extends FormRequest
             'category' => ['sometimes', 'in:advisory,announcement'],
             'writer_id' => ['sometimes', 'exists:users,id'],
             'details' => ['sometimes', 'string'],
-            'published_at' => ['sometimes', 'null', 'date'],
+            'published_at' => ['sometimes', 'date'],
             'cover_photo' => ['sometimes', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
             'cover_artist_id' => ['sometimes', 'exists:users,id']
         ];

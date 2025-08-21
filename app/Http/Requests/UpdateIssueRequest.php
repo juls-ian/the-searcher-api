@@ -24,7 +24,7 @@ class UpdateIssueRequest extends FormRequest
         return [
             'title' => ['sometimes', 'string'],
             'description' => ['sometimes', 'string'],
-            'published_at' => ['nullable', 'date'],
+            'published_at' => ['sometimes', 'date'],
             'editors' => ['sometimes'],
             'editors.*' => ['string'],
             'writers' => ['sometimes'],
