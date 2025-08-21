@@ -35,7 +35,7 @@ class StoreIssueRequest extends FormRequest
             'artists.*' => ['string'],
             'layout_artists' => ['required'],
             'layout_artists.*' => ['string'],
-            'contributors' => ['required'],
+            'contributors' => ['nullable'],
             'contributors.*' => ['string'],
             'issue_file' => [
                 'required',
