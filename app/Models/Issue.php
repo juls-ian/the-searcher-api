@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Issue extends Model
 {
@@ -23,6 +24,7 @@ class Issue extends Model
         'contributors',
         'issue_file',
         'thumbnail',
+        'publisher_id'
     ];
 
     protected $casts = [
@@ -34,4 +36,18 @@ class Issue extends Model
         'contributors' => 'array',
         'published_at' => 'datetime',
     ];
+
+    public function publisher()
+    {
+        return $this->belongsTo(User::class, 'publisher_id');
+    }
+
+    public static function booted()
+    {
+        static::creating(function ($issue) {
+            if (!$issue->publisher_id && Auth::id()) {
+                $issue->publisher_id = Auth::id();
+            }
+        });
+    }
 }

@@ -28,9 +28,10 @@ return new class extends Migration {
             $table->string('segment_cover');
             $table->foreignIdFor(User::class, 'cover_artist_id');
             $table->string('cover_caption');
+            $table->foreignIdFor(User::class, 'publisher_id')
+                ->constrained('users');
             $table->timestamps();
             $table->softDeletes();
-
         });
     }
 

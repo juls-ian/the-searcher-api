@@ -6,6 +6,7 @@ use App\Traits\Archivable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 class Article extends Model
 {
@@ -29,7 +30,8 @@ class Article extends Model
         'thumbnail_artist_id',
         'archived_at',
         'add_to_ticker',
-        'ticker_expires_at'
+        'ticker_expires_at',
+        'publisher_id'
     ];
 
     // Convert incoming values automatically
@@ -77,6 +79,11 @@ class Article extends Model
         return $this->belongsTo(User::class, 'thumbnail_artist_id');
     }
 
+    public function publisher()
+    {
+        return $this->belongsTo(User::class, 'publisher_id');
+    }
+
     // self-reference relationship for series (LIVE ARTICLES)
     public function series()
     {
@@ -86,5 +93,20 @@ class Article extends Model
     public function seriesArticles()
     {
         return $this->hasMany(Article::class, 'series_id');
+    }
+
+    public static function booted()
+    {
+        /**
+         * To save the publisher_id 
+         *  Alternatively we can handle this in the controller:
+         * $validatedArticle['publisher_id'] = auth()->id();
+         */
+        static::creating(function ($article) {
+            // Only set publisher_id if not already set and user is authenticated
+            if (!$article->publisher_id && Auth::id()) {
+                $article->publisher_id = Auth::id();
+            }
+        });
     }
 }

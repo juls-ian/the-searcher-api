@@ -44,6 +44,7 @@ class ArticleFactory extends Factory
             // 'archived_at' => fake()->optional(0.2)->dateTimeBetween('-1 year', 'now'),
             'add_to_ticker' => fake()->boolean(10),
             'ticker_expires_at' => fake()->dateTimeBetween('now', '1 week'),
+            'publisher_id' => User::factory()
 
         ];
     }

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -32,6 +33,7 @@ class IssueFactory extends Factory
             'contributors' => $this->faker->words(3),
             'issue_file' => 'issues/' . $this->faker->uuid . '.pdf',
             'thumbnail' => 'thumbnails/' . $this->faker->uuid . '.jpg',
+            'publisher_id' => User::factory()
         ];
     }
 }

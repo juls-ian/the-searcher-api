@@ -31,9 +31,9 @@ class CommunitySegmentFactory extends Factory
             'series_order' => fake()->numberBetween(1, 9),
             'segment_cover' => fake()->imageUrl(800, 600, 'news'),
             'cover_artist_id' => User::factory(),
-            'cover_caption' => fake()->sentence()
+            'cover_caption' => fake()->sentence(),
+            'publisher_id' => User::factory()
         ];
-
     }
 
     public function article()

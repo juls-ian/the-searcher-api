@@ -121,6 +121,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Article::class, 'thumbnail_artist_id');
     }
 
+    public function publishedArticles()
+    {
+        return $this->hasMany(Article::class, 'publisher_id');
+    }
+
     /**
      * Relationships to CommunitySegment
      */
@@ -132,6 +137,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function segmentCoverContributions()
     {
         return $this->hasMany(CommunitySegment::class, 'cover_artist_id');
+    }
+
+    public function publishedSegment()
+    {
+        return $this->hasMany(CommunitySegment::class, 'publisher_id');
     }
 
     /**
@@ -147,10 +157,14 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Multimedia::class, 'thumbnail_artist_id');
     }
 
+    public function publishedMultimedia()
+    {
+        return $this->hasMany(Multimedia::class, 'publisher_id');
+    }
+
     /**
      * Relationships to Bulletin 
      */
-
     public function writtenBulletin()
     {
         return $this->hasMany(Bulletin::class, 'writer_id');
@@ -159,6 +173,27 @@ class User extends Authenticatable implements MustVerifyEmail
     public function bulletinCoverContributions()
     {
         return $this->hasMany(Bulletin::class, 'cover_artist_id');
+    }
+
+    public function publishedBulletin()
+    {
+        return $this->hasMany(Bulletin::class, 'publisher_id');
+    }
+
+    /**
+     * Relationship to Issues 
+     */
+    public function publishedIssue()
+    {
+        return $this->hasMany(Issue::class, 'publisher_id');
+    }
+
+    /**
+     * Relationship to Archive
+     */
+    public function archivedEntries()
+    {
+        return $this->hasMany(Archive::class, 'archiver_id');
     }
 
     // ---------------------------------------------

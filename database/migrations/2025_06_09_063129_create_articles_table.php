@@ -42,6 +42,8 @@ return new class extends Migration {
             $table->timestampTz('archived_at')->nullable();
             $table->boolean('add_to_ticker')->default(false);
             $table->dateTimeTz('ticker_expires_at')->nullable();
+            $table->foreignIdFor(User::class, 'publisher_id')
+                ->constrained('users');
             $table->timestamps();
             $table->softDeletes(); // soft delete feature deleted_at column
         });
