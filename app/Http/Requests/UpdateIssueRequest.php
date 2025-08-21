@@ -35,7 +35,7 @@ class UpdateIssueRequest extends FormRequest
             'artists.*' => ['string'],
             'layout_artists' => ['sometimes'],
             'layout_artists.*' => ['string'],
-            'contributors' => ['sometimes'],
+            'contributors' => ['sometimes', 'nullable'],
             'contributors.*' => ['string'],
             'issue_file' => [
                 'sometimes',

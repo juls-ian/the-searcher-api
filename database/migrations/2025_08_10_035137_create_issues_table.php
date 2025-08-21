@@ -23,7 +23,7 @@ return new class extends Migration
             $table->json('photojournalists');
             $table->json('artists');
             $table->json('layout_artists');
-            $table->json('contributors');
+            $table->json('contributors')->nullable();
             $table->string('issue_file');
             $table->string('thumbnail');
             $table->foreignIdFor(User::class, 'publisher_id')
