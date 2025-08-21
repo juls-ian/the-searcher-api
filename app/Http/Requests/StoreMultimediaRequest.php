@@ -26,7 +26,7 @@ class StoreMultimediaRequest extends FormRequest
             'title' => ['required', 'string'],
             'category' => ['required', 'in:gallery,video,illustration,segment'],
             'caption' => ['required', 'string'],
-            'published_at' => ['nullable', 'date'],
+            'published_at' => ['sometimes', 'date'],
             'files' => ['required'],
             'files.*' => ['image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
             'multimedia_artists_id.*' => ['required', 'integer', 'exists:users,id'],

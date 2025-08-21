@@ -26,7 +26,7 @@ class StoreBulletinRequest extends FormRequest
             'category' => ['required', 'in:advisory,announcement'],
             'writer_id' => ['required', 'exists:users,id'],
             'details' => ['required', 'string'],
-            'published_at' => ['nullable', 'date'],
+            'published_at' => ['sometimes', 'date'],
             'cover_photo' => ['required', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
             'cover_artist_id' => ['required', 'exists:users,id']
         ];

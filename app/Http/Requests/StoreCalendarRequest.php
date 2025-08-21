@@ -34,10 +34,10 @@ class StoreCalendarRequest extends FormRequest
                     ['after:start_at']
                 )
             ],
-            'is_allday' => ['nullable', 'boolean'],
+            'is_allday' => ['sometimes', 'boolean'],
             'details' => ['nullable', 'string'],
             'venue' => ['nullable', 'string'],
-            'is_public' => ['nullable', 'boolean'],
+            'is_public' => ['sometimes', 'boolean'],
             'event_type' => ['required', 'in:release,event,meeting']
         ];
     }

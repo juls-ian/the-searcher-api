@@ -34,10 +34,10 @@ class UpdateCalendarRequest extends FormRequest
                     ['after:start_at']
                 )
             ],
-            'is_allday' => ['sometimes', 'nullable', 'boolean'],
+            'is_allday' => ['sometimes', 'boolean'],
             'details' => ['sometimes', 'nullable', 'string'],
             'venue' => ['sometimes', 'nullable', 'string'],
-            'is_public' => ['sometimes', 'nullable', 'boolean'],
+            'is_public' => ['sometimes', 'boolean'],
             'event_type' => ['sometimes', 'in:release,event,meeting']
         ];
     }
