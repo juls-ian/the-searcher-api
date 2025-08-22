@@ -32,6 +32,11 @@ class CommunitySegment extends Model
         'published_at' => 'datetime'
     ];
 
+    // Defaults 
+    protected $attributes = [
+        'credit_type' => 'photo'
+    ];
+
     /**
      * Relationships
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<User, CommunitySegment>
