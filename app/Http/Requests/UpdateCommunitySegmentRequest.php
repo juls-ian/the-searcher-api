@@ -25,26 +25,43 @@ class UpdateCommunitySegmentRequest extends FormRequest
         $rules = [
             'title' => ['sometimes', 'string'],
             'writer_id' => ['sometimes', 'integer', 'exists:users,id'],
-            'series_of' => ['sometimes', 'nullable', 'integer', 'exists:community_segments,id'],
+            'series_type' => ['sometimes', 'in:standalone,series_header,series_issue'],
+            'series_of' => [
+                # remove nullable when series_type is series_issue
+                Rule::when($this->series_type === 'series_issue', ['sometimes', 'integer']),
+                Rule::when($this->series_type !== 'series_issue', ['sometimes', 'nullable', 'integer']),
+                Rule::exists('community_segments', 'id')->where(function ($query) {
+                    # we only want series headers to be valid parents.
+                    $query->where('series_type', 'series_header');
+                }),
+                # forbid setting parent if itself is a header or standalone
+                Rule::prohibitedIf(fn() => in_array($this->series_type, ['series_header', 'standalone']))
+            ],
+            // Require series_order if series_of is not null, but prohibit for standalone and series_header
+            'series_order' => [
+                'sometimes',
+                'nullable',
+                'integer',
+                // Rule::requiredIf(fn($input) => !is_null($input->series_of)),
+                Rule::when($this->series_type === 'series_issue', ['required', 'min:2']),
+                Rule::prohibitedIf(fn() => in_array($this->series_type, ['standalone', 'series_header'])),
+                Rule::prohibitedIf(fn() => $this->segment_type === 'poll')
+            ],
             'published_at' => ['sometimes', 'date'],
             'segment_cover' => ['sometimes', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
+            'credit_type' => ['sometimes', 'in:photo,graphics'],
             'cover_artist_id' => ['sometimes', 'exists:users,id'],
-            'cover_caption' => ['sometimes', 'string']
+            'cover_caption' => ['sometimes', 'nullable', 'string']
         ];
 
         if ($this->segment_type === 'article') {
-            $rules['series_order'] = [
-                'sometimes',
-                'nullable',
-                'exists:community_segments,id'
-            ];
             $rules['body'] = ['sometimes', 'string'];
         } else if ($this->segment_type === 'poll') {
             $rules['series_order'] = [
                 Rule::prohibitedIf($this->segment_type === 'poll'),
             ];
             $rules['question'] = ['sometimes', 'string', 'max:500'];
-            $rules['options'] = ['sometimes', 'array', 'min: 2', 'max:10'];
+            $rules['options'] = ['sometimes', 'array', 'min:2', 'max:10'];
             $rules['options.*'] = ['sometimes', 'string', 'max:250'];
             $rules['ends_at'] = ['sometimes', 'date', 'after:today'];
         }
@@ -55,12 +72,15 @@ class UpdateCommunitySegmentRequest extends FormRequest
     public function messages()
     {
         return [
+            'segment_type.in' => 'Segment type should only be article or poll',
+            'series_type.prohibited' => 'Series type is only valid for article segments',
+            'series_order.prohibited' => 'Series order is not allowed for polls or standalone segments',
+            'series_of.required' => 'A series header must be selected when creating a series issue',
+            'series_of.prohibited' => 'Series parent cannot be set for standalone segments or series headers',
+            'credit_type.in' => 'Credits type should only be photo or graphics',
             'segment_cover.image' => 'Cover photo must be a valid image file.',
             'segment_cover.mimes' => 'Cover photo must be jpeg, png, or webp format',
             'segment_cover.max' => 'Cover photo must not exceed 5MB',
-            'thumbnail.image' => 'Thumbnail must be a valid image file.',
-            'thumbnail.mimes' => 'Thumbnail must be jpeg, png, gif, or webp format',
-            'thumbnail.max' => 'Thumbnail must not exceed 5MB',
         ];
     }
 

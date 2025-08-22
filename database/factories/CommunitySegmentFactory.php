@@ -26,11 +26,13 @@ class CommunitySegmentFactory extends Factory
             'slug' => Str::slug($title) . '-' . fake()->unique()->randomNumber(6),
             'segment_type' => fake()->randomElement(['poll', 'article']),
             'writer_id' => User::factory(),
+            'series_type' => fake()->randomElement(['standalone', 'series_header', 'series_issue']),
             'series_of' => null,
             'published_at' => fake()->dateTimeBetween('-1 year', 'now'),
             'series_order' => fake()->numberBetween(1, 9),
             'segment_cover' => fake()->imageUrl(800, 600, 'news'),
             'cover_artist_id' => User::factory(),
+            'credit_type' => fake()->randomElement(['photo', 'graphics']),
             'cover_caption' => fake()->sentence(),
             'publisher_id' => User::factory()
         ];
