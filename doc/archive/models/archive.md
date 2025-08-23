@@ -1,6 +1,7 @@
 # Scrapped codes from Archive model 
 
-## v.1:boot()
+## boot()
+### 1.0: overriding the deleting and forceDeleting
 
     protected static function boot()
     {
@@ -19,7 +20,19 @@
         });
     }
 
-## v.2: deleteFiles()
+### booted()
+### 1.0: automatically setting the archiver_id
+    public static function booted()
+    {
+        static::creating(function ($archive) {
+            if (!$archive->archiver_id && Auth::id()) {
+                $archive->archiver_id = Auth::id();
+            }
+        });
+    }
+
+## deleteFiles()
+### 1.0: initial code
 public function deleteFiles()
     {
         $data = $this->data ?? [];
@@ -35,9 +48,8 @@ public function deleteFiles()
         }
     }
 
-## v.3: moveFilesToTrash()
-
-
+## moveFilesToTrash()
+### 1.0: initial code
     public function moveFilesToTrash()
     {
         $data = $this->data ?? [];

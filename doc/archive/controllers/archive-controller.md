@@ -1,7 +1,7 @@
 # Unused codes in the ArchiveController
 
 
-## v.1: bulk actions
+## bulk actions
     /**
      * Bulk restore multiple archives.
      */
@@ -41,7 +41,8 @@
         ]);
     }
 
-## v.2: restore() - simple restore function 
+## restore()
+### 1.0: simplest restore function 
     public function restore($id)
     {
         // Find soft deleted entries
@@ -57,9 +58,39 @@
             'message' => 'Archive was restored',
             'data' => ArchiveResource::make($archive->load('archivable'))
     }
+### 1.1: other version
+    public function restore($id)
+    {
+        // Find soft deleted entries
+        $archive = Archive::onlyTrashed()->findOrFail($id);
 
+        $data = is_string($archive->data)
+            ? json_decode($archive->date, true)
+            : $archive->data;
 
-## v.3: destroy() - doesn't save the original dirname
+        $this->processFiles($data, function ($path) use (&$data) {
+            $storage = Storage::disk('public');
+            $originalPath = ltrim($path, '/');
+
+            // If file is inside trash, move it back 
+            if (str_starts_with($originalPath, 'archives/path')) {
+            }
+        });
+
+        // Restore archive 
+        $archive->restore();
+
+        // Re-set archived_at timestamp in the related model 
+        $archive->archivable()->update(['archived_at' => now()]);
+
+        return response()->json([
+            'message' => 'Archive was restored',
+            'data' => ArchiveResource::make($archive->load('archivable'))
+        ]);
+    }
+
+## destroy()
+### 1.0: doesn't save the original dirname
     public function destroy(Archive $archive)
     {
         // Convert to array 
@@ -96,8 +127,7 @@
             'message' => 'Archive deleted successfully'
         ]);
     }
-
-## v.3.1: destroy() - not working
+### 1.1: not working
     public function destroy(Archive $archive)
     {
         // Convert to array 
@@ -137,8 +167,8 @@
         ]);
     }
 
-
-## v.4: store()
+## store()
+## 1.1: initial version
     public function store(StoreArchiveRequest $request)
     {
         //
@@ -188,9 +218,112 @@
             'data' => new ArchiveResource($archive)
         ]);
     }
+## 1.2: no archivable_type in the file paths
+   public function store(StoreArchiveRequest $request)
+    {
+        $this->authorize('create', Archive::class);
+        $validatedArchive = $request->validated();
 
+        $archivableData = $validatedArchive['data'] ?? [];
 
-## v.5: update() - brittle 
+        #                         'cover' => null 
+        foreach ($archivableData as $key => $value) {
+            if ($request->hasFile("data.$key")) {
+
+                $file = $request->file("data.$key"); # get uploaded file 
+                $mimeType = $file->getMimeType(); # get file type: returns "image/jpg"
+
+                // Store uploads based on type 
+                if (str_starts_with($mimeType, 'image/')) {
+                    # store covers
+                    $path = $request->file("data.$key")->store('archives/covers', 'public');
+                } elseif (str_starts_with($mimeType, 'video/')) {
+                    # store videos 
+                    $path = $request->file("data.$key")->store('archives/videos', 'public');
+                } else {
+                    # store files 
+                    $path = $request->file("data.$key")->store('archives/files', 'public');
+                }
+
+                // Replace original value with URL or storage path 
+                $archivableData[$key] = [
+                    'path' => $path,
+                    'original_dir' => dirname($path)
+                ];
+            }
+        }
+
+        $archive = Archive::create([
+            'archivable_type' => $validatedArchive['archivable_type'],
+            'archivable_id' => $validatedArchive['archivable_id'] ?? null,
+            'title' => $validatedArchive['title'],
+            'data' => json_encode($archivableData),
+            'archived_at' => now(),
+            'archiver_id' => Auth::id()
+
+        ]);
+
+        return response()->json([
+            'message' => 'Archive created successfully',
+            'data' => new ArchiveResource($archive)
+        ]);
+    }
+## 1.3: add archivable_type in the file name using uniqid
+    public function store(StoreArchiveRequest $request)
+    {
+        $this->authorize('create', Archive::class);
+        $validatedArchive = $request->validated();
+        $archivableType = $validatedArchive['archivable_type'];
+        $archivableData = $validatedArchive['data'] ?? [];
+
+        #                         'cover' => null 
+        foreach ($archivableData as $key => $value) {
+            if ($request->hasFile("data.$key")) {
+
+                $file = $request->file("data.$key"); # get uploaded file 
+                $mimeType = $file->getMimeType(); # get file type: returns "image/jpg"
+
+                // Build the subdirectory
+                if (str_starts_with($mimeType, 'image/')) {
+                    $dir = 'archives/covers';
+                } elseif (str_starts_with($mimeType, 'video/')) {
+                    $dir = 'archives/videos';
+                } else {
+                    $dir = 'archives/files';
+                }
+
+                // Generate filename: {archivable_type}-{timestamp}.{ext}
+                $filename = $archivableType . '-' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+                // Store file with custom name
+                $path = $file->storeAs($dir, $filename, 'public');
+
+                // Replace original value with URL or storage path 
+                $archivableData[$key] = [
+                    'path' => $path,
+                    'original_dir' => dirname($path)
+                ];
+            }
+        }
+
+        $archive = Archive::create([
+            'archivable_type' => $validatedArchive['archivable_type'],
+            'archivable_id' => $validatedArchive['archivable_id'] ?? null,
+            'title' => $validatedArchive['title'],
+            'data' => json_encode($archivableData),
+            'archived_at' => now(),
+            'archiver_id' => Auth::id()
+
+        ]);
+
+        return response()->json([
+            'message' => 'Archive created successfully',
+            'data' => new ArchiveResource($archive)
+        ]);
+    }
+
+## update()
+### 1.0: brittle 
     public function update(UpdateArchiveRequest $request, Archive $archive)
     {
         $validatedArchive = $request->validated();
@@ -256,8 +389,7 @@
             'data' => new ArchiveResource($archive->fresh())
         ]);
     }
-
-## v.6: update() - another version
+### 1.1: another version
     public function update(UpdateArchiveRequest $request, Archive $archive)
     {
         $validatedArchive = $request->validated();
@@ -329,35 +461,140 @@
             'data' => new ArchiveResource($archive->fresh())
         ]);
     }
+### 1.2: always treat data as JSON (json_decode on load and json_encode on save)
+public function update(UpdateArchiveRequest $request, Archive $archive)
+{
+    $this->authorize('update', $archive);
+    $validated = $request->validated();
 
+    // Get current data
+    $oldData = json_decode($archive->data, true) ?? [];
+    $newData = $validated['data'] ?? [];
 
-## v.7: restore() - simple
-    public function restore($id)
-    {
-        // Find soft deleted entries
-        $archive = Archive::onlyTrashed()->findOrFail($id);
+    // Process each field
+    foreach ($newData as $key => $value) {
+        if ($request->hasFile("data.$key")) {
+            // New file uploaded
+            $file = $request->file("data.$key");
+            $mimeType = $file->getMimeType();
 
-        $data = is_string($archive->data)
-            ? json_decode($archive->date, true)
-            : $archive->data;
-
-        $this->processFiles($data, function ($path) use (&$data) {
-            $storage = Storage::disk('public');
-            $originalPath = ltrim($path, '/');
-
-            // If file is inside trash, move it back 
-            if (str_starts_with($originalPath, 'archives/path')) {
+            // Choose folder
+            if (str_starts_with($mimeType, 'image/')) {
+                $folder = 'archives/covers';
+            } elseif (str_starts_with($mimeType, 'video/')) {
+                $folder = 'archives/videos';
+            } else {
+                $folder = 'archives/files';
             }
-        });
 
-        // Restore archive 
-        $archive->restore();
+            $path = $file->store($folder, 'public');
+            $newData[$key] = ['path' => $path];
 
-        // Re-set archived_at timestamp in the related model 
-        $archive->archivable()->update(['archived_at' => now()]);
+            // Delete old file
+            if (isset($oldData[$key]['path'])) {
+                Storage::disk('public')->delete($oldData[$key]['path']);
+            }
+        } else {
+            // Keep old file if no new upload
+            $newData[$key] = $oldData[$key] ?? $value;
+        }
+    }
+
+    // Update fields
+    $updateData = [];
+    if (isset($validated['title'])) $updateData['title'] = $validated['title'];
+    if (isset($validated['archivable_type'])) $updateData['archivable_type'] = $validated['archivable_type'];
+    if (isset($validated['archivable_id'])) $updateData['archivable_id'] = $validated['archivable_id'];
+    if (isset($validated['data'])) $updateData['data'] = json_encode($newData);
+
+    $archive->update($updateData);
+
+    return response()->json([
+        'message' => 'Archive updated successfully',
+        'data' => new ArchiveResource($archive->fresh())
+    ]);
+}
+### 1.3: final version but without archivable_type in the filename
+  public function update(UpdateArchiveRequest $request, Archive $archive)
+    {
+        $this->authorize('update', $archive);
+
+        // When archivable_id is not null 
+        if (!is_null($archive->archivable_id)) {
+            return response()->json([
+                'message' => 'This archive is came from other resource and cannot be updated directly.'
+            ], 403);
+        }
+
+        $validatedArchive = $request->validated();
+        $archivableData = $validatedArchive['data'] ?? null; # raw validated data 
+
+        // Convert to array 
+        $oldData = is_string($archive->data)
+            # if string (contains JSON), convert to assoc array and return array instead of object 
+            ? json_decode($archive->data, true)
+            # if data has value it uses that value hence = empty array 
+            : ($archive->data ?? []);
+
+        if (is_array($archivableData)) {
+            foreach ($archivableData as $key => $value) {
+                // Checks if a file was uploaded for this specific field (like data.cover_image or data.video)
+                if ($request->hasFile("data.$key")) {
+
+                    $file = $request->file("data.$key"); # get uploaded file 
+                    $mimeType = $file->getMimeType(); # get mime type: returns 'image/jpeg', 'video/mp4', 'application/pdf'
+
+                    // Handle different file types storage 
+                    if (str_starts_with($mimeType, 'image/')) {
+                        $dir = 'archives/covers';
+                    } elseif (str_starts_with($mimeType, 'video/')) {
+                        $dir = 'archives/videos';
+                    } else {
+                        $dir = 'archives/files';
+                    }
+
+                    // Store files first 
+                    $path = $file->store($dir, 'public');
+
+                    $archivableData[$key] = [
+                        'path' => $path, #replace original value with URL or storage path 
+                        'original_dir' => $dir # save the original directory
+                    ];
+
+
+                    # delete old file only if it exists for this key/field 
+                    if (isset($oldData[$key])) {
+                        $oldPath = is_array($oldData[$key]) ? $oldData[$key]['path'] : $oldData[$key];
+                        if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+                            Storage::disk('public')->delete($oldPath);
+                        }
+                    }
+                } else {
+                    // if no new file, keep the old files 
+                    $archivableData[$key] = $oldData[$key] ?? $value;
+                }
+            }
+        }
+
+        $updateData = []; # batch of updated data 
+
+        // Field whitelist
+        foreach (['title', 'archivable_type', 'archivable_id'] as $field) {
+            # if field exists in $validatedArchive it copies to the $updateData
+            if (isset($validatedArchive[$field])) {
+                $updateData[$field] = $validatedArchive[$field];
+            }
+        }
+
+        // Check if data field is submitted 
+        if (isset($validatedArchive['data'])) {
+            $updateData['data'] = $archivableData; # fully processed data ready for storage 
+        }
+
+        $archive->update($updateData);
 
         return response()->json([
-            'message' => 'Archive was restored',
-            'data' => ArchiveResource::make($archive->load('archivable'))
+            'message' => 'Archive successfully updated',
+            'data' => new ArchiveResource($archive->fresh())
         ]);
     }
