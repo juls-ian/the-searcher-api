@@ -58,6 +58,11 @@ class CommunitySegmentController extends Controller
             $validatedSegment['published_at'] = Carbon::now();
         }
 
+        // Handler 3: set series_order automatically to 1
+        if (isset($validatedSegment['series_type']) && $validatedSegment['series_type'] === 'series_header') {
+            $validatedSegment['series_order'] = 1;
+        }
+
         $segment = CommunitySegment::create($validatedSegment);
 
 
@@ -123,22 +128,34 @@ class CommunitySegmentController extends Controller
             unset($validatedSegment['segment_cover']);
         }
 
+        // Handler 3: manage series_order based on series_type changes
+        if (isset($validatedSegment['series_type'])) {
+            if ($validatedSegment['series_type'] === 'series_header') {
+                $validatedSegment['series_order'] = 1;
+            } elseif ($validatedSegment['series_type'] === 'standalone') {
+                $validatedSegment['series_order'] = null;
+            }
+        }
         $communitySegment->update($validatedSegment);
 
         if ($communitySegment->segment_type === 'article') {
             // Access poll data from article_segments key 
             $articleData = $request->input('article_segments'); # for nested data, key is the object key
-            SegmentsArticle::where('segment_id', $communitySegment->id)->update([
-                'body' => $articleData['body'] ?? null
-            ]);
+
+            // Only update if article data is provided 
+            if ($articleData && isset($articleData['body'])) {
+                SegmentsArticle::where('segment_id', $communitySegment->id)->update([
+                    'body' => $articleData['body']
+                ]);
+            }
         } else if ($communitySegment->segment_type === 'poll') {
             // Accessing poll data from poll_segments key 
             $pollData = $request->input('poll_segments'); # input() for nested data 
 
             SegmentsPoll::where('segment_id', $communitySegment->id)->update([
-                'question' => $pollData['question'] ?? null,
-                'options' => $pollData['options'] ?? null,
-                'ends_at' => $pollData['ends_at'] ?? null
+                'question' => $pollData['question'],
+                'options' => $pollData['options'],
+                'ends_at' => $pollData['ends_at']
             ]);
         }
 

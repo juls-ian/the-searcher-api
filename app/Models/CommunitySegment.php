@@ -16,11 +16,13 @@ class CommunitySegment extends Model
     protected $fillable = [
         'title',
         'segment_type',
+        'series_type',
         'writer_id',
         'published_at',
         'series_of',
         'series_order',
         'segment_cover',
+        'credit_type',
         'cover_artist_id',
         'cover_caption',
         'publisher_id'
