@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Archive extends Model
 {
@@ -33,7 +34,7 @@ class Archive extends Model
         return $this->morphTo();
     }
 
-    public function archivedBy()
+    public function archiver()
     {
         return $this->belongsTo(User::class, 'archiver_id');
     }

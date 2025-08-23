@@ -8,6 +8,7 @@ use App\Http\Requests\StoreArchiveRequest;
 use App\Http\Requests\UpdateArchiveRequest;
 use App\Http\Resources\ArchiveResource;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class ArchiveController extends Controller
@@ -54,7 +55,7 @@ class ArchiveController extends Controller
     {
         $this->authorize('create', Archive::class);
         $validatedArchive = $request->validated();
-
+        $archivableType = $validatedArchive['archivable_type'];
         $archivableData = $validatedArchive['data'] ?? [];
 
         #                         'cover' => null 
@@ -64,17 +65,23 @@ class ArchiveController extends Controller
                 $file = $request->file("data.$key"); # get uploaded file 
                 $mimeType = $file->getMimeType(); # get file type: returns "image/jpg"
 
-                // Store uploads based on type 
+                // Build the subdirectory
                 if (str_starts_with($mimeType, 'image/')) {
-                    # store covers
-                    $path = $request->file("data.$key")->store('archives/covers', 'public');
+                    $dir = 'archives/covers';
                 } elseif (str_starts_with($mimeType, 'video/')) {
-                    # store videos 
-                    $path = $request->file("data.$key")->store('archives/videos', 'public');
+                    $dir = 'archives/videos';
                 } else {
-                    # store files 
-                    $path = $request->file("data.$key")->store('archives/files', 'public');
+                    $dir = 'archives/files';
                 }
+
+                // Generating custom hash name 
+                $randomName = $file->hashName();
+
+                // Adding prefix 
+                $filename = $archivableType . '-' . $randomName;
+
+                // Store file with custom name
+                $path = $file->storeAs($dir, $filename, 'public');
 
                 // Replace original value with URL or storage path 
                 $archivableData[$key] = [
@@ -90,7 +97,7 @@ class ArchiveController extends Controller
             'title' => $validatedArchive['title'],
             'data' => json_encode($archivableData),
             'archived_at' => now(),
-            'archiver_id' => $validatedArchive['archiver_id']
+            'archiver_id' => Auth::id()
 
         ]);
 
@@ -124,8 +131,17 @@ class ArchiveController extends Controller
     public function update(UpdateArchiveRequest $request, Archive $archive)
     {
         $this->authorize('update', $archive);
+
+        // When archivable_id is not null 
+        if (!is_null($archive->archivable_id)) {
+            return response()->json([
+                'message' => 'This archive is came from other resource and cannot be updated directly.'
+            ], 403);
+        }
+
         $validatedArchive = $request->validated();
         $archivableData = $validatedArchive['data'] ?? null; # raw validated data 
+        $archivableType = $validatedArchive['archivable_type'] ?? $archive->archivable_type;
 
         // Convert to array 
         $oldData = is_string($archive->data)
@@ -151,8 +167,12 @@ class ArchiveController extends Controller
                         $dir = 'archives/files';
                     }
 
+                    // Generating random hash filename with prefix 
+                    $randomName = $file->hashName();
+                    $filename = $archivableType . '-' . $randomName;
+
                     // Store files first 
-                    $path = $file->store($dir, 'public');
+                    $path = $file->storeAs($dir, $filename, 'public');
 
                     $archivableData[$key] = [
                         'path' => $path, #replace original value with URL or storage path 
@@ -177,7 +197,7 @@ class ArchiveController extends Controller
         $updateData = []; # batch of updated data 
 
         // Field whitelist
-        foreach (['title', 'archivable_type', 'archivable_id', 'archiver_id'] as $field) {
+        foreach (['title', 'archivable_type', 'archivable_id'] as $field) {
             # if field exists in $validatedArchive it copies to the $updateData
             if (isset($validatedArchive[$field])) {
                 $updateData[$field] = $validatedArchive[$field];

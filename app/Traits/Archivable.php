@@ -36,10 +36,13 @@ trait Archivable
             return;
         }
 
-
-
+        /**
+         * Laravel automatically sets the polymorphic fields: Before inserting into the database, Laravel automatically adds:
+         * archivable_type = 'App\Models\Article' (the fully qualified class name)
+         * archivable_id = the Article's id field
+         */
         $archive =  $this->archives()->create([ # use archives() relationship 
-            'archivable_id' => $this->id,
+            // 'archivable_id' => $this->id,
             'title' => $this->title ?? null,
             'slug' => $this->slug ?? null,
             'data' => $this->toArray(),
