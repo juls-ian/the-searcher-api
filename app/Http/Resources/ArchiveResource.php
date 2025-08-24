@@ -16,7 +16,11 @@ class ArchiveResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $data = json_decode($this->data, true);
+        // Normalize data into array no matter what 
+        $data = is_array($this->data)
+            ? $this->data
+            : json_decode($this->data, true);
+
         # defaults 
         return [
             'id' => $this->id,
@@ -46,19 +50,31 @@ class ArchiveResource extends JsonResource
                     'published_at' => $data['published_at'],
                     'cover_photo' => $data['cover_photo'],
                     'cover_artist' => User::find($data['cover_artist_id'])?->only(['full_name']),
-                    'credit_type' => $data['credit_type']
+                    'credit_type' => $data['credit_type'] ?? null
                 ];
 
             case 'multimedia':
+                // Multiple artists handler 
+                $multimediaArtists = [];
+                if (isset($data['multimedia_artists_id']) && is_array($data['multimedia_artists_id'])) {
+                    $artistsIds = $data['multimedia_artists_id'];
+                    $multimediaArtists = User::whereIn('id', $artistsIds)
+                        ->get()
+                        ->map(fn($user) => $user->only(['id', 'full_name']))
+                        ->toArray();
+                }
+
                 return [
                     'category' => $data['category'],
                     'caption' => $data['caption'],
                     'published_at' => $data['published_at'],
-                    'files'  => $data['files'],
-                    'multimedia_artists' => User::find($data['multimedia_artists_id'])?->only(['full_name']),
+                    'files' => isset($data['files'])
+                        ? ($this->isAssoc($data['files']) ? [$data['files']] : $data['files'])
+                        : [],
+                    'multimedia_artists' => $multimediaArtists,
                     'thumbnail' => $data['thumbnail'],
                     'thumbnail_artist' => User::find($data['thumbnail_artist_id'])?->only(['full_name']),
-                    'credit_type' => $data['credit_type']
+                    'credit_type' => $data['credit_type'] ?? null
                 ];
 
             case 'community-segment':
@@ -71,7 +87,7 @@ class ArchiveResource extends JsonResource
                     'body' => $data['body'],
                     'segment_cover' => $data['segment_cover'],
                     'cover_artist' => User::find($data['cover_artist_id'])?->only(['full_name']),
-                    'credit_type' => $data['credit_type']
+                    'credit_type' => $data['credit_type'] ?? null
                 ];
 
             case 'bulletin':
@@ -97,6 +113,14 @@ class ArchiveResource extends JsonResource
                     'issue_file' => $data['issue_file'],
                     'thumbnail' => $data['thumbnail']
                 ];
+
+            default:
+                return $data;
         }
+    }
+
+    private function isAssoc(array $arr): bool
+    {
+        return array_keys($arr) !== range(0, count($arr) - 1);
     }
 }

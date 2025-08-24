@@ -62,32 +62,55 @@ class ArchiveController extends Controller
         foreach ($archivableData as $key => $value) {
             if ($request->hasFile("data.$key")) {
 
-                $file = $request->file("data.$key"); # get uploaded file 
-                $mimeType = $file->getMimeType(); # get file type: returns "image/jpg"
+                $files = $request->file("data.$key"); # get uploaded file 
 
-                // Build the subdirectory
-                if (str_starts_with($mimeType, 'image/')) {
-                    $dir = 'archives/covers';
-                } elseif (str_starts_with($mimeType, 'video/')) {
-                    $dir = 'archives/videos';
+                // Handler 1: multiple files uploaded 
+                if (is_array($files)) {
+                    $archivableData[$key] = []; # reset to hold multiple files 
+
+
+                    foreach ($files as $file) {
+                        $mimeType = $file->getMimeType(); # get file type: returns "image/jpg"
+
+                        // Build the subdirectory
+                        if (str_starts_with($mimeType, 'image/')) {
+                            $dir = 'archives/covers';
+                        } elseif (str_starts_with($mimeType, 'video/')) {
+                            $dir = 'archives/videos';
+                        } else {
+                            $dir = 'archives/files';
+                        }
+
+                        $filename = $archivableType . '-' . $file->hashName(); # add prefix 
+                        $path = $file->storeAs($dir, $filename, 'public'); # store file with custom name
+
+                        // Replace original value with URL or storage path 
+                        $archivableData[$key][] = [ # multiple file but single file is returned fix 
+                            'path' => $path,
+                            'original_dir' => $dir
+                        ];
+                    }
                 } else {
-                    $dir = 'archives/files';
+                    // Handler 2: single file upload fallback 
+                    $file = $files;
+                    $mimeType = $file->getMimeType();
+
+                    if (str_starts_with($mimeType, 'image/')) {
+                        $dir = 'archives/covers';
+                    } elseif (str_starts_with($mimeType, 'video/')) {
+                        $dir = 'archives/videos';
+                    } else {
+                        $dir = 'archives/files';
+                    }
+
+                    $filename = $archivableType . '-' . $file->hashName();
+                    $path = $file->storeAs($dir, $filename, 'public');
+
+                    $archivableData[$key] = [
+                        'path' => $path,
+                        'original_dir' => $dir
+                    ];
                 }
-
-                // Generating custom hash name 
-                $randomName = $file->hashName();
-
-                // Adding prefix 
-                $filename = $archivableType . '-' . $randomName;
-
-                // Store file with custom name
-                $path = $file->storeAs($dir, $filename, 'public');
-
-                // Replace original value with URL or storage path 
-                $archivableData[$key] = [
-                    'path' => $path,
-                    'original_dir' => dirname($path)
-                ];
             }
         }
 
@@ -155,36 +178,73 @@ class ArchiveController extends Controller
                 // Checks if a file was uploaded for this specific field (like data.cover_image or data.video)
                 if ($request->hasFile("data.$key")) {
 
-                    $file = $request->file("data.$key"); # get uploaded file 
-                    $mimeType = $file->getMimeType(); # get mime type: returns 'image/jpeg', 'video/mp4', 'application/pdf'
+                    $files = $request->file("data.$key"); # get uploaded file 
 
-                    // Handle different file types storage 
-                    if (str_starts_with($mimeType, 'image/')) {
-                        $dir = 'archives/covers';
-                    } elseif (str_starts_with($mimeType, 'video/')) {
-                        $dir = 'archives/videos';
+                    // Handler 1: multiple files 
+                    if (is_array($files)) {
+                        $archivableData[$key] = [];
+
+                        foreach ($files as $file) {
+
+                            $mimeType = $file->getMimeType(); # get mime type: returns 'image/jpeg', 'video/mp4', 'application/pdf'
+
+                            if (str_starts_with($mimeType, 'image/')) {
+                                $dir = 'archives/covers';
+                            } elseif (str_starts_with($mimeType, 'videos/')) {
+                                $dir = 'archives/videos';
+                            } else {
+                                $dir = 'archives/files';
+                            }
+
+                            $filename = $archivableType . '-' . $file->hashName();
+                            $path = $file->storeAs($dir, $filename, 'public');
+
+                            $archivableData[$key][] = [
+                                'path' => $path, #replace original value with URL or storage path
+                                'original_dir' => $dir # save the original directory
+                            ];
+                        }
+
+                        // Cleanup old files if exists 
+                        if (isset($oldData[$key]) && is_array($oldData[$key])) {
+                            foreach ($oldData[$key] as $oldFile) {
+                                if (isset($oldFile['path']) && Storage::disk('public')->exists($oldFile['path'])) {
+                                    Storage::disk('public')->delete($oldFile['path']);
+                                }
+                            }
+                        }
+                        // Handler 2: single file 
                     } else {
-                        $dir = 'archives/files';
-                    }
 
-                    // Generating random hash filename with prefix 
-                    $randomName = $file->hashName();
-                    $filename = $archivableType . '-' . $randomName;
+                        $file = $files;
+                        $mimeType = $file->getMimeType();
 
-                    // Store files first 
-                    $path = $file->storeAs($dir, $filename, 'public');
+                        // Handle different file types storage 
+                        if (str_starts_with($mimeType, 'image/')) {
+                            $dir = 'archives/covers';
+                        } elseif (str_starts_with($mimeType, 'video/')) {
+                            $dir = 'archives/videos';
+                        } else {
+                            $dir = 'archives/files';
+                        }
 
-                    $archivableData[$key] = [
-                        'path' => $path, #replace original value with URL or storage path 
-                        'original_dir' => $dir # save the original directory
-                    ];
+                        // Generating random hash filename with prefix 
+                        $filename = $archivableType . '-' . $file->hashName();
 
+                        // Store files first 
+                        $path = $file->storeAs($dir, $filename, 'public');
 
-                    # delete old file only if it exists for this key/field 
-                    if (isset($oldData[$key])) {
-                        $oldPath = is_array($oldData[$key]) ? $oldData[$key]['path'] : $oldData[$key];
-                        if ($oldPath && Storage::disk('public')->exists($oldPath)) {
-                            Storage::disk('public')->delete($oldPath);
+                        $archivableData[$key] = [
+                            'path' => $path, #replace original value with URL or storage path 
+                            'original_dir' => $dir # save the original directory
+                        ];
+
+                        # delete old file only if it exists for this key/field 
+                        if (isset($oldData[$key])) {
+                            $oldPath = is_array($oldData[$key]) ? $oldData[$key]['path'] : $oldData[$key];
+                            if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+                                Storage::disk('public')->delete($oldPath);
+                            }
                         }
                     }
                 } else {
@@ -273,7 +333,7 @@ class ArchiveController extends Controller
     public function forceDestroy($id)
     {
         $archive = Archive::onlyTrashed()->findOrFail($id);
-        $this->authorize('forceDestroy', $archive);
+        $this->authorize('forceDelete', $archive);
 
         $this->processFiles($archive->data ?? [], function ($path) {
             if (Storage::disk('public')->exists($path)) {
@@ -303,33 +363,43 @@ class ArchiveController extends Controller
 
         $storage = Storage::disk('public');
 
-        // Process each file entry
-        foreach ($data as $key => $value) {
-            if (is_array($value) && isset($value['path'], $value['original_dir'])) {
+        // Recursive restore closure function 
+        $restoreFiles = function (&$node) use (&$restoreFiles, $storage) {
+            if (is_array($node)) {
+                if (isset($node['path'], $node['original_dir'])) {
+                    $currentPath = $node['path'];
+                    $originalDir = $node['original_dir'];
 
-                $currentPath = $value['path'];
-                $originalDir = $value['original_dir'];
+                    if (str_starts_with($currentPath, 'archives/trash/')) {
+                        $newPath = $originalDir . '/' . basename($currentPath);
 
-                # move files back from trash 
-                if (str_starts_with($currentPath, 'archives/trash/')) {
-                    $newPath = $originalDir . '/' . basename($currentPath);
+                        if ($storage->exists($currentPath)) {
+                            $storage->move($currentPath, $newPath);
+                        }
 
-                    if ($storage->exists($currentPath)) {
-                        $storage->move($currentPath, $newPath);
+                        $node['path'] = $newPath;
                     }
+                }
 
-                    $value[$key]['path'] = $newPath;
+                # recurse deeper into the child elements 
+                foreach ($node as &$child) {
+                    $restoreFiles($child);
                 }
             }
+        };
+
+        $restoreFiles($data);
+
+        if ($archive->archivable_id !== null) {
+            // Re-set archived_at timestamp in the related model 
+            $archive->archivable()->update(['archived_at' => now()]);
         }
 
-        // Save modified array back to database 
-        $archive->data = $data;
+        // Save back modified as json to database 
+        $archive->data = json_encode($data);
         // Restore archive 
         $archive->restore();
 
-        // Re-set archived_at timestamp in the related model 
-        $archive->archivable()->update(['archived_at' => now()]);
 
         return response()->json([
             'message' => 'Archive was restored',
