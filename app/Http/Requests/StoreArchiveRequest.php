@@ -52,11 +52,12 @@ class StoreArchiveRequest extends FormRequest
                 $rules['data.category'] = ['required', 'in:gallery,video,illustration,segment'];
                 $rules['data.caption'] = ['required', 'string'];
                 $rules['data.published_at'] = ['required', 'date'];
-                $rules['data.files'] = ['required'];
-                $rules['data.files.*'] = ['image', 'mimes:jpg,png,jpeg,webp', 'max:5000'];
-                $rules['data.multimedia_artists_id'] = ['required', 'integer', 'exists:users,id'];
+                $rules['data.files'] = ['required', 'array', 'min:1'];
+                $rules['data.files.*'] = ['file', 'mimes:jpg,png,jpeg,webp,mp4,avi,mov,wmv,flv,webm', 'max:50000'];
+                $rules['data.multimedia_artists_id'] = ['required', 'array', 'exists:users,id'];
                 $rules['data.thumbnail'] = ['required', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'];
-                $rules['data.thumbnail_artist_id'] = ['required', 'integer', 'exists:users,id'];
+                $rules['data.thumbnail_artist_id'] = ['required', 'integer', 'min:1'];
+                $rules['data.thumbnail_artist_id.*'] = ['integer', 'exists:users,id'];
                 $rules['data.credit_type'] = ['required', 'in:photo,graphics'];
                 break;
 

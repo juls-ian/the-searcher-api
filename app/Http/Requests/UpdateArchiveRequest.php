@@ -51,11 +51,13 @@ class UpdateArchiveRequest extends FormRequest
                 $rules['data.category'] = ['sometimes', 'in:gallery,video,illustration,segment'];
                 $rules['data.caption'] = ['sometimes', 'string'];
                 $rules['data.published_at'] = ['sometimes', 'date'];
-                $rules['data.files'] = ['sometimes'];
-                $rules['data.files.*'] = ['image', 'mimes:jpg,png,jpeg,webp', 'max:5000'];
-                $rules['data.multimedia_artists_id'] = ['sometimes', 'integer', 'exists:users,id'];
+                $rules['data.files'] = ['sometimes', 'array', 'min:1'];
+                $rules['data.files.*'] = ['file', 'mimes:jpg,png,jpeg,webp,mp4,avi,mov,wmv,flv,webm', 'max:50000'];
+                $rules['data.multimedia_artists_id'] = ['sometimes', 'array', 'exists:users,id'];
                 $rules['data.thumbnail'] = ['sometimes', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'];
-                $rules['data.thumbnail_artist_id'] = ['sometimes', 'integer', 'exists:users,id'];
+                $rules['data.thumbnail_artist_id'] = ['sometimes', 'integer', 'min:1'];
+                $rules['data.thumbnail_artist_id.*'] = ['integer', 'exists:users,id'];
+                $rules['data.credit_type'] = ['sometimes', 'in:photo,graphics'];
                 break;
 
             // Archive: Community Segment
