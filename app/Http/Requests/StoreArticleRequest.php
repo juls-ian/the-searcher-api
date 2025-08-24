@@ -34,6 +34,7 @@ class StoreArticleRequest extends FormRequest
             // 'cover_photo' => 'required|file,image',
             'cover_caption' => ['required', 'string'],
             'cover_artist_id' => ['required', 'integer', 'exists:users,id'],
+            'cover_credit_type' => ['sometimes', 'in:photo,graphics,illustration'],
             'thumbnail_same_as_cover' => ['sometimes', 'boolean'],
             'thumbnail' => ['sometimes', 'required_if:thumbnail_same_as_cover,false', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
             // 'thumbnail' => 'nullable|required_without:thumbnail_same_as_cover|file|image',

@@ -38,6 +38,7 @@ class ArticleFactory extends Factory
             // 'cover_photo' => UploadedFile::fake()->image('cover.jpg', 800, 600),
             'cover_caption' => fake()->optional(0.9)->sentence(),
             'cover_artist_id' => User::factory(),
+            'cover_credit_type' => fake()->randomElement(['photo', 'graphics', 'illustration']),
             'thumbnail' => fake()->imageUrl(300, 200, 'news'),
             // 'thumbnail' => UploadedFile::fake()->image('thumbnail.jpg', 800, 600),
             'thumbnail_artist_id' => User::factory(),

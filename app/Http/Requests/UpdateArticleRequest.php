@@ -34,6 +34,7 @@ class UpdateArticleRequest extends FormRequest
             'cover_photo' => ['sometimes', 'nullable', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
             'cover_caption' => ['sometimes', 'string'],
             'cover_artist_id' => ['sometimes', 'integer', 'exists:users,id'],
+            'cover_credit_type' => ['sometimes', 'in:photo,graphics,illustration'],
             'thumbnail_same_as_cover' => ['sometimes', 'boolean'],
             'thumbnail' => ['sometimes', 'required_if:thumbnail_same_as_cover,false', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
             // 'thumbnail' => ['required_if:thumbnail_same_as_cover,false'],
