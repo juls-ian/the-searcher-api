@@ -55,7 +55,7 @@ class StoreCommunitySegmentRequest extends FormRequest
             ],
             'published_at' => ['sometimes', 'date'],
             'segment_cover' => ['required', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
-            'credit_type' => ['required', 'in:photo,graphics'],
+            'credit_type' => ['sometimes', 'in:photo,graphics'],
             'cover_artist_id' => ['required', 'exists:users,id'],
             'cover_caption' => ['nullable', 'string']
         ];

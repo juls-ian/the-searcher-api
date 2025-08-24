@@ -25,6 +25,7 @@ class Article extends Model
         'cover_photo',
         'cover_caption',
         'cover_artist_id',
+        'cover_credit_type',
         'thumbnail_same_as_cover',
         'thumbnail',
         'thumbnail_artist_id',
