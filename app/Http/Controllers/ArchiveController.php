@@ -9,21 +9,30 @@ use App\Http\Requests\UpdateArchiveRequest;
 use App\Http\Resources\ArchiveResource;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 class ArchiveController extends Controller
 {
     use AuthorizesRequests;
-    private function processFiles($data, callable $callback)
+
+    private function processFiles($data, callable $callback) # callback = a function can be called later 
     {
-        foreach ($data as $key => $value) {
-            if (is_string($value) && str_contains($value, 'archives/')) {
-                $callback($value, $key);
-            } elseif (is_array($value)) {
-                foreach ($value as $subValue) {
-                    if (is_string($subValue) && str_contains($subValue, 'archives/')) {
-                        $callback($subValue, $key);
-                    }
+
+        // Base case: strings 
+        if (is_string($data) && str_contains($data, 'archives/')) {
+            $callback($data);
+            return;
+        }
+        // Recursive case: arrays 
+        if (is_array($data)) {
+            foreach ($data as $key => $value) {
+                // Handle case where value is ['path' => ..., 'original_dir' => ...]
+                if (is_array($value) && isset($value['path']) && str_contains($value['path'], 'archives/')) {
+                    $callback($value['path']);
+                } else {
+                    # recurse deeper if it's needed array
+                    $this->processFiles($value, $callback);
                 }
             }
         }
@@ -335,13 +344,22 @@ class ArchiveController extends Controller
         $archive = Archive::onlyTrashed()->findOrFail($id);
         $this->authorize('forceDelete', $archive);
 
+        // Decode jason if needed 
+        $data = is_string($archive->data)
+            ? json_decode($archive->data, true)
+            : $archive->data;
+
         $this->processFiles($archive->data ?? [], function ($path) {
             if (Storage::disk('public')->exists($path)) {
                 Storage::disk('public')->delete($path);
             }
         });
 
-        $archive->archivable()->update(['archived_at' => null]);
+        // Only update if the archive has archivable_id
+        if ($archive->archivable_id && $archive->archivable) {      # polymorph relationship
+            $archive->archivable()->update(['archived_at' => null]);
+        }
+
         // Permanently delete the archived
         $archive->forceDelete();
 
@@ -390,8 +408,8 @@ class ArchiveController extends Controller
 
         $restoreFiles($data);
 
-        if ($archive->archivable_id !== null) {
-            // Re-set archived_at timestamp in the related model 
+        // Only update if the archive has archivable_id
+        if ($archive->archivable_id && $archive->archivable) {       # polymorph relationship
             $archive->archivable()->update(['archived_at' => now()]);
         }
 
@@ -408,21 +426,28 @@ class ArchiveController extends Controller
     }
 
     /**
-     * Unarchive
+     * Unarchive 
      */
     public function unarchive($id)
     {
         $archive = Archive::findOrFail($id); # find the archived article 
         $this->authorize('unarchive', $archive);
 
-        // Set the archived_at in the related model 
-        $archive->archivable()->update(['archived_at' => null]);
+        // Only update if the archive has archivable_id
+        if ($archive->archivable_id && $archive->archivable) { # polymorph relationship
+            // Set the archived_at in the related model 
+            $archive->archivable()->update(['archived_at' => null]);
 
-        $archive->forceDelete(); # permanently delete archived record 
+            $archive->forceDelete(); # permanently delete archived record 
 
-        return response()->json([
-            'message' => 'Archive was unarchive successfully'
-        ]);
+            return response()->json([
+                'message' => 'Archive was unarchive successfully'
+            ]);
+        } else {
+            return response()->json([
+                'message' => 'Cannot unarchive this archive'
+            ], 403);
+        }
     }
 
     /**

@@ -793,3 +793,66 @@ public function update(UpdateArchiveRequest $request, Archive $archive)
             'data' => new ArchiveResource($archive->fresh())
         ]);
     }
+
+## forceDestroy()
+### 1.1: initial code
+    public function forceDestroy($id)
+    {
+        $archive = Archive::onlyTrashed()->findOrFail($id);
+        $this->authorize('forceDelete', $archive);
+
+        $this->processFiles($archive->data ?? [], function ($path) {
+            if (Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
+            }
+        });
+
+        $archive->archivable()->update(['archived_at' => null]);
+        // Permanently delete the archived
+        $archive->forceDelete();
+
+        return response()->json([
+            'message' => 'Archive was permanently deleted'
+        ]);
+    }
+
+## processFiles()
+### 1.0: not deleting the files in the trash (initial code)
+    private function processFiles($data, callable $callback)
+    {
+
+        foreach ($data as $key => $value) {
+            if (is_string($value) && str_contains($value, 'archives/')) {
+                $callback($value, $key);
+            } elseif (is_array($value)) {
+                foreach ($value as $subValue) {
+                    if (is_string($subValue) && str_contains($subValue, 'archives/')) {
+                        $callback($subValue, $key);
+                    }
+                }
+            }
+        }
+    }
+
+## unarchive()
+### 1.0: before revision - check is stuck in the archives table
+  public function unarchive($id)
+    {
+        $archive = Archive::findOrFail($id); # find the archived article 
+        $this->authorize('unarchive', $archive);
+
+        if ($archive->archivable_id && Schema::hasColumn($archive->getTable(), 'archived_at')) {
+            // Set the archived_at in the related model 
+            $archive->archivable()->update(['archived_at' => null]);
+
+            $archive->forceDelete(); # permanently delete archived record 
+
+            return response()->json([
+                'message' => 'Archive was unarchive successfully'
+            ]);
+        } else {
+            return response()->json([
+                'message' => 'Cannot unarchive this archive'
+            ], 403);
+        }
+    }
