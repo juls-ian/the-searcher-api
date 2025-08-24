@@ -44,6 +44,7 @@ class UpdateArchiveRequest extends FormRequest
                 $rules['data.published_at'] = ['sometimes', 'date'];
                 $rules['data.cover_photo'] = ['sometimes', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'];
                 $rules['data.cover_artist_id'] = ['sometimes', 'integer', 'exists:users,id'];
+                $rules['data.credit_type'] = ['sometimes', 'in:photo,graphics,illustration'];
                 break;
 
             // Archive : Multimedia
@@ -57,7 +58,7 @@ class UpdateArchiveRequest extends FormRequest
                 $rules['data.thumbnail'] = ['sometimes', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'];
                 $rules['data.thumbnail_artist_id'] = ['sometimes', 'integer', 'min:1'];
                 $rules['data.thumbnail_artist_id.*'] = ['integer', 'exists:users,id'];
-                $rules['data.credit_type'] = ['sometimes', 'in:photo,graphics'];
+                $rules['data.credit_type'] = ['sometimes', 'in:photo,graphics,video,illustration'];
                 break;
 
             // Archive: Community Segment

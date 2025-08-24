@@ -44,7 +44,7 @@ class StoreArchiveRequest extends FormRequest
                 $rules['data.published_at'] = ['required', 'date'];
                 $rules['data.cover_photo'] = ['required', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'];
                 $rules['data.cover_artist_id'] = ['required', 'integer', 'exists:users,id'];
-                $rules['data.credit_type'] = ['required', 'in:photo,graphics'];
+                $rules['data.credit_type'] = ['required', 'in:photo,graphics,illustration'];
                 break;
 
             // Archive : Multimedia
@@ -58,7 +58,7 @@ class StoreArchiveRequest extends FormRequest
                 $rules['data.thumbnail'] = ['required', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'];
                 $rules['data.thumbnail_artist_id'] = ['required', 'integer', 'min:1'];
                 $rules['data.thumbnail_artist_id.*'] = ['integer', 'exists:users,id'];
-                $rules['data.credit_type'] = ['required', 'in:photo,graphics'];
+                $rules['data.credit_type'] = ['required', 'in:photo,graphics,video,illustration'];
                 break;
 
             // Archive: Community Segment
@@ -92,7 +92,7 @@ class StoreArchiveRequest extends FormRequest
                 $rules['data.body'] =  ['required', 'string'];
                 $rules['data.segment_cover'] = ['required', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'];
                 $rules['data.cover_artist_id'] = ['required', 'exists:users,id'];
-                $rules['data.credit_type'] = ['required', 'in:photo,graphics'];
+                $rules['data.credit_type'] = ['required', 'in:photo,graphics,illustration'];
                 break;
 
             // Archive: Bulletin
