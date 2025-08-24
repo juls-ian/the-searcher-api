@@ -20,12 +20,17 @@ class Multimedia extends Model
         'published_at',
         'files',
         'thumbnail',
-        'thumbnail_artist_id'
+        'thumbnail_artist_id',
+        'thumbnail_credit_type'
     ];
 
     protected $casts = [
         'files' => 'array',
         'published_at' => 'datetime'
+    ];
+
+    protected $attributes = [
+        'thumbnail_credit_type' => 'photo'
     ];
 
 

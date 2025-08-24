@@ -25,6 +25,7 @@ class MultimediaResource extends JsonResource
             'multimedia_artists' => $this->multimediaArtists->pluck('full_name'), # array of names
             'thumbnail' => $this->thumbnail,
             'thumbnail_artist' => $this->thumbnailArtist->full_name ?? null,
+            'credit_type' => $this->thumbnail_credit_type ?? null,
             'published_by' => $this->publisher->full_name ?? null
         ];
     }
