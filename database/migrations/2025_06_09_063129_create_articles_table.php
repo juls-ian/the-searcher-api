@@ -35,6 +35,7 @@ return new class extends Migration {
             $table->text('cover_caption')->nullable();
             $table->foreignIdFor(User::class, 'cover_artist_id')
                 ->constrained('users');
+            $table->enum('cover_credit_type', ['photo', 'graphics', 'illustration'])->default('photo');
             $table->boolean('thumbnail_same_as_cover')->default(false);
             $table->string('thumbnail')->nullable(); // filename
             $table->foreignIdFor(User::class, 'thumbnail_artist_id')

@@ -48,6 +48,7 @@ class Article extends Model
     protected $attributes = [
         'is_live' => false,
         'is_header' => false,
+        'cover_credit_type' => 'photo',
         'thumbnail_same_as_cover' => false,
         'add_to_ticker' => false
     ];
