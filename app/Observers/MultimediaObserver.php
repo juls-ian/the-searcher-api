@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Multimedia;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class MultimediaObserver
@@ -20,17 +21,16 @@ class MultimediaObserver
      */
     public function creating(Multimedia $multimedia)
     {
-
-        $baseSlug = Str::slug($multimedia->title); # convert title into slug 
+        $baseSlug = Str::slug($multimedia->title);
         $slugDate = now()->format('Y-m-d');
         $slug = "{$baseSlug}-{$slugDate}";
 
-        // Check if slug exists in db 
+        // Keep generating slug if it's not unique 
         while (Multimedia::where('slug', $slug)->exists()) {
             $randomId = Str::lower(Str::random(8));
-            $slug = "{$slug}-{$randomId}";
+            $slug = "{$baseSlug}-{$slugDate}-{$randomId}";
         }
-        $multimedia->slug = $slug;
+        $multimedia->slug = $slug; # base final value 
     }
 
     /**
@@ -50,7 +50,7 @@ class MultimediaObserver
                 ->exists()
             ) {
                 $randomId = Str::lower(Str::random(8));
-                $slug =  "{$slug}-{$randomId}";
+                $slug = "{$baseSlug}-{$slugDate}-{$randomId}";
             }
             $multimedia->slug = $slug; # final base value 
         }
