@@ -29,12 +29,13 @@ Route::get('/user', function (Request $request) {
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('articles', ArticleController::class)->only(['store', 'update', 'destroy']);
 
+
+    Route::delete('articles/{article}/forceDestroy', [ArticleController::class, 'forceDestroy'])->name('articles.forceDestroy');
+    Route::post('articles/{article}/restore', [ArticleController::class, 'restore'])->name('articles.restore');
     // Archive routes 
     Route::get('articles/archived', [ArticleController::class, 'archiveIndex'])->name('articles.index-archived');
     Route::get('articles/{id}/archived', [ArticleController::class, 'showArchived'])->name('articles.show-archived');
     Route::post('articles/{id}/archive', [ArticleController::class, 'archive'])->name('articles.archive');
-    Route::delete('articles/{article}/forceDestroy', [ArticleController::class, 'forceDestroy'])->name('articles.forceDestroy');
-    Route::post('articles/{article}/restore', [ArticleController::class, 'restore'])->name('articles.restore');
 });
 Route::apiResource('articles', ArticleController::class)->only(['index', 'show']); # public route
 
@@ -74,6 +75,12 @@ Route::apiResource('community-segments', CommunitySegmentController::class)->onl
  */
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('multimedia', MultimediaController::class)->only(['store', 'update', 'destroy']);
+    Route::delete('multimedia/{multimedia}/forceDestroy', [MultimediaController::class, 'forceDestroy'])->name('multimedia.forceDestroy');
+    Route::post('multimedia/{multimedia}/restore', [MultimediaController::class, 'restore'])->name('multimedia.restore');
+    // Archive routes 
+    Route::post('multimedia/{id}/archive', [MultimediaController::class, 'archive'])->name('multimedia.archive');
+    Route::get('multimedia/archived', [MultimediaController::class, 'archiveIndex'])->name('multimedia.index-archived');
+    Route::get('multimedia/{id}/archived', [MultimediaController::class, 'showArchived'])->name('multimedia.show-archived');
 });
 Route::apiResource('multimedia', MultimediaController::class)->only(['index', 'show']); # public multimedia route
 

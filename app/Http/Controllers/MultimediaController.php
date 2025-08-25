@@ -6,9 +6,12 @@ use App\Models\Multimedia;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreMultimediaRequest;
 use App\Http\Requests\UpdateMultimediaRequest;
+use App\Http\Resources\ArchiveResource;
 use App\Http\Resources\MultimediaResource;
+use App\Models\Archive;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -192,8 +195,13 @@ class MultimediaController extends Controller
     public function destroy(Multimedia $multimedia)
     {
         $this->authorize('delete', $multimedia);
-
         $storage = Storage::disk('public');
+        $trashDir = 'multimedia/trash/';
+
+        // Ensure directory exists 
+        if (!$storage->exists($trashDir)) {
+            $storage->makeDirectory($trashDir);
+        }
 
         // Delete files stored as JSON array 
         if ($multimedia->files) {
@@ -203,14 +211,16 @@ class MultimediaController extends Controller
                 foreach ($files as $file) {
                     # deletes the local files 
                     if ($storage->exists($file)) {
-                        $storage->delete($file);
+                        $filename = basename($file);
+                        $storage->move($file, $trashDir . $filename);
                     }
                 }
             }
         }
 
         if ($multimedia->thumbnail && $storage->exists($multimedia->thumbnail)) {
-            $storage->delete($multimedia->thumbnail);
+            $filename = basename($multimedia->thumbnail);
+            $storage->move($multimedia->thumbnail, $trashDir . $filename);
         }
 
         try {
@@ -219,5 +229,123 @@ class MultimediaController extends Controller
         } catch (Exception $e) {
             return response()->json(['error' => 'Failed to delete multimedia'], 500);
         }
+    }
+
+    /**
+     * Permanently delete soft deleted models 
+     */
+    public function forceDestroy(Multimedia $multimedia)
+    {
+
+        $storage = Storage::disk('public');
+        $trashDir = 'multimedia/trash/';
+
+        // Delete files 
+        if ($multimedia->files) {
+            $files = json_decode($multimedia->files, true);
+
+            if (is_array($files)) {
+                foreach ($files as $file) {
+                    $filename = basename($file);
+                    $trashPath = $trashDir . $filename;
+
+                    if ($storage->exists($trashPath)) {
+                        $storage->delete($trashPath);
+                    }
+                }
+            }
+        }
+
+        // Delete multimedia
+        if ($multimedia->thumbnail) {
+            $filename = basename($multimedia->thumbnail);
+            $trashPath = $trashDir . $filename;
+
+            if ($storage->exists($trashPath)) {
+                $storage->delete($trashPath);
+            }
+        }
+
+        try {
+            $multimedia->forceDelete();
+            return response()->json(['message' => 'Multimedia was permanently deleted'], 200);
+        } catch (Exception $e) {
+            return response()->json(['message' => 'Failed to permanently delete multimedia'], 500);
+        }
+    }
+
+    public function restore(Multimedia $multimedia)
+    {
+        $storage = Storage::disk('public');
+        $trashDir = 'multimedia/trash/';
+
+        if ($multimedia->files) {
+            $files = json_decode($multimedia->files, true);
+
+            if (is_array($files)) {
+
+                foreach ($files as $file) {
+                    $filename = basename($file); # file.jpg
+                    $trashPath = $trashDir . $filename;
+
+                    if ($storage->exists($trashPath)) {
+                        $storage->move($trashPath, $file);
+                    }
+                }
+            }
+        }
+
+        if ($multimedia->thumbnail) {
+            $filename = basename($multimedia->thumbnail);
+            $trashPath = $trashDir . $filename;
+
+            if ($storage->exists($trashPath)) {
+                $storage->move($trashPath, $multimedia->thumbnail);
+            }
+        }
+
+        $multimedia->restore();
+
+        return response()->json([
+            'message' => 'Multimedia was restored',
+            'data' => MultimediaResource::make($multimedia)
+        ]);
+    }
+
+    public function archive($id)
+    {
+        $multimedia = Multimedia::findOrFail($id); # find multimedia 
+        $archive = $multimedia->archive(); # calls the trait method to create archive
+
+        // If trait didn’t create a new archive because the article was already archived
+        if (! $archive) {
+            return response()->json([
+                'message' => 'This multimedia has already been archived'
+            ], 409);
+        }
+
+        return response()->json([
+            'message' => 'Multimedia archived successfully',
+            'data' => new ArchiveResource($archive)
+        ]);
+    }
+
+    public function showArchived($id)
+    {
+
+        try {
+            $archive = Archive::where('archivable_type', 'multimedia')
+                ->where('id', $id)
+                ->firstOrFail();
+            return response()->json($archive);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['message' => 'Can only show archived data is not']);
+        }
+    }
+
+    public function archiveIndex()
+    {
+        $archivedMultimedia = Multimedia::archived()->get(); # query scope
+        return response()->json($archivedMultimedia);
     }
 }

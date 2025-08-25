@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Archivable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 class Multimedia extends Model
 {
     /** @use HasFactory<\Database\Factories\MultimediaFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, Archivable;
 
     protected $fillable = [
         'title',
@@ -21,7 +22,8 @@ class Multimedia extends Model
         'files',
         'thumbnail',
         'thumbnail_artist_id',
-        'thumbnail_credit_type'
+        'thumbnail_credit_type',
+        'archived_at'
     ];
 
     protected $casts = [
@@ -51,6 +53,11 @@ class Multimedia extends Model
     public function publisher()
     {
         return $this->belongsTo(User::class, 'publisher_id');
+    }
+
+    public function scopeArchivedMultimedia($query)
+    {
+        return $query->where('archivable_type', 'multimedia');
     }
 
     public static function booted()

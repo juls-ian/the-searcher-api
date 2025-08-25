@@ -1,3 +1,6 @@
+# Scrapped codes for ArchiveResource
+
+## 1.1: initial version
 <?php
 
 namespace App\Http\Resources;
@@ -64,29 +67,13 @@ class ArchiveResource extends JsonResource
                         ->toArray();
                 }
 
-                // Handle files - ensure it's always an array
-                $files = [];
-                if (isset($data['files'])) {
-                    if (is_array($data['files'])) {
-                        # if it's already an array, check if it's associative array 
-                        $files = $this->isAssoc($data['files']) ? [$data['files']] : $data['files'];
-                    } else {
-                        # if it's a string (JSON or single value), try to decode or wrap in array
-                        $decoded = json_decode($data['files'], true);
-                        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                            $files = $decoded;
-                        } else {
-                            # if it's not a valid json, treat is a single file 
-                            $files = $data['files'];
-                        }
-                    }
-                }
-
                 return [
                     'category' => $data['category'],
                     'caption' => $data['caption'],
                     'published_at' => $data['published_at'],
-                    'files' => $files,
+                    'files' => isset($data['files'])
+                        ? ($this->isAssoc($data['files']) ? [$data['files']] : $data['files'])
+                        : [],
                     'multimedia_artists' => $multimediaArtists,
                     'thumbnail' => $data['thumbnail'],
                     'thumbnail_artist' => User::find($data['thumbnail_artist_id'])?->only(['full_name']),

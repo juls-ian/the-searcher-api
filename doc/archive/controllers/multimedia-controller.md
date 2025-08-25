@@ -1,6 +1,7 @@
 # Unused codes in the MultimediaController 
 
-## v.1
+## store()
+### 1.0: initial code
 public function store(StoreMultimediaRequest $request)
     {
         $validatedMultimedia = $request->validated();
@@ -37,9 +38,7 @@ public function store(StoreMultimediaRequest $request)
         $multimedia->load(['multimediaArtists', 'thumbnailArtist']);
         return MultimediaResource::make($multimedia);
     }
-
-
-## v.2
+### 1.1: when log for debugging
 public function store(StoreMultimediaRequest $request)
     {
 
@@ -99,9 +98,7 @@ public function store(StoreMultimediaRequest $request)
         $multimedia->load(['multimediaArtists', 'thumbnailArtist']);
         return MultimediaResource::make($multimedia);
     }
-
-
-## v.3 
+### 1.2: with array slice 
     public function store(StoreMultimediaRequest $request)
     {
 
@@ -163,7 +160,8 @@ public function store(StoreMultimediaRequest $request)
         return MultimediaResource::make($multimedia);
     }
 
-## v.4
+## update()
+### 1.1: other version
    public function update(UpdateMultimediaRequest $request, Multimedia $multimedia)
     {
         $validatedMultimedia = $request->validated();
@@ -241,8 +239,8 @@ public function store(StoreMultimediaRequest $request)
         return MultimediaResource::make($multimedia);
     }
 
-
-## v.5
+## destroy()
+### 1.0: with try and catch 
    public function destroy(Multimedia $multimedia)
     {
         $this->authorize('delete', $multimedia);
@@ -274,11 +272,57 @@ public function store(StoreMultimediaRequest $request)
             return response()->json(['error' => 'Failed to delete multimedia'], 500);
         }
     }
+### 1.1: not implementing soft delete
+    public function destroy(Multimedia $multimedia)
+    {
+        $this->authorize('delete', $multimedia);
+        $storage = Storage::disk('public');
 
+        // Delete files stored as JSON array 
+        if ($multimedia->files) {
+            $files = json_decode($multimedia->files, true);
 
+            if (is_array($files)) {
+                foreach ($files as $file) {
+                    # deletes the local files 
+                    if ($storage->exists($file)) {
+                        $storage->delete($file);
+                    }
+                }
+            }
+        }
 
+        if ($multimedia->thumbnail && $storage->exists($multimedia->thumbnail)) {
+            $storage->delete($multimedia->thumbnail);
+        }
 
+        try {
+            $multimedia->delete();
+            return response()->json(['message' => 'Multimedia deleted successfully'], 200);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Failed to delete multimedia'], 500);
+        }
+    }
 
+## showArchived()
+### 1.0: initial version
+   public function showArchived($id)
+    {
+        $archive = Archive::findOrFail($id);
+        return response()->json($archive);
+    }
+
+## archiveIndex()
+### 1.0: initial version
+ public function archiveIndex()
+    {
+        $archivedMultimedia = Multimedia::archived()->get(); # query scope
+        return response()->json($archivedMultimedia);
+    }
+
+    
+
+    
 
 
 
