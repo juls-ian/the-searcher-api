@@ -6,6 +6,7 @@ Documentation shall consist Article model's properties, resource and migrations
 1. multimediaArtists <-belongsToMany-> User
    1. *since this is m:m it has a pivot table named 'multimedia_user'*
 2. thumbnailArtist <-belongsTo-> User  
+3. publisher <-belongsTo-> User  
 
 ## Model Properties:
 
@@ -16,6 +17,11 @@ Documentation shall consist Article model's properties, resource and migrations
 - 'files' => 'array',
 - 'published_at' => 'datetime'
 
+#### 3. Attributes 
+- 'thumbnail_credit_type' => 'photo'
+
+#### 4. booted()
+- sets the publisher_id automatically
 
 ## Observer:
 1. MultimediaObserver

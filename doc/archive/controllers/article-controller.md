@@ -12,6 +12,42 @@
             'message' => 'Article has been unarchive'
         ]);
     }
+### 1.1: before refactor
+    public function restore(Article $article)
+    {
+
+        $storage = Storage::disk('public');
+        $trashDir = 'articles/trash/';
+
+        // Move back to the original path 
+        if ($article->cover_photo) {
+            $filename = basename($article->cover_photo);
+            $trashPath = $trashDir . $filename;
+
+            if ($storage->exists($trashPath)) {
+                $storage->move($trashPath, $article->cover_photo);
+            }
+        }
+
+        if ($article->thumbnail) {
+            $filename = basename($article->thumbnail);
+            $trashPath = $trashDir . $filename;
+
+            if ($storage->exists($trashPath)) {
+                $storage->move($trashPath, $article->thumbnail);
+            }
+        }
+
+
+
+
+        $article->restore();
+
+        return response()->json([
+            'message' => 'Article was restored',
+            'data' => ArticleResource::make($article)
+        ]);
+    }
 
 ## update()
 ### 1.1: individual isset check for fields

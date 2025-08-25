@@ -63,7 +63,11 @@ class AppServiceProvider extends ServiceProvider
 
         // By default route model binding does not work on soft deleted models, hence me must customize binding to include trashed models 
         Route::bind('article', function (string $value) {
-            return Article::withTrashed()->where('id', $value)->firstOrFail();
+            return Article::withTrashed()->where('id', $value)->firstOrFail(); # for forceDestroy & restore 
+        });
+
+        Route::bind('multimedia', function (string $value) {
+            return Multimedia::withTrashed()->where('id', $value)->firstOrFail();
         });
     }
 }
