@@ -74,6 +74,11 @@ class MultimediaPolicy
      */
     public function forceDelete(User $user, Multimedia $multimedia): bool
     {
-        return false;
+        return $user->role === 'editor';
+    }
+
+    public function archive(User $user, Multimedia $multimedia)
+    {
+        return $user->role === 'editor';
     }
 }

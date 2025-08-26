@@ -210,6 +210,7 @@ class ArticleController extends Controller
 
     public function forceDestroy(Article $article)
     {
+        $this->authorize('forceDelete', $article);
         $storage = Storage::disk('public');
         $trashDir = 'articles/trash/';
 
@@ -236,6 +237,7 @@ class ArticleController extends Controller
 
     public function restore(Article $article)
     {
+        $this->authorize('restore', $article);
         $storage = Storage::disk('public');
         $trashDir = 'articles/trash/';
 
@@ -287,6 +289,7 @@ class ArticleController extends Controller
      */
     public function archive($id)
     {
+        $this->authorize('archive', $id);
         $article = Article::findOrFail($id); # find article or fail 
         $archive = $article->archive(); # calls the trait method to create archive | returns Archive or null 
 

@@ -75,6 +75,11 @@ class ArticlePolicy
      */
     public function forceDelete(User $user, Article $article): bool
     {
-        return false;
+        return $user->role === 'editor';
+    }
+
+    public function archive(User $user, Article $article)
+    {
+        return $user->role === 'editor';
     }
 }

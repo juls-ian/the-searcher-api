@@ -236,7 +236,7 @@ class MultimediaController extends Controller
      */
     public function forceDestroy(Multimedia $multimedia)
     {
-
+        $this->authorize('forceDelete', $multimedia);
         $storage = Storage::disk('public');
         $trashDir = 'multimedia/trash/';
 
@@ -276,6 +276,7 @@ class MultimediaController extends Controller
 
     public function restore(Multimedia $multimedia)
     {
+        $this->authorize('restore', $multimedia);
         $storage = Storage::disk('public');
         $trashDir = 'multimedia/trash/';
 
@@ -314,6 +315,7 @@ class MultimediaController extends Controller
 
     public function archive($id)
     {
+        $this->authorize('archive', $id);
         $multimedia = Multimedia::findOrFail($id); # find multimedia 
         $archive = $multimedia->archive(); # calls the trait method to create archive
 
