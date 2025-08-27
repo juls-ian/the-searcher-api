@@ -53,6 +53,12 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::apiResource('users', UserController::class)->only(['index', 'show']);
 
 /**
+ * Editorial Board route 
+ */
+Route::get('editorial-board/', [UserController::class, 'edBoardIndex'])->name('editorial-board-index');
+
+
+/**
  * Article Category routes 
  */
 Route::middleware('auth:sanctum')->group(function () {

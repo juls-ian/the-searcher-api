@@ -1,6 +1,7 @@
 # Scrapped codes in the UserController 
 
-## v.1: addTerm - simpler version
+## addTerm()
+### 1.0: simpler version
     public function addTerm(Request $request, User $user)
     {
 
@@ -31,7 +32,7 @@
         ]);
     }
 
-## v.1.1: addTerm - prevents term duplication
+### 1.1: prevents term duplication
     public function addTerm(Request $request, User $user)
     {
         $this->authorize('create', $user);
@@ -75,7 +76,7 @@
         ]);
     }
 
-## v.1.2: addTerm - with logs to debug
+### 1.3: with logs to debug
     public function addTerm(Request $request, User $user)
     {
         $this->authorize('create', $user);
@@ -123,7 +124,8 @@
     }
 
 
-## v.2: setCurrentTerm - creation/update of term depends if it exist
+## setCurrentTerm()
+### 1.0: creation/update of term depends if it exist
     public function setCurrentTerm(Request $request, User $user)
     {
         $this->authorize('update', $user);
@@ -181,7 +183,9 @@
         ]);
     }
 
-## v.4: update() - also includes the term in the update
+
+## update()
+## 1.0: also includes the term in the update
     public function update(UpdateUserRequest $request, User $user)
     {
         $this->authorize('update', $user);
@@ -224,4 +228,94 @@
         }
 
         return UserResource::make($user); # return updated data
+    }
+
+## archiveTerm()
+### 1.0: initial code
+public function archiveTerm(Request $request, User $user)
+{
+    $this->authorize('update', $user);
+
+    $request->validate([
+        'editorial_board_id' => 'required|exists:editorial_boards,id'
+    ]);
+
+    $editorialBoard = $user->editorialBoards()->findOrFail($request->editorial_board_id);
+
+    if ($user->editorialBoards()->count() === 1) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Cannot archive the only term for the user'
+        ], 422);
+    }
+
+    $isCurrentTerm = $user->currentEditorialBoard?->id === $editorialBoard->id;
+
+    $editorialBoard->archive();
+
+    $message = $isCurrentTerm
+        ? 'Current term was archived, previous term is now the current'
+        : 'Term archived';
+
+    return response()->json([
+        'success' => true,
+        'message' => $message,
+        'current_term' => $user->fresh()->currentTerm()
+    ]);
+}
+
+## restoreTerm()
+### 1.0: initial code
+public function restoreTerm(Request $request, User $user)
+{
+    $this->authorize('update', $user);
+
+    $request->validate([
+        'editorial_board_id' => 'required|exists:editorial_boards,id'
+    ]);
+
+    $editorialBoard = $user->editorialBoards()->withTrashed()->findOrFail($request->editorial_board_id);
+
+    $editorialBoard->restoreFromArchive();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Term restored successfully',
+        'data' => $editorialBoard
+    ]);
+}
+
+## edBoardIndex()
+### 1.0: initial code
+    public function edBoardIndex(User $user)
+    {
+        $boards = $user->editorialBoards->map(function ($board) {
+            return [
+                'term' => $board->term,
+                'is_current' => $board->is_automatically_current || $board->is_current,
+                'is_archived' => $board->is_archived,
+            ];
+        });
+
+        return response()->json([
+            'data' => $boards,
+        ]);
+    }
+### 1.1: right code
+    public function edBoardIndex()
+    {
+        $boards = EditorialBoard::with('user')
+            ->get()
+            ->map(function ($board) {
+                return [
+                    'term' => $board->term,
+                    'is_current' => $board->is_automatically_current || $board->is_current,
+                    'is_archived' => $board->is_archived,
+                    'user' => $board
+                ];
+            });
+
+        return response()->json([
+            'data' => $boards,
+        ]);
     }

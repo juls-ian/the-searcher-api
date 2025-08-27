@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Archivable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -17,5 +18,28 @@ class EditorialBoard extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    // Computed attribute 1: is this term current based on year?
+    public function getIsAutomaticallyCurrentAttribute()
+    {
+        // Term format "2025-2026" 
+        [$startYear, $endYear] = explode('-', $this->term);
+
+        $currentYear = now()->year;
+
+        /**
+         * Checks if the current year falls between $startYear and $endYear (inclusive)
+         * If $term = "2025-2026" and $currentYear = 2025 → returns true.
+         *If $term = "2025-2026" and $currentYear = 2026 → returns true.
+         *If $term = "2025-2026" and $currentYear = 2024 → returns false.
+         */
+        return $currentYear >= (int)  $startYear && $currentYear <= (int) $endYear;
+    }
+
+    // Computed attribute 2: is this term archived?
+    public function getIsArchivedAttribute()
+    {
+        return !$this->is_automatically_current;
     }
 }

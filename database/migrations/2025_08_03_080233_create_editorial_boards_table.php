@@ -18,6 +18,7 @@ return new class extends Migration
                 ->onDelete('cascade');
             $table->string('term');
             $table->boolean('is_current')->default('false');
+            $table->timestampsTz('archived_at')->nullable()->after('is_current');
             $table->timestamps();
         });
     }

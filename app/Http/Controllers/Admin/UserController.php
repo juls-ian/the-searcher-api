@@ -82,7 +82,6 @@ class UserController extends Controller
         $user->notify(new SetPasswordNotification($token));
 
         return response()->json([
-            'success' => true,
             'message' => 'Successfully registered the staff. An email has been sent to them to set their password. '
         ]);
     }
@@ -137,6 +136,23 @@ class UserController extends Controller
     }
 
     /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(User $user)
+    {
+        $this->authorize('delete', $user);
+        // Delete profile pic before deleting user 
+        $storage = Storage::disk('public');
+
+        if ($user->profile_pic && $storage->exists($user->profile_pic)) {
+            $storage->delete($user->profile_pic);
+        }
+
+        $user->delete();
+        return response()->json(['message' => 'User was deleted'], 200);
+    }
+
+    /**
      * Add term to user 
      */
     public function addTerm(Request $request, User $user)
@@ -152,7 +168,6 @@ class UserController extends Controller
 
         if ($user->editorialBoards()->where('term', $request->term)->exists()) {
             return response()->json([
-                'success' => false,
                 'message' => 'The term already exists for the user'
             ], 422);
         }
@@ -170,14 +185,13 @@ class UserController extends Controller
         ]);
 
         return response()->json([
-            'success' => true,
             'message' => 'Term added successfully',
             'data' => $editorialBoard
         ]);
     }
 
     /**
-     * Delete a user's term 
+     * Hard delete a user's term 
      */
     public function deleteTerm(Request $request, User $user)
     {
@@ -193,7 +207,6 @@ class UserController extends Controller
         // Check if it's the only term for the user, hence it cannot be deleted 
         if ($user->editorialBoards()->count() === 1) {
             return response()->json([
-                'success' => false,
                 'message' => 'Cannot delete the only term for the user'
             ], 422);
         }
@@ -208,7 +221,6 @@ class UserController extends Controller
             : 'Term deleted';
 
         return response()->json([
-            'success' => true,
             'message' => $message,
             'current_term' => $user->fresh()->currentTerm()
         ]);
@@ -239,26 +251,42 @@ class UserController extends Controller
         );
 
         return response()->json([
-            'success' => true,
             'message' => 'Active term updated successfully',
             'data' => $editorialBoard,
         ]);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Show ed boards 
      */
-    public function destroy(User $user)
+    public function edBoardIndex()
     {
-        $this->authorize('delete', $user);
-        // Delete profile pic before deleting user 
-        $storage = Storage::disk('public');
+        $boards = EditorialBoard::with('user') #fetch the data 
+            ->get()
+            ->groupBy('term') # group by terms 
+            // Map each group | $term = group key, $group = sub collection of ed board that belong to $term 
+            ->map(function ($group, $term) {
+                return [
+                    'term' => $term,
+                    'current' => $group->first()->is_automatically_current || $group->first()->is_current,
+                    'archived' => $group->first()->is_archived,
+                    'members' => $group->map(function ($board) { # loop over all members in the group 
+                        return [
+                            'id' => $board->user->id,
+                            'full_name' => $board->user->full_name,
+                            'pen_name' => $board->user->pen_name,
+                            'board_position' => $board->user->board_position,
+                            'profile_pic' => $board->user->profile_pic,
+                            'status' => $board->user->status,
+                            'role' => $board->user->role,
+                        ];
+                    })
+                ];
+            })
+            ->values(); # reset keys so it's clean array 0, 1, 2
 
-        if ($user->profile_pic && $storage->exists($user->profile_pic)) {
-            $storage->delete($user->profile_pic);
-        }
-
-        $user->delete();
-        return response()->json(['message' => 'User was deleted'], 200);
+        return response()->json([
+            'data' => $boards,
+        ]);
     }
 }
