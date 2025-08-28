@@ -79,3 +79,131 @@
         $communitySegment->load(['writer', 'coverArtist', 'series', 'segmentPolls', 'segmentArticles']);
         return CommunitySegmentResource::make($communitySegment);
     }
+
+## destroy()
+### 1.0: initial code 
+    public function destroy(CommunitySegment $communitySegment)
+    {
+        $this->authorize('delete', $communitySegment);
+
+        $storage = Storage::disk('public');
+        if ($communitySegment->segment_cover && $storage->exists($communitySegment->segment_cover)) {
+            $storage->delete($communitySegment->segment_cover);
+        }
+
+        $communitySegment->delete();
+        return response()->json(['message' => 'Segment deleted successfully']);
+    }
+### 1.1: removed saveQuietly
+    public function destroy(CommunitySegment $communitySegment)
+    {
+        $this->authorize('delete', $communitySegment);
+        $storage = Storage::disk('public');
+        $trashDir = 'community-segments/trash/';
+
+        if (!$trashDir) {
+            $storage->makeDirectory($trashDir);
+        }
+
+        if ($communitySegment->segment_cover && $storage->exists($communitySegment->segment_cover)) {
+            $filename = basename($communitySegment->segment_cover);
+            $filePath = $trashDir . $filename;
+            $storage->move($communitySegment->segment_cover, $filePath);
+
+            $communitySegment->segment_cover = $filePath;
+            $communitySegment->saveQuietly();
+        }
+
+        $communitySegment->delete();
+        return response()->json(['message' => 'Segment deleted successfully']);
+    }
+
+## restore()
+### 1.0: initial code, $communitySegment->segment_cover initial starting dir is the trash 
+    public function restore(CommunitySegment $communitySegment)
+    {
+        $storage = Storage::disk('public');
+        $trashDir = 'community-segments/trash/';
+
+        Log::info(['cover_photo' => $communitySegment->segment_cover]);
+
+
+        if ($communitySegment->segment_cover) {
+            $filename = basename($communitySegment->segment_cover);
+            $trashPath = $trashDir . $filename;
+
+            Log::info(['filename' => $filename]);
+            Log::info(['trash path' => $trashPath]);
+
+            if ($storage->exists($trashPath)) {
+                $storage->move($trashPath, $communitySegment->segment_cover);
+            }
+        }
+
+        $communitySegment->restore();
+        return response()->json([
+            'message' => 'Community segment restored',
+            'data' => CommunitySegmentResource::make($communitySegment)
+        ]);
+    }
+### 1.1: refined code
+public function restore(CommunitySegment $communitySegment)
+{
+    $storage = Storage::disk('public');
+    $trashDir = 'community-segments/trash/';
+    $baseDir  = 'community-segments/'; // original folder
+
+    if ($communitySegment->segment_cover) {
+        $filename = basename($communitySegment->segment_cover);
+        $trashPath = $trashDir . $filename;
+        $restorePath = $baseDir . $filename;
+
+        Log::info(['filename' => $filename]);
+        Log::info(['trash path' => $trashPath]);
+        Log::info(['restore path' => $restorePath]);
+
+        if ($storage->exists($trashPath)) {
+            $storage->move($trashPath, $restorePath);
+
+            // update DB column back to original path
+            $communitySegment->segment_cover = $restorePath;
+        }
+    }
+
+    $communitySegment->restore();
+    $communitySegment->save();
+
+    return response()->json([
+        'message' => 'Community segment restored',
+        'data' => CommunitySegmentResource::make($communitySegment)
+    ]);
+}
+### 1.2: removed $baseDir
+  public function restore(CommunitySegment $communitySegment)
+    {
+        $this->authorize('restore', $communitySegment);
+        $storage = Storage::disk('public');
+        $trashDir = 'community-segments/trash/';
+        $baseDir  = 'community-segments/covers/'; # original folder
+
+
+        if ($communitySegment->segment_cover) {
+            $filename = basename($communitySegment->segment_cover);
+            $trashPath = $trashDir . $filename;
+            $restorePath = $baseDir . $filename;
+
+            if ($storage->exists($trashPath)) {
+                $storage->move($trashPath, $restorePath);
+                // Set back the db column to its original path 
+                $communitySegment->segment_cover = $restorePath;
+            }
+        }
+
+        $communitySegment->restore();
+        $communitySegment->save();
+
+        return response()->json([
+            'message' => 'Community segment restored',
+            'data' => CommunitySegmentResource::make($communitySegment)
+        ]);
+    }

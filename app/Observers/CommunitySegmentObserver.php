@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\CommunitySegment;
 use Illuminate\Support\Str;
+use PgSql\Lob;
 
 class CommunitySegmentObserver
 {
@@ -27,9 +28,8 @@ class CommunitySegmentObserver
         // Check if the same slug exists in db 
         while (CommunitySegment::where('slug', $slug)->exists()) {
             $randomId = Str::lower(Str::random(8));
-            $slug = "{$slug}-{$randomId}"; # append count it slug exists
+            $slug = "{$baseSlug}-{$slugDate}-{$randomId}";
         }
-
         $communitySegment->slug = $slug; # final value 
     }
 
@@ -47,7 +47,7 @@ class CommunitySegmentObserver
                 ->exists()
             ) {
                 $randomId = Str::lower(Str::random(8));
-                $slug = "{$slug}-{$randomId}";
+                $slug = "{$baseSlug}-{$slugDate}-{$randomId}";
             }
             $communitySegment->slug = $slug; # final base value 
         }

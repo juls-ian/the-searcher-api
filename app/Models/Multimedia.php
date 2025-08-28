@@ -55,10 +55,10 @@ class Multimedia extends Model
         return $this->belongsTo(User::class, 'publisher_id');
     }
 
-    public function scopeArchivedMultimedia($query)
-    {
-        return $query->where('archivable_type', 'multimedia');
-    }
+    // public function scopeArchivedMultimedia($query)
+    // {
+    //     return $query->where('archivable_type', 'multimedia');
+    // }
 
     public static function booted()
     {

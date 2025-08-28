@@ -10,7 +10,7 @@ use App\Models\User;
 class CommunitySegmentPolicy
 {
     use HandlesAuthorization;
-    
+
     // Override abilities
     public function before(User $user, string $ability)
     {
@@ -74,6 +74,11 @@ class CommunitySegmentPolicy
      */
     public function forceDelete(User $user, CommunitySegment $communitySegment): bool
     {
-        return false;
+        return $user->role === 'editor';
+    }
+
+    public function archive(User $user, CommunitySegment $communitySegment)
+    {
+        return $user->role === 'editor';
     }
 }

@@ -28,16 +28,16 @@ Route::get('/user', function (Request $request) {
  */
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('articles', ArticleController::class)->only(['store', 'update', 'destroy']);
-
-
     Route::delete('articles/{article}/forceDestroy', [ArticleController::class, 'forceDestroy'])->name('articles.forceDestroy');
     Route::post('articles/{article}/restore', [ArticleController::class, 'restore'])->name('articles.restore');
-    // Archive routes 
-    Route::get('articles/archived', [ArticleController::class, 'archiveIndex'])->name('articles.index-archived');
-    Route::get('articles/{id}/archived', [ArticleController::class, 'showArchived'])->name('articles.show-archived');
+    // Archive route
     Route::post('articles/{id}/archive', [ArticleController::class, 'archive'])->name('articles.archive');
 });
-Route::apiResource('articles', ArticleController::class)->only(['index', 'show']); # public route
+// Public archive routes - static routes must be declared before api resource
+Route::get('articles/archived', [ArticleController::class, 'archiveIndex'])->name('articles.index-archived');
+Route::get('articles/{id}/archived', [ArticleController::class, 'showArchived'])->name('articles.show-archived');
+// Public routes
+Route::apiResource('articles', ArticleController::class)->only(['index', 'show']);
 
 /**
  * User routes
@@ -52,7 +52,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 Route::apiResource('users', UserController::class)->only(['index', 'show']);
 
-/**
+/** 
  * Editorial Board route 
  */
 Route::get('editorial-board/', [UserController::class, 'edBoardIndex'])->name('editorial-board-index');
@@ -72,8 +72,21 @@ Route::apiResource('article-categories', ArticleCategoryController::class)->only
  */
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('community-segments', CommunitySegmentController::class)->only(['store', 'update', 'destroy']);
+    Route::delete('community-segments/{community_segment}/forceDestroy', [CommunitySegmentController::class, 'forceDestroy'])
+        ->name('community-segments.forceDestroy');
+    Route::post('community-segments/{community_segment}/restore', [CommunitySegmentController::class, 'restore'])
+        ->name('community-segments.restore');
+    Route::post('community-segments/{id}/archive', [CommunitySegmentController::class, 'archive'])
+        ->name('community-segments.archive');
 });
+// Public archive routes
+Route::get('community-segments/archived', [CommunitySegmentController::class, 'archiveIndex'])
+    ->name('community-segments.archived');
+Route::get('community-segments/{id}/archived', [CommunitySegmentController::class, 'showArchived'])
+    ->name('community-segments.show-archived');
+// Public routes  
 Route::apiResource('community-segments', CommunitySegmentController::class)->only(['index', 'show']); # public segment routes 
+
 
 
 /**
@@ -81,13 +94,16 @@ Route::apiResource('community-segments', CommunitySegmentController::class)->onl
  */
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('multimedia', MultimediaController::class)->only(['store', 'update', 'destroy']);
-    Route::delete('multimedia/{multimedia}/forceDestroy', [MultimediaController::class, 'forceDestroy'])->name('multimedia.forceDestroy');
+    Route::delete('multimedia/{multimedia}/forceDestroy', [MultimediaController::class, 'forceDestroy'])
+        ->name('multimedia.forceDestroy');
     Route::post('multimedia/{multimedia}/restore', [MultimediaController::class, 'restore'])->name('multimedia.restore');
     // Archive routes 
     Route::post('multimedia/{id}/archive', [MultimediaController::class, 'archive'])->name('multimedia.archive');
-    Route::get('multimedia/archived', [MultimediaController::class, 'archiveIndex'])->name('multimedia.index-archived');
-    Route::get('multimedia/{id}/archived', [MultimediaController::class, 'showArchived'])->name('multimedia.show-archived');
 });
+// Public archive routes
+Route::get('multimedia/archived', [MultimediaController::class, 'archiveIndex'])->name('multimedia.index-archived');
+Route::get('multimedia/{id}/archived', [MultimediaController::class, 'showArchived'])->name('multimedia.show-archived');
+// Public routes
 Route::apiResource('multimedia', MultimediaController::class)->only(['index', 'show']); # public multimedia route
 
 /**

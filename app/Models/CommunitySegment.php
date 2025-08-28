@@ -2,16 +2,16 @@
 
 namespace App\Models;
 
+use App\Traits\Archivable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
-use InvalidArgumentException;
 
 class CommunitySegment extends Model
 {
     /** @use HasFactory<\Database\Factories\CommunitySegmentFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, Archivable;
 
     protected $fillable = [
         'title',
@@ -25,7 +25,8 @@ class CommunitySegment extends Model
         'credit_type',
         'cover_artist_id',
         'cover_caption',
-        'publisher_id'
+        'publisher_id',
+        'archived_at'
 
     ];
 

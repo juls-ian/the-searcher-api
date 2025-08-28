@@ -65,9 +65,11 @@ class AppServiceProvider extends ServiceProvider
         Route::bind('article', function (string $value) {
             return Article::withTrashed()->where('id', $value)->firstOrFail(); # for forceDestroy & restore 
         });
-
         Route::bind('multimedia', function (string $value) {
             return Multimedia::withTrashed()->where('id', $value)->firstOrFail();
+        });
+        Route::bind('community-segment', function (string $value) {
+            return CommunitySegment::withTrashed()->where('id', $value)->firstOrFail();
         });
     }
 }

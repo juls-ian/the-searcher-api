@@ -315,8 +315,8 @@ class MultimediaController extends Controller
 
     public function archive($id)
     {
-        $this->authorize('archive', $id);
         $multimedia = Multimedia::findOrFail($id); # find multimedia 
+        $this->authorize('archive', $multimedia);
         $archive = $multimedia->archive(); # calls the trait method to create archive
 
         // If trait didn’t create a new archive because the article was already archived
@@ -341,7 +341,7 @@ class MultimediaController extends Controller
                 ->firstOrFail();
             return response()->json($archive);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['message' => 'Can only show archived data is not']);
+            return response()->json(['message' => 'Can only archived multimedia']);
         }
     }
 

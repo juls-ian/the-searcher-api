@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\ArticleCategory;
+use App\Models\SegmentsArticle;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -94,13 +95,20 @@ class ArchiveResource extends JsonResource
                 ];
 
             case 'community-segment':
+                #                archivable morphTo relation
+                $segment = $this->archivable()->with('segmentArticles')->first(); # eager load segmentArticles relationship
                 return [
                     'writer' => User::find($data['writer_id'])?->only(['full_name']),
                     'series_type' => $data['series_type'],
                     'series_of' => $data['series_of'],
                     'published_at' => $data['published_at'],
                     'series_order' => $data['series_order'],
-                    'body' => $data['body'],
+                    /**
+                     * If $segment is null, this whole expression is null. 
+                     * If $segment exists, then it tries to access its segmentArticles relation
+                     * if $segmentArticles = null returns null otherwise access the body
+                     */
+                    'body' => $segment?->segmentArticles?->body, # null-safe operator 
                     'segment_cover' => $data['segment_cover'],
                     'cover_artist' => User::find($data['cover_artist_id'])?->only(['full_name']),
                     'credit_type' => $data['credit_type'] ?? null

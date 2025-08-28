@@ -32,6 +32,7 @@ return new class extends Migration {
             $table->string('cover_caption')->nullable();
             $table->foreignIdFor(User::class, 'publisher_id')
                 ->constrained('users');
+            $table->timestampTz('archived_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
