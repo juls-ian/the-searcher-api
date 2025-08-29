@@ -10,6 +10,7 @@ use App\Http\Resources\ArchiveResource;
 use App\Http\Resources\ArticleResource;
 use App\Models\Archive;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -280,8 +281,14 @@ class ArticleController extends Controller
 
     public function showArchived($id)
     {
-        $archive = Archive::findOrFail($id);
-        return response()->json($archive);
+        try {
+            $archive = Archive::where('archivable_type', 'article')
+                ->where('id', $id)
+                ->firstOrFail();
+            return response()->json($archive);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['message' => 'Can only show archived articles']);
+        }
     }
 
     /**
@@ -289,8 +296,8 @@ class ArticleController extends Controller
      */
     public function archive($id)
     {
-        $this->authorize('archive', $id);
         $article = Article::findOrFail($id); # find article or fail 
+        $this->authorize('archive', $article);
         $archive = $article->archive(); # calls the trait method to create archive | returns Archive or null 
 
         // If trait didn’t create a new archive because the article was already archived

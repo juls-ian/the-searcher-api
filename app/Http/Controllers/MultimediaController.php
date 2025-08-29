@@ -341,7 +341,7 @@ class MultimediaController extends Controller
                 ->firstOrFail();
             return response()->json($archive);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['message' => 'Can only archived multimedia']);
+            return response()->json(['message' => 'Can show only archived multimedia']);
         }
     }
 

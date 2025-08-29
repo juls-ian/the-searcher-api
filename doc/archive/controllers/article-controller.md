@@ -392,7 +392,13 @@
         ]);
     }
 
-
+## showArchived()
+### 1.0: initial code
+    public function showArchived($id)
+    {
+        $archive = Archive::findOrFail($id);
+        return response()->json($archive);
+    }
 
 
 
