@@ -119,7 +119,12 @@ Route::apiResource('issues', IssueController::class)->only(['index', 'show']);
  */
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('bulletins', BulletinController::class)->only(['store', 'update', 'destroy']);
+    Route::delete('bulletins/{bulletin}/forceDestroy', [BulletinController::class, 'forceDestroy'])->name('bulletins.forceDestroy');
+    Route::post('bulletins/{bulletin}/restore', [BulletinController::class, 'restore'])->name('bulletins.restore');
+    Route::post('bulletins/{id}/archive', [BulletinController::class, 'archive'])->name('bulletins.archive');
 });
+Route::get('bulletins/archived', [BulletinController::class, 'archiveIndex'])->name('bulletins.archived');
+Route::get('bulletins/{id}/archived', [BulletinController::class, 'showArchived'])->name('bulletins.show-archived');
 Route::apiResource('bulletins', BulletinController::class)->only(['index', 'show']);
 
 /**

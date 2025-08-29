@@ -121,7 +121,7 @@ class ArchiveResource extends JsonResource
                     'details' => $data['details'],
                     'published_at' => $data['published_at'],
                     'cover_photo' => $data['cover_photo'],
-                    'cover_artist' => $data['cover_artist']
+                    'cover_artist' => User::find($data['cover_artist_id'])?->only(['full_name']),
                 ];
 
             case 'issue':

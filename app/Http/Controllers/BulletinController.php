@@ -6,7 +6,10 @@ use App\Models\Bulletin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreBulletinRequest;
 use App\Http\Requests\UpdateBulletinRequest;
+use App\Http\Resources\ArchiveResource;
 use App\Http\Resources\BulletinResource;
+use App\Models\Archive;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -116,14 +119,100 @@ class BulletinController extends Controller
     public function destroy(Bulletin $bulletin)
     {
         $this->authorize('delete', $bulletin);
+        $storage = Storage::disk('public');
+        $trashDir = 'bulletins/trash/';
+
+        if (!$trashDir) {
+            $storage->makeDirectory($trashDir);
+        }
+
         // Handler 1: cover_photo deletion 
-        if ($bulletin->cover_photo && Storage::disk('public')->exists($bulletin->cover_photo)) {
-            Storage::disk('public')->delete($bulletin->cover_photo);
+        if ($bulletin->cover_photo && $storage->exists($bulletin->cover_photo)) {
+            $filename = basename($bulletin->cover_photo);
+            $trashPath = $trashDir . $filename;
+            $storage->move($bulletin->cover_photo, $trashPath);
         }
 
         $bulletin->delete();
         return response()->json([
             'message' => 'Bulletin has been deleted'
         ]);
+    }
+
+    public function forceDestroy(Bulletin $bulletin)
+    {
+
+        $storage = Storage::disk('public');
+        $trashDir = 'bulletins/trash/';
+
+        if ($bulletin->cover_photo) {
+            $filename = basename($bulletin->cover_photo);
+            $trashPath = $trashDir . $filename;
+
+            if ($storage->exists($trashPath)) {
+                $storage->delete($trashPath);
+            }
+        }
+
+        $bulletin->forceDelete();
+        return response()->json([
+            'message' => 'Bulletin was deleted permanently'
+        ]);
+    }
+
+    public function restore(Bulletin $bulletin)
+    {
+        $storage = Storage::disk('public');
+        $trashDir = 'bulletins/trash/';
+
+        if ($bulletin->cover_photo) {
+            $filename = basename($bulletin->cover_photo);
+            $trashPath = $trashDir . $filename;
+
+            if ($storage->exists($trashPath)) {
+                $storage->move($trashPath, $bulletin->cover_photo);
+            }
+        }
+
+        $bulletin->restore();
+        return response()->json([
+            'message' => 'Bulletin was restored',
+            'data' => BulletinResource::make($bulletin)
+        ]);
+    }
+
+    public function archive($id)
+    {
+        $bulletin = Bulletin::findOrFail($id);
+        $archive = $bulletin->archive();
+
+        if (! $archive) {
+            return response()->json([
+                'message' => 'This bulletin has already been archived'
+            ], 409);
+        }
+
+        return response()->json([
+            'message' => 'Bulletin archived successfully',
+            'data' => new ArchiveResource($archive)
+        ]);
+    }
+
+    public function archiveIndex()
+    {
+        $archivedBulletins = Bulletin::archived()->get(); # query scope in the Archivable trait 
+        return response()->json($archivedBulletins);
+    }
+
+    public function showArchived($id)
+    {
+        try {
+            $archive = Archive::where('archivable_type', 'bulletin')
+                ->where('id', $id)
+                ->firstOrFail();
+            return response()->json($archive);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['message' => 'Can only show archived bulletin']);
+        }
     }
 }

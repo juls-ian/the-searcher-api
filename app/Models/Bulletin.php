@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Archivable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -10,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 class Bulletin extends Model
 {
     /** @use HasFactory<\Database\Factories\BulletinFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, Archivable;
 
     protected $fillable = [
         'title',
@@ -20,7 +21,8 @@ class Bulletin extends Model
         'published_at',
         'cover_photo',
         'cover_artist_id',
-        'publisher_id'
+        'publisher_id',
+        'archived_at'
     ];
 
     public function casts()

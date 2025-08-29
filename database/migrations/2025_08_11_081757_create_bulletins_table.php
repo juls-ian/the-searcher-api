@@ -26,6 +26,7 @@ return new class extends Migration
                 ->constrained('users');
             $table->foreignIdFor(User::class, 'publisher_id')
                 ->constrained('users');
+            $table->timestampTz('archived_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

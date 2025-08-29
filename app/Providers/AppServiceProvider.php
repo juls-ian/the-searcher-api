@@ -71,5 +71,9 @@ class AppServiceProvider extends ServiceProvider
         Route::bind('community-segment', function (string $value) {
             return CommunitySegment::withTrashed()->where('id', $value)->firstOrFail();
         });
+
+        Route::bind('bulletin', function (string $value) {
+            return Bulletin::withTrashed()->where('id', $value)->firstOrFail();
+        });
     }
 }
