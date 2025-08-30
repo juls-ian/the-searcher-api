@@ -266,32 +266,6 @@ class ArticleController extends Controller
     }
 
     /**
-     * Show all archive articles 
-     */
-    public function archiveIndex()
-    {
-        $archivedArticles = Article::archived()->get(); # query scope
-        return response()->json($archivedArticles);
-        // return view('articles.archived', compact('articles'));
-    }
-
-    /**
-     * Show archive article
-     */
-
-    public function showArchived($id)
-    {
-        try {
-            $archive = Archive::where('archivable_type', 'article')
-                ->where('id', $id)
-                ->firstOrFail();
-            return response()->json($archive);
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['message' => 'Can only show archived articles']);
-        }
-    }
-
-    /**
      * Archive an article
      */
     public function archive($id)
@@ -311,5 +285,33 @@ class ArticleController extends Controller
             'message' => 'Article archived successfully',
             'data' => new ArchiveResource($archive)
         ]);
+    }
+
+    /**
+     * Show all archived articles 
+     */
+    public function archiveIndex()
+    {
+        $archivedArticles = Archive::where('archivable_type', 'article')
+            ->with(['archiver']) # load archiver relationship 
+            ->orderBy('archived_at', 'desc')
+            ->get();;
+        return ArchiveResource::collection($archivedArticles);
+        // return view('articles.archived', compact('articles'));
+    }
+
+    /**
+     * Show archived article
+     */
+    public function showArchived($id)
+    {
+        try {
+            $archive = Archive::where('archivable_type', 'article')
+                ->where('id', $id)
+                ->firstOrFail();
+            return new ArchiveResource($archive);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['message' => 'Can only show archived articles']);
+        }
     }
 }

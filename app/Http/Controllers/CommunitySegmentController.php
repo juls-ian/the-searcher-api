@@ -247,6 +247,9 @@ class CommunitySegmentController extends Controller
         ]);
     }
 
+    /**
+     * Archive a segment 
+     */
     public function archive($id)
     {
         $communitySegment = CommunitySegment::findOrFail($id);
@@ -271,19 +274,28 @@ class CommunitySegmentController extends Controller
         ]);
     }
 
+    /**
+     * Show all archived segments
+     */
     public function archiveIndex()
     {
-        $archivedSegments = CommunitySegment::archived()->get(); # uses trait scope
-        return response()->json($archivedSegments);
+        $archivedIssues = Archive::where('archivable_type', 'community-segment')
+            ->with(['archiver']) # load archiver relationship 
+            ->orderBy('archived_at', 'desc')
+            ->get();
+        return ArchiveResource::collection($archivedIssues);
     }
 
+    /**
+     * Show archived segment
+     */
     public function showArchived($id)
     {
         try {
             $archive = Archive::where('archivable_type', 'community-segment')
                 ->where('id', $id)
                 ->firstOrFail();
-            return response()->json($archive);
+            return  new ArchiveResource($archive);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'message' =>   'Can only show archived community segments article'

@@ -200,8 +200,11 @@ class BulletinController extends Controller
 
     public function archiveIndex()
     {
-        $archivedBulletins = Bulletin::archived()->get(); # query scope in the Archivable trait 
-        return response()->json($archivedBulletins);
+        $archivedBulletins = Archive::where('archivable_type', 'issue')
+            ->with(['archiver']) # load archiver relationship 
+            ->orderBy('archived_at', 'desc')
+            ->get();
+        return ArchiveResource::collection($archivedBulletins);
     }
 
     public function showArchived($id)
@@ -210,7 +213,7 @@ class BulletinController extends Controller
             $archive = Archive::where('archivable_type', 'bulletin')
                 ->where('id', $id)
                 ->firstOrFail();
-            return response()->json($archive);
+            return new ArchiveResource($archive);
         } catch (ModelNotFoundException $e) {
             return response()->json(['message' => 'Can only show archived bulletin']);
         }

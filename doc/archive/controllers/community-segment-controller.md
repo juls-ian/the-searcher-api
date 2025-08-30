@@ -207,3 +207,28 @@ public function restore(CommunitySegment $communitySegment)
             'data' => CommunitySegmentResource::make($communitySegment)
         ]);
     }
+
+## archivedIndex()
+### 1.0: initial code
+    public function archiveIndex()
+    {
+        $archivedSegments = CommunitySegment::archived()->get(); # uses trait scope
+        return response()->json($archivedSegments);
+    }
+
+## showArchived()
+### 1.0: initial code
+    public function showArchived($id)
+    {
+        try {
+            $archive = Archive::where('archivable_type', 'community-segment')
+                ->where('id', $id)
+                ->firstOrFail();
+            return response()->json($archive);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' =>   'Can only show archived community segments article'
+            ], 403);
+        }
+    }
+}

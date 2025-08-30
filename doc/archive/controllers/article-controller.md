@@ -399,7 +399,27 @@
         $archive = Archive::findOrFail($id);
         return response()->json($archive);
     }
+### 1.1: before revision
+    public function showArchived($id)
+    {
+        try {
+            $archive = Archive::where('archivable_type', 'article')
+                ->where('id', $id)
+                ->firstOrFail();
+            return new ArchiveResource($archive);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['message' => 'Can only show archived articles']);
+        }
+    }
 
+## archivedIndex()
+### 1.0: initial code
+    public function archiveIndex()
+    {
+        $archivedArticles = Article::archived()->get(); # query scope
+        return response()->json($archivedArticles);
+        // return view('articles.archived', compact('articles'));
+    }
 
 
 

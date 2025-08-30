@@ -313,6 +313,9 @@ class MultimediaController extends Controller
         ]);
     }
 
+    /**
+     * Archive multimedia
+     */
     public function archive($id)
     {
         $multimedia = Multimedia::findOrFail($id); # find multimedia 
@@ -332,6 +335,21 @@ class MultimediaController extends Controller
         ]);
     }
 
+    /**
+     * Show all archived multimedia
+     */
+    public function archiveIndex()
+    {
+        $archivedMultimedia = Archive::where('archivable_type', 'multimedia')
+            ->with(['archiver']) # load archiver relationship 
+            ->orderBy('archived_at', 'desc')
+            ->get();
+        return ArchiveResource::collection($archivedMultimedia);
+    }
+
+    /**
+     * Show all archive multimedia
+     */
     public function showArchived($id)
     {
 
@@ -339,15 +357,9 @@ class MultimediaController extends Controller
             $archive = Archive::where('archivable_type', 'multimedia')
                 ->where('id', $id)
                 ->firstOrFail();
-            return response()->json($archive);
+            return new ArchiveResource($archive);
         } catch (ModelNotFoundException $e) {
             return response()->json(['message' => 'Can show only archived multimedia']);
         }
-    }
-
-    public function archiveIndex()
-    {
-        $archivedMultimedia = Multimedia::archived()->get(); # query scope
-        return response()->json($archivedMultimedia);
     }
 }

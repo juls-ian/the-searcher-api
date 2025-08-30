@@ -42,3 +42,25 @@
             ]);
         }
     }
+
+## archivedIndex()
+### 1.0: initial code
+    public function archiveIndex()
+    {
+        $archivedBulletins = Bulletin::archived()->get(); # query scope in the Archivable trait 
+        return response()->json($archivedBulletins);
+    }
+
+### showArchived()
+### 1.0: initial code
+   public function showArchived($id)
+    {
+        try {
+            $archive = Archive::where('archivable_type', 'bulletin')
+                ->where('id', $id)
+                ->firstOrFail();
+            return response()->json($archive);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['message' => 'Can only show archived bulletin']);
+        }
+    }

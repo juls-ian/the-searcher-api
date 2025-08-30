@@ -311,6 +311,19 @@ public function store(StoreMultimediaRequest $request)
         $archive = Archive::findOrFail($id);
         return response()->json($archive);
     }
+### 1.1: before improvement
+    public function showArchived($id)
+    {
+
+        try {
+            $archive = Archive::where('archivable_type', 'multimedia')
+                ->where('id', $id)
+                ->firstOrFail();
+            return response()->json($archive);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['message' => 'Can show only archived multimedia']);
+        }
+    }
 
 ## archiveIndex()
 ### 1.0: initial version
