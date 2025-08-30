@@ -37,7 +37,7 @@ class UpdateIssueRequest extends FormRequest
             'layout_artists.*' => ['string'],
             'contributors' => ['sometimes', 'nullable'],
             'contributors.*' => ['string'],
-            'issue_file' => [
+            'file' => [
                 'sometimes',
                 'file',
                 'max:5120', # 50mb 

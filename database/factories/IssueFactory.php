@@ -31,7 +31,7 @@ class IssueFactory extends Factory
             'artists' => $this->faker->words(2),
             'layout_artists' => $this->faker->words(2),
             'contributors' => $this->faker->words(3),
-            'issue_file' => 'issues/' . $this->faker->uuid . '.pdf',
+            'file' => 'issues/' . $this->faker->uuid . '.pdf',
             'thumbnail' => 'thumbnails/' . $this->faker->uuid . '.jpg',
             'publisher_id' => User::factory()
         ];

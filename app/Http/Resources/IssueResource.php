@@ -26,7 +26,7 @@ class IssueResource extends JsonResource
             'artists' => $this->artists,
             'layout_artists' => $this->layout_artists,
             'contributors' => $this->contributors,
-            'file' => $this->issue_file,
+            'file' => $this->file,
             'thumbnail' => $this->thumbnail,
             'published_by' => $this->publisher->full_name ?? null
         ];

@@ -22,7 +22,7 @@ class Issue extends Model
         'artists',
         'layout_artists',
         'contributors',
-        'issue_file',
+        'file',
         'thumbnail',
         'publisher_id'
     ];

@@ -37,7 +37,7 @@ class StoreIssueRequest extends FormRequest
             'layout_artists.*' => ['string'],
             'contributors' => ['nullable'],
             'contributors.*' => ['string'],
-            'issue_file' => [
+            'file' => [
                 'required',
                 'file',
                 'max:102400', # 100mb    
