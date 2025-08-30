@@ -70,6 +70,11 @@ class IssuePolicy
      */
     public function forceDelete(User $user, Issue $issue): bool
     {
-        return false;
+        return $user->role === 'editor';
+    }
+
+    public function archive(User $user, Issue $issue)
+    {
+        return $user->role === 'editor';
     }
 }

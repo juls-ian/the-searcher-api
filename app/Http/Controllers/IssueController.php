@@ -6,9 +6,13 @@ use App\Models\Issue;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreIssueRequest;
 use App\Http\Requests\UpdateIssueRequest;
+use App\Http\Resources\ArchiveResource;
 use App\Http\Resources\IssueResource;
+use App\Models\Archive;
 use App\Models\Article;
 use App\Models\User;
+use Illuminate\Contracts\Cache\Store;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -42,9 +46,9 @@ class IssueController extends Controller
         $validatedIssue = $request->validated();
 
         // Handler 1: file upload 
-        if ($request->hasFile('issue_file')) {
-            $filePath = $request->file('issue_file')->store('issues/files', 'public');
-            $validatedIssue['issue_file'] = $filePath;
+        if ($request->hasFile('file')) {
+            $filePath = $request->file('file')->store('issues/files', 'public');
+            $validatedIssue['file'] = $filePath;
         }
 
         // Handler 2: thumbnail upload 
@@ -93,17 +97,17 @@ class IssueController extends Controller
         $storage = Storage::disk('public');
 
         // Handler 1: file upload 
-        if ($request->hasFile('issue_file')) {
+        if ($request->hasFile('file')) {
 
             # delete old file if it exists 
-            if ($issue->issue_file && $storage->exists($issue->issue_file)) {
-                $issue->delete($issue->issue_file);
+            if ($issue->file && $storage->exists($issue->file)) {
+                $issue->delete($issue->file);
             }
-            $validatedIssue['issue_file'] = $request->file('issue_file')->store('issues/files', 'public');
+            $validatedIssue['file'] = $request->file('file')->store('issues/files', 'public');
         } else {
 
             # exclude file in any subsequent db operation 
-            unset($validatedIssue['issue_file']);
+            unset($validatedIssue['file']);
         }
 
         // Handler 2: thumbnail
@@ -128,17 +132,131 @@ class IssueController extends Controller
     public function destroy(Issue $issue)
     {
         $this->authorize('delete', $issue);
-        if ($issue->issue_file && Storage::disk('public')->exists($issue->issue_file)) {
-            Storage::disk('public')->delete($issue->issue_file);
+        $storage = Storage::disk('public');
+        $trashDir = 'issues/trash/';
+
+        $destroyFile = function ($filePath) use ($storage, $trashDir) {
+            if (!$filePath) return;
+
+            $filename = basename($filePath);
+            $trashPath = $trashDir . $filename;
+
+            if ($storage->exists($filePath)) {
+                $storage->move($filePath, $trashPath);
+            }
+        };
+
+        if (! $storage->exists($trashDir)) {
+            $storage->makeDirectory($trashDir);
         }
 
-        if ($issue->thumbnail && Storage::disk('public')->exists($issue->thumbnail)) {
-            Storage::disk('public')->delete($issue->thumbnail);
-        }
+        $destroyFile($issue->file);
+        $destroyFile($issue->thumbnail);
 
         $issue->delete();
         return response()->json([
             'message' => 'Issue was deleted successfully'
         ]);
+    }
+
+    public function forceDestroy(Issue $issue)
+    {
+        $this->authorize('forceDelete', $issue);
+        $storage = Storage::disk('public');
+        $trashDir = 'issues/trash/';
+
+        $forceDestroyFile = function ($filePath) use ($storage, $trashDir) {
+            if (!$filePath) return;
+
+            $filename = basename($filePath);
+            $trashPath = $trashDir . $filename;
+
+            if ($storage->exists($trashPath)) {
+                $storage->delete($trashPath);
+            }
+        };
+
+        $forceDestroyFile($issue->file);
+        $forceDestroyFile($issue->thumbnail);
+
+        $issue->forceDelete();
+        return response()->json([
+            'message' => 'Issue was permanently deleted'
+        ]);
+    }
+
+    public function restore(Issue $issue)
+    {
+        $this->authorize('restore', $issue);
+        $storage = Storage::disk('public');
+        $trashDir = 'issues/trash/';
+
+        $restoreFile = function ($filePath) use ($storage, $trashDir) {
+            if (!$filePath) return;
+
+            $filename = basename($filePath);
+            $trashPath = $trashDir . $filename;
+
+            if ($storage->exists($trashPath)) {
+                $storage->move($trashPath, $filePath);
+            }
+        };
+
+        $restoreFile($issue->file);
+        $restoreFile($issue->thumbnail);
+
+        $issue->restore();
+        return response()->json([
+            'message' => 'Issue was restored',
+            'data' =>  IssueResource::make($issue)
+        ]);
+    }
+
+    /**
+     * Archive an issue 
+     */
+    public function archive($id)
+    {
+        $issue = Issue::findOrFail($id);
+        $this->authorize('archive', $issue);
+        $archive = $issue->archive(); # trait method 
+
+        if (!$archive) {
+            return response()->json([
+                'message' => 'This issue has already been archived'
+            ], 409);
+        }
+
+        return response()->json([
+            'message' => 'Issue archived successfully',
+            'data' => new ArchiveResource($archive)
+        ]);
+    }
+
+    /**
+     * Show all archived issues
+     */
+    public function archiveIndex()
+    {
+        $archivedIssues = Archive::where('archivable_type', 'issue')
+            ->with(['archiver']) # load archiver relationship 
+            ->orderBy('archived_at', 'desc')
+            ->get();
+        return ArchiveResource::collection($archivedIssues);
+    }
+
+    /**
+     * Show archived issue
+     */
+    public function showArchived($id)
+    {
+        try {
+            $archive = Archive::where('archivable_type', 'issue')
+                ->where('id', $id)
+                ->firstOrFail();
+            return new ArchiveResource($archive);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['message' => 'Can only show archived issues']);
+        }
     }
 }

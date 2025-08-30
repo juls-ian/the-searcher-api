@@ -66,7 +66,6 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 Route::apiResource('article-categories', ArticleCategoryController::class)->only(['index', 'show']);
 
-
 /**
  * Community Segment routes 
  */
@@ -86,8 +85,6 @@ Route::get('community-segments/{id}/archived', [CommunitySegmentController::clas
     ->name('community-segments.show-archived');
 // Public routes  
 Route::apiResource('community-segments', CommunitySegmentController::class)->only(['index', 'show']); # public segment routes 
-
-
 
 /**
  * Multimedia routes 
@@ -111,7 +108,12 @@ Route::apiResource('multimedia', MultimediaController::class)->only(['index', 's
  */
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('issues', IssueController::class)->only(['store', 'update', 'destroy']);
+    Route::delete('issues/{issue}/forceDestroy', [IssueController::class, 'forceDestroy'])->name('issues.forceDestroy');
+    Route::post('issues/{issue}/restore', [IssueController::class, 'restore'])->name('issues.restore');
+    Route::post('issues/{id}/archive', [IssueController::class, 'archive'])->name('issues.archive');
 });
+Route::get('issues/archived', [IssueController::class, 'archiveIndex'])->name('issues.archived');
+Route::get('issues/{id}/archived', [IssueController::class, 'showArchived'])->name('issues.show-archived');
 Route::apiResource('issues', IssueController::class)->only(['index', 'show']);
 
 /**

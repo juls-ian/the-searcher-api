@@ -75,5 +75,9 @@ class AppServiceProvider extends ServiceProvider
         Route::bind('bulletin', function (string $value) {
             return Bulletin::withTrashed()->where('id', $value)->firstOrFail();
         });
+
+        Route::bind('issue', function (string $value) {
+            return Issue::withTrashed()->where('id', $value)->firstOrFail();
+        });
     }
 }

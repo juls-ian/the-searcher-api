@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use App\Traits\Archivable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 
 class Issue extends Model
 {
     /** @use HasFactory<\Database\Factories\IssueFactory> */
-    use HasFactory;
+    use HasFactory, SoftDeletes, Archivable;
 
     protected $fillable = [
         'title',
@@ -24,7 +26,8 @@ class Issue extends Model
         'contributors',
         'file',
         'thumbnail',
-        'publisher_id'
+        'publisher_id',
+        'archived_at'
     ];
 
     protected $casts = [

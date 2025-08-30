@@ -17,6 +17,7 @@ class ArchiveResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+
         // Normalize data into array no matter what 
         $data = is_array($this->data)
             ? $this->data
@@ -25,8 +26,8 @@ class ArchiveResource extends JsonResource
         # defaults 
         return [
             'id' => $this->id,
-            'archive_type' => $this->archivable_type,
-            'archived_id' => $this->archivable_id,
+            'archivable_type' => $this->archivable_type,
+            'archivable_id' => $this->archivable_id,
             'title' => $this->title,
             'slug' => $this->slug,
             'data' => $this->formDataByType($data),
@@ -134,7 +135,7 @@ class ArchiveResource extends JsonResource
                     'artists' => $data['artists'],
                     'layout_artists' => $data['layout_artists'],
                     'contributors' => $data['contributors'],
-                    'issue_file' => $data['issue_file'],
+                    'file' => $data['file'],
                     'thumbnail' => $data['thumbnail']
                 ];
 
