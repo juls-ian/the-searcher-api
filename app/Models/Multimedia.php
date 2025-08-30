@@ -20,9 +20,9 @@ class Multimedia extends Model
         'caption',
         'published_at',
         'files',
+        'files_credit_type',
         'thumbnail',
         'thumbnail_artist_id',
-        'thumbnail_credit_type',
         'archived_at'
     ];
 
@@ -32,7 +32,7 @@ class Multimedia extends Model
     ];
 
     protected $attributes = [
-        'thumbnail_credit_type' => 'photo'
+        'files_credit_type' => 'photo'
     ];
 
 

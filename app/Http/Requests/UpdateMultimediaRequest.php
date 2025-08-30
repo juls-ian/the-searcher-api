@@ -31,7 +31,7 @@ class UpdateMultimediaRequest extends FormRequest
             'multimedia_artists_id.*' => ['sometimes', 'integer', 'exists:users,id'],
             'thumbnail' => ['sometimes', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
             'thumbnail_artist_id' => ['sometimes', 'integer', 'exists:users,id'],
-            'thumbnail_credit_type' => ['sometimes', 'in:photo,graphics,video,illustration']
+            'files_credit_type' => ['sometimes', 'in:photo,graphics,video,illustration']
         ];
     }
 

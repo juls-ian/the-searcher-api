@@ -32,7 +32,7 @@ class StoreMultimediaRequest extends FormRequest
             'multimedia_artists_id.*' => ['required', 'integer', 'exists:users,id'],
             'thumbnail' => ['required', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
             'thumbnail_artist_id' => ['required', 'integer', 'exists:users,id'],
-            'thumbnail_credit_type' => ['sometimes', 'in:photo,graphics,video,illustration']
+            'files_credit_type' => ['sometimes', 'in:photo,graphics,video,illustration']
 
         ];
     }

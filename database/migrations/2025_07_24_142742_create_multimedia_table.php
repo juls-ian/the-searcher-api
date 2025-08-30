@@ -20,10 +20,10 @@ return new class extends Migration
             $table->string('caption');
             $table->dateTimeTz('published_at');
             $table->string('files');
+            $table->enum('files_credit_type', ['photo', 'graphics', 'illustration', 'video'])->default('photo');
             $table->string('thumbnail');
             $table->foreignIdFor(User::class, 'thumbnail_artist_id')
                 ->constrained('users');
-            $table->enum('thumbnail_credit_type', ['photo', 'graphics', 'illustration', 'video'])->default('photo');
             $table->foreignIdFor(User::class, 'publisher_id')
                 ->constrained('users');
             $table->timestampTz('archived_at')->nullable();
