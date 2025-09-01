@@ -18,8 +18,10 @@ class ArticleResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'slug' => $this->slug,
-            'writer' => $this->writer->full_name,
             'category' => $this->category->name ?? null,
+            'writer' => in_array($this->category->name, ['Opinion', 'Column', 'Editorial'])
+                ? $this->writer->pen_name
+                : $this->writer->full_name,
             'body' => $this->body,
             'published_at' => $this->published_at,
             'is_live' => $this->is_live,
