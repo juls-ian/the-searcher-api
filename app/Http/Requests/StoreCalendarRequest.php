@@ -38,7 +38,7 @@ class StoreCalendarRequest extends FormRequest
             'details' => ['nullable', 'string'],
             'venue' => ['nullable', 'string'],
             'is_public' => ['sometimes', 'boolean'],
-            'event_type' => ['required', 'in:release,event,meeting']
+            'event_type' => ['required', 'in:release,event,campus,internal']
         ];
     }
 

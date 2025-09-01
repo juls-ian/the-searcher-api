@@ -38,7 +38,7 @@ class UpdateCalendarRequest extends FormRequest
             'details' => ['sometimes', 'nullable', 'string'],
             'venue' => ['sometimes', 'nullable', 'string'],
             'is_public' => ['sometimes', 'boolean'],
-            'event_type' => ['sometimes', 'in:release,event,meeting']
+            'event_type' => ['sometimes', 'in:release,event,campus,internal']
         ];
     }
 

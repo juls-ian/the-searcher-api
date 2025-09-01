@@ -15,7 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('slug')->unique();
-            $table->enum('event_type', ['release', 'event', 'meeting'])->default('event');
+            $table->enum('event_type', [
+                'release',   # publication release
+                'event',     # general/public events
+                'internal',  # internal editorial activities
+                'campus',    # university/college-wide events
+            ])->default('event');
             $table->dateTime('start_at');
             $table->dateTime('ends_at')->nullable();
             $table->boolean('is_allday')->default(false);

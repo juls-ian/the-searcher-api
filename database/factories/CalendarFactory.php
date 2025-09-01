@@ -27,7 +27,7 @@ class CalendarFactory extends Factory
             'is_allday' => fake()->boolean(20),
             'venue' => fake()->city() . ',' . ' ' . fake()->country(),
             'details' => fake()->sentence(8, true),
-            'event_type' => fake()->randomElement(['event', 'meeting', 'release'])
+            'event_type' => fake()->randomElement(['event', 'internal', 'release', 'campus'])
         ];
     }
 }
