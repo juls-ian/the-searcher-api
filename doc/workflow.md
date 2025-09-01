@@ -232,11 +232,11 @@ Initiate **php artisan install:api**
 1. make a trait 
 2. use the trait on the respective models 
 3. implement own archiving on each models (separate from the archive model)
+4. Bulletin, Article, Community Segment, Multimedia, and Issue shall be archivable 
 
 ## Soft and Hard Deletion and Restore
 1. implement this feat on the Article, User, Multimedia, Community Segments, Bulletin, Issue, and Archive
 2. declare route binding of each models through the AppServiceProvider if using a route model binding in the crud functions of the controllers
-
 
 ## Calendar
 1. make these components of the Calendar:
@@ -249,3 +249,62 @@ Initiate **php artisan install:api**
 3. implement crud features to manage calendar 
 4. implement slug generation and register it in the AppServiceProvider
 5. define in the api routes
+
+## Search Feature
+
+### Dependencies Overview 
+1. because of the multiple models we shall use:
+   1. Laravel Scout 
+   2. Algolia*
+   3. Meilisearch*  
+   4. Postgres Full Text Search +  Postgres Scout driver (no extra service)
+
+### Dependency Installation
+1. composer require laravel/scout
+2. php artisan vendor:publish --provider="Laravel\Scout\ScoutServiceProvider"
+
+#### Dependency Installation: Laravel Scout Postgres
+1. composer require pmatseykanets/laravel-scout-postgres
+2. in config/scout.php 
+3. 'driver' => 'pgsql',
+
+#### Dependency Installation: Meilisearch 
+1. composer require laravel/scout meilisearch/meilisearch-php http-interop/http-factory-guzzle
+2. in config/scout.php
+   1. 'driver' => 'meilisearch',
+3. in .env
+   1. SCOUT_DRIVER=meilisearch
+   2. MEILISEARCH_HOST=http://127.0.0.1:7700
+   3. MEILISEARCH_KEY=MASTER_KEY
+4. docker run -it --rm -p 7700:7700 getmeili/meilisearch
+
+#### Dependency Installation: Algolia
+1. composer require algolia/algoliasearch-client-php
+2. php artisan vendor:publish --provider="Laravel\Scout\ScoutServiceProvider"
+3. in .env
+   1. SCOUT_DRIVER=algolia
+   2. ALGOLIA_APP_ID=
+   3. ALGOLIA_API_KEY= admin api key
+4. in scout.php
+   1. 
+    'algolia' => [
+        'id' => env('ALGOLIA_APP_ID', ''),
+        'secret' => env('ALGOLIA_API_KEY', ''),
+   2. 'queue' => env('SCOUT_QUEUE', true),
+   3. 'driver' => env('SCOUT_DRIVER', 'algolia'),
+
+
+##### Algolia Problem Fix
+Fix for the *Impossible to connect, please check your Algolia Application Id* issue
+1. php --ini
+2. download Grab the latest CA bundle here (official from cURL):
+🔗 https://curl.se/ca/cacert.pem
+3. move to a folder 
+4. in the php.ini write
+   1. curl.cainfo = "file-location\cacert.pem"
+   2. openssl.cafile = "file-location\cacert.pem"
+
+### Implementation 
+1. make the models Searchable
+2. add the toSearchableArray in the model 
+3. php artisan scout:import "App\Models\Article" *add all the searchable models*
