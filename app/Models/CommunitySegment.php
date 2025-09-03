@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Scout\Searchable;
 
 class CommunitySegment extends Model
 {
     /** @use HasFactory<\Database\Factories\CommunitySegmentFactory> */
-    use HasFactory, SoftDeletes, Archivable;
+    use HasFactory, SoftDeletes, Archivable, Searchable;
 
     protected $fillable = [
         'title',
@@ -39,6 +40,23 @@ class CommunitySegment extends Model
     protected $attributes = [
         'credit_type' => 'photo'
     ];
+
+    // For the search engine
+    public function toSearchableArray()
+    {
+        return [
+            'title' => $this->title,
+            'writer' => $this->writer?->full_name,
+            'cover_artist' => $this->coverArtist?->full_name,
+            'body' => $this->segment_type === 'article'
+                ? $this->segmentArticles?->body
+                : null,
+            'question' => $this->segment_type === 'poll'
+                ? $this->segmentPolls?->question
+                : null,
+
+        ];
+    }
 
     /**
      * Relationships

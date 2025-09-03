@@ -5,15 +5,24 @@ namespace App\Models;
 use App\Traits\Archivable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 class EditorialBoard extends Model
 {
-    use HasFactory;
+    use HasFactory, Searchable;
     protected $fillable = [
         'user_id',
         'term',
         'is_current'
     ];
+
+    // For the search engine
+    public function toSearchableArray()
+    {
+        return [
+            'term' => $this->term
+        ];
+    }
 
     public function user()
     {

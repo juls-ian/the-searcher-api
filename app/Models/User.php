@@ -13,11 +13,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
+use Laravel\Scout\Searchable;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens, CanResetPassword, SoftDeletes;
+    use HasFactory, Notifiable, HasApiTokens, CanResetPassword, SoftDeletes, Searchable;
 
     /**
      * The attributes that are mass assignable.
@@ -63,6 +64,14 @@ class User extends Authenticatable implements MustVerifyEmail
             'joined_at' => 'datetime',
             'left_at' => 'datetime',
             'password' => 'hashed',
+        ];
+    }
+
+    public function toSearchableArray()
+    {
+        return [
+            'pen_name' => $this->pen_name,
+            'staff' => $this->full_name
         ];
     }
 

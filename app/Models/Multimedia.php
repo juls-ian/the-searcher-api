@@ -8,11 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Scout\Searchable;
 
 class Multimedia extends Model
 {
     /** @use HasFactory<\Database\Factories\MultimediaFactory> */
-    use HasFactory, SoftDeletes, Archivable;
+    use HasFactory, SoftDeletes, Archivable, Searchable;
 
     protected $fillable = [
         'title',
@@ -35,6 +36,13 @@ class Multimedia extends Model
         'files_credit_type' => 'photo'
     ];
 
+    public function toSearchableArray()
+    {
+        return [
+            'title' => $this->title,
+            'caption' => $this->caption
+        ];
+    }
 
     public function multimediaArtists()
     {

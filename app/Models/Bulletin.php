@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Scout\Searchable;
 
 class Bulletin extends Model
 {
     /** @use HasFactory<\Database\Factories\BulletinFactory> */
-    use HasFactory, SoftDeletes, Archivable;
+    use HasFactory, SoftDeletes, Archivable, Searchable;
 
     protected $fillable = [
         'title',
@@ -30,6 +31,17 @@ class Bulletin extends Model
         return [
             'published_at' => 'datetime',
             'cover_photo' => 'string'
+        ];
+    }
+
+    // For the search engine
+    public function toSearchableArray()
+    {
+        return [
+            'title' => $this->title,
+            'details' => $this->details,
+            'writer' => $this->writer->full_name,
+            'cover_artist' => $this->coverArtist->full_name
         ];
     }
 

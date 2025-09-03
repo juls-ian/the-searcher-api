@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Scout\Searchable;
 
 class Article extends Model
 {
     /** @use HasFactory<\Database\Factories\ArticleFactory> */
-    use HasFactory, SoftDeletes, Archivable;
+    use HasFactory, SoftDeletes, Archivable, Searchable;
 
     protected $fillable = [
         'title',
@@ -56,7 +57,17 @@ class Article extends Model
 
     protected $dates = ['archived_at'];
 
-    // protected 
+    // For the search engine
+    public function toSearchableArray()
+    {
+        return [
+            'title' => $this->title,
+            'body' => $this->body,
+            'writer' => $this->writer->full_name,
+            'cover_artist' => $this->coverArtist->full_name,
+            'thumbnail_artist' => $this->thumbnailArtist->full_name
+        ];
+    }
 
     // relation to ArticleCategory
     public function category()

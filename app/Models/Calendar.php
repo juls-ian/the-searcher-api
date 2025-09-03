@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
+use Laravel\Scout\Searchable;
 
 class Calendar extends Model
 {
     /** @use HasFactory<\Database\Factories\CalendarFactory> */
-    use HasFactory;
+    use HasFactory, Searchable;
 
     protected $fillable = [
         'title',
@@ -36,6 +37,16 @@ class Calendar extends Model
     ];
 
     protected $appends = ['status']; // adds 'status' to JSON responses
+
+    // For the search engine
+    public function toSearchableArray()
+    {
+        return [
+            'title' => $this->title,
+            'venue' => $this->venue,
+            'details' => $this->details
+        ];
+    }
 
     // Dynamic status indicator - Model accessor
     public function getStatusAttribute()

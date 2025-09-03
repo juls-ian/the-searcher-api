@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Scout\Searchable;
 
 class Issue extends Model
 {
     /** @use HasFactory<\Database\Factories\IssueFactory> */
-    use HasFactory, SoftDeletes, Archivable;
+    use HasFactory, SoftDeletes, Archivable, Searchable;
 
     protected $fillable = [
         'title',
@@ -39,6 +40,14 @@ class Issue extends Model
         'contributors' => 'array',
         'published_at' => 'datetime',
     ];
+
+    public function toSearchableArray()
+    {
+        return [
+            'title' => $this->title,
+            'description' => $this->description
+        ];
+    }
 
     public function publisher()
     {
