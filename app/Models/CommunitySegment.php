@@ -54,6 +54,7 @@ class CommunitySegment extends Model
             'question' => $this->segment_type === 'poll'
                 ? $this->segmentPolls?->question
                 : null,
+            'segment_type' => $this->segment_type
 
         ];
     }

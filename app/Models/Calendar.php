@@ -44,7 +44,8 @@ class Calendar extends Model
         return [
             'title' => $this->title,
             'venue' => $this->venue,
-            'details' => $this->details
+            'details' => $this->details,
+            'event_type' => $this->event_type,
         ];
     }
 

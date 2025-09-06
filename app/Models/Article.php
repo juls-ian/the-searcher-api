@@ -65,7 +65,8 @@ class Article extends Model
             'body' => $this->body,
             'writer' => $this->writer->full_name,
             'cover_artist' => $this->coverArtist->full_name,
-            'thumbnail_artist' => $this->thumbnailArtist->full_name
+            'thumbnail_artist' => $this->thumbnailArtist->full_name,
+            'category' => $this->category->name
         ];
     }
 

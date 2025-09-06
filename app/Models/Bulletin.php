@@ -41,7 +41,8 @@ class Bulletin extends Model
             'title' => $this->title,
             'details' => $this->details,
             'writer' => $this->writer->full_name,
-            'cover_artist' => $this->coverArtist->full_name
+            'cover_artist' => $this->coverArtist->full_name,
+            'category' => $this->category
         ];
     }
 

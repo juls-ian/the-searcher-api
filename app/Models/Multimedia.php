@@ -40,7 +40,8 @@ class Multimedia extends Model
     {
         return [
             'title' => $this->title,
-            'caption' => $this->caption
+            'caption' => $this->caption,
+            'category' => $this->category
         ];
     }
 
