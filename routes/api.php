@@ -15,6 +15,7 @@ use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CommunitySegmentController;
 use App\Http\Controllers\IssueController;
 use App\Http\Controllers\MultimediaController;
+use App\Http\Controllers\SearchController;
 use App\Http\Middleware\HandleExpiredTokens;
 
 /*
@@ -151,6 +152,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('calendars', CalendarController::class)->only(['store', 'update', 'destroy']);
 });
 Route::apiResource('calendars', CalendarController::class)->only(['index', 'show']);
+
+/**
+ * Search
+ */
+Route::get('/search', [SearchController::class, 'universal'])->name('search.universal');
+Route::get('/search/{model}', [SearchController::class, 'model'])->name('search.model');
 
 /**
  * User Auth routes
