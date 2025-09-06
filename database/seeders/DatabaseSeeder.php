@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Http\Resources\SegmentArticleResource;
+use App\Models\Archive;
 use App\Models\User;
 use App\Models\Article;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -30,6 +31,7 @@ class DatabaseSeeder extends Seeder
         ArticleCategory::factory()->createCompleteStructure();
         Issue::factory()->count(10)->create();
         Calendar::factory()->count(8)->create();
+        Archive::factory()->count(30)->create();
 
         $users = [
             User::factory()->create([
@@ -40,11 +42,32 @@ class DatabaseSeeder extends Seeder
             ]),
 
             User::factory()->create([
+                'first_name' => 'Jean',
+                'last_name' => 'Grey',
+                'email' => 'jean@email.com',
+                'role' => 'admin'
+            ]),
+
+            User::factory()->create([
                 'first_name' => 'Rod',
                 'last_name' => 'Bacason',
                 'email' => 'rod@email.com',
                 'role' => 'staff'
-            ])
+            ]),
+
+            User::factory()->create([
+                'first_name' => 'Scott',
+                'last_name' => 'Summers',
+                'email' => 'scott@email.com',
+                'role' => 'editor'
+            ]),
+
+            User::factory()->create([
+                'first_name' => 'Steve',
+                'last_name' => 'Rogers',
+                'email' => 'steve@email.com',
+                'role' => 'editor'
+            ]),
         ];
 
         foreach ($users as $user) {
