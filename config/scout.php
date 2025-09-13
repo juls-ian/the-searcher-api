@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Archive;
+
 return [
 
     /*
@@ -154,9 +156,13 @@ return [
         'host' => env('MEILISEARCH_HOST', 'http://localhost:7700'),
         'key' => env('MEILISEARCH_KEY'),
         'index-settings' => [
-            // 'users' => [
-            //     'filterableAttributes'=> ['id', 'name', 'email'],
-            // ],
+            'users' => [
+                'filterableAttributes' => ['id', 'name', 'email'],
+            ],
+            Archive::class => [
+                'filterableAttributes' => ['year', 'month', 'archived_at'],
+                'sortableAttributes'   => ['archived_at'],
+            ],
         ],
     ],
 

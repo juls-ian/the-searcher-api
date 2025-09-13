@@ -156,6 +156,7 @@ Route::apiResource('calendars', CalendarController::class)->only(['index', 'show
 /**
  * Search
  */
+Route::get('/search/archives', [SearchController::class, 'archive'])->name('search.archive');
 Route::get('/search', [SearchController::class, 'universal'])->name('search.universal');
 Route::get('/search/{model}', [SearchController::class, 'model'])->name('search.model');
 

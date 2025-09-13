@@ -308,3 +308,7 @@ Fix for the *Impossible to connect, please check your Algolia Application Id* is
 1. make the models Searchable
 2. add the toSearchableArray in the model 
 3. php artisan scout:import "App\Models\Article" *add all the searchable models*
+4. add a **search service** which will handle the logic of building and running the search
+5. add a **search controller** that handles the request or response
+6. add the filterable and sortable attributes
+7. php artisan scout:sync-index-settings

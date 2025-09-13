@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Laravel\Scout\Searchable;
@@ -29,11 +27,17 @@ class Archive extends Model
         'archived_at' => 'datetime'
     ];
 
+    /**
+     * Searchable attributes 
+     */
     public function toSearchableArray()
     {
         return [
             'title' => $this->title,
             'data' => $this->formattedDataByType(),
+            'year'        => (int) $this->archived_at?->format('Y'), # cast into numeric "2025" -> 2025
+            'month' => $this->archived_at?->format('F'), # or 'M'
+            'archived_at' => $this->archived_at?->toDateString()
         ];
     }
 

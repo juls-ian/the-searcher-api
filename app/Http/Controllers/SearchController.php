@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Archive;
 use App\Services\SearchService;
 use Illuminate\Http\Request;
 use InvalidArgumentException;
@@ -45,6 +46,25 @@ class SearchController extends Controller
             return response()->json(['message' => $e->getMessage()], 400);
         }
 
+        return response()->json($results);
+    }
+
+    /**
+     * Search/filter archive
+     */
+    public function archive(Request $request)
+    {
+        $validated = $request->validate([
+            'q' => ['nullable', 'string'],
+            'year' => ['nullable', 'integer'],
+            'month' => ['nullable', 'string'],
+            'sort' => ['nullable', 'in:asc,desc'],
+            // Support year only and full date
+            'from' => ['nullable', 'regex:/^\d{4}(-\d{2}-\d{2})?$/'],
+            'to' => ['nullable', 'regex:/^\d{4}(-\d{2}-\d{2})?$/'],
+        ]);
+
+        $results = $this->searchService->searchArchives($validated);
         return response()->json($results);
     }
 }
