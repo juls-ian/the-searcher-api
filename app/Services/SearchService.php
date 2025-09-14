@@ -90,17 +90,9 @@ class SearchService
 
             $filters = [];
 
-            // Case 1: Year only 
-            if ($year) {
-                $filters[] = "year = $year";
-            }
 
-            // Case 2: Month only 
-            if ($month) {
-                $filters[] = "month = \"$month\""; # needs quotes since it's a string in Meilisearch
-            }
 
-            // Case 3: Year + Month - specific month in a year
+            // Case 1: Year + Month - specific month in a year
             if ($year && $month) {
 
                 // Convert month name to number if necessary
@@ -114,7 +106,8 @@ class SearchService
                 $end = date('Y-m-d', strtotime("$start +1 month")); # $start = "2025-09-01" → $end = "2025-10-01"
                 # builds the filter 
                 $filters[] = "archived_at >= $start AND archived_at < $end"; # archived_at >= 2025-09-01 AND archived_at < 2025-10-01
-            } // Case 4: Custom date range  
+            }
+            // Case 4: Custom date range  
             elseif ($from && $to) {
                 # interpret $from & $to as years if both are 4 digits 
                 if (strlen($from) === 4 && strlen($to) === 4) {
@@ -126,6 +119,14 @@ class SearchService
                     # fallback
                     $filters[] = "archived_at >= $from AND archived_at <= $to";
                 }
+            }
+            // Case 2: Year only 
+            elseif ($year) {
+                $filters[] = "year = $year";
+            }
+            // Case 3: Month only
+            elseif ($month) {
+                $filters[] = "month = \"$month\""; # needs quotes since it's a string in Meilisearch
             }
 
             /**
