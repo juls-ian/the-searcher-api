@@ -250,7 +250,7 @@ class User extends Authenticatable implements MustVerifyEmail
         // get first 3 letters of last name
         $lNamePrefix = strtoupper(substr($lastName, 0, 3));
 
-        $fNameInitial = strtoupper(substr($lastName, 0, 1));
+        $fNameInitial = strtoupper(substr($firstName, 0, 1));
 
         // find highest existing increment this year and name combination
         $pattern = $lNamePrefix . '-' . $year . '-' . $fNameInitial . '-' . '%';
