@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -25,12 +26,23 @@ class UserFactory extends Factory
     {
         $firstName = fake()->firstName();
         $lastName = fake()->lastName();
+        $baseEmail = strtolower($firstName . $lastName) . '@iskolarngbayan.pup.edu.ph';
+
+        $email = $baseEmail;
+        $counter = 1;
+
+        // Ensuring email uniqueness 
+        while (User::where('email', $email)->exists()) {
+            $email = strtolower($firstName . $lastName, $counter) . '@iskolarngbayan.pup.edu.ph';
+            $counter++;
+        };
+
         return [
             'first_name' => $firstName,
             'last_name' => $lastName,
             // 'full_name' => $firstName . ' ' . $lastName,
             'pen_name' => fake()->userName(),
-            'email' => fake()->unique()->safeEmail(),
+            'email' => $email,
             'year_level' => fake()->randomElement(['1st Year', '2nd Year', '3rd Year', '4th Year']),
             'course' => fake()->word(),
             'phone' => fake()->phoneNumber(),

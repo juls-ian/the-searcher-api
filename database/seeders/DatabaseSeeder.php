@@ -26,8 +26,8 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // User::factory(10)->create();
-
         // $this->call(ArticleCategorySeeder::class);
+
         ArticleCategory::factory()->createCompleteStructure();
         Issue::factory()->count(10)->create();
         Calendar::factory()->count(8)->create();
@@ -37,35 +37,35 @@ class DatabaseSeeder extends Seeder
             User::factory()->create([
                 'first_name' => 'Ian',
                 'last_name' => 'Valdez',
-                'email' => 'ian@email.com',
+                'email' => 'ianvaldez@iskolarngbayan.pup.edu.ph',
                 'role' => 'admin'
             ]),
 
             User::factory()->create([
                 'first_name' => 'Jean',
                 'last_name' => 'Grey',
-                'email' => 'jean@email.com',
+                'email' => 'jeangrey@iskolarngbayan.pup.edu.ph',
                 'role' => 'admin'
             ]),
 
             User::factory()->create([
                 'first_name' => 'Rod',
                 'last_name' => 'Bacason',
-                'email' => 'rod@email.com',
+                'email' => 'rodbacason@iskolarngbayan.pup.edu.ph',
                 'role' => 'staff'
             ]),
 
             User::factory()->create([
                 'first_name' => 'Scott',
                 'last_name' => 'Summers',
-                'email' => 'scott@email.com',
+                'email' => 'scottsummers@iskolarngbayan.pup.edu.ph',
                 'role' => 'editor'
             ]),
 
             User::factory()->create([
                 'first_name' => 'Steve',
                 'last_name' => 'Rogers',
-                'email' => 'steve@email.com',
+                'email' => 'steverogers@iskolarngbayan.pup.edu.ph',
                 'role' => 'editor'
             ]),
         ];
