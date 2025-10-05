@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Middleware\HandleExpiredTokens;
+use Illuminate\Auth\Middleware\EnsureEmailIsVerified;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -19,8 +21,36 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'check.expired.tokens' => HandleExpiredTokens::class
         ]);
-
     })
+
+    // For connecting to the frontend 
+    ->withMiddleware(function (Middleware $middleware) {
+        $middleware->api(prepend: [
+            EnsureFrontendRequestsAreStateful::class
+        ]);
+
+
+        /**
+         * To resolve CSRF token mismatch:
+         * Since we're using token-based auth 
+         * API routes won't need CSRF Protection with Token Auth 
+         * routes/web.php - For browser-based apps (uses CSRF protection)
+         * routes/api.php - For API endpoints (CSRF exempt by design)
+         */
+        // Only exclude API routes from CSRF verification, not web routes 
+        $middleware->validateCsrfTokens(except: [
+            'api/*' // All API routes are CSRF-exempt
+        ]);
+
+        // CRITICAL: Prevent redirects for unauthenticated API requests
+        $middleware->redirectGuestsTo(fn() => null);
+
+        // Ensure email is verified 
+        // $middleware->alias([
+        //     'verified' => EnsureEmailIsVerified::class
+        // ]);
+    })
+
     ->withExceptions(function (Exceptions $exceptions) {
         // Handler 1: Authorization Exceptions 
         $exceptions->render(function (AccessDeniedHttpException $e, Request $request) {
@@ -52,7 +82,4 @@ return Application::configure(basePath: dirname(__DIR__))
             // Non-API requests shall be handled by Laravel 
             return null;
         });
-
-
-
     })->create();

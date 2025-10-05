@@ -29,7 +29,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'login' => ['required', 'string'],
+            'emailOrId' => ['required', 'string'],
             'password' => ['required', 'string'],
             'remember' => ['nullable', 'boolean']
         ];
@@ -44,7 +44,7 @@ class LoginRequest extends FormRequest
 
         $this->ensureIsNotRateLimited();
 
-        $login = $this->input('login');
+        $login = $this->input('emailOrId');
         $password = $this->input('password');
 
         // Determine if login is email or staff id 
@@ -58,7 +58,7 @@ class LoginRequest extends FormRequest
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'login' => ['The credentials entered are incorrect']
+                'emailOrId' => ['The credentials entered are incorrect']
             ]);
         }
 
@@ -93,7 +93,7 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'login' => __('auth.throttle', [
+            'emailOrId' => __('auth.throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60)
             ])
@@ -106,9 +106,6 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey()
     {
-        return Str::transliterate(Str::lower($this->string('login')) . '|' . $this->ip());
+        return Str::transliterate(Str::lower($this->string('emailOrId')) . '|' . $this->ip());
     }
-
-
-
 }
