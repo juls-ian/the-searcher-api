@@ -2,6 +2,7 @@
 
 ## searchArchives()
 ### 1.0: full date range filter
+```php
     public function searchArchives(array $params)
     {
         $query = $params['q'] ?? '*';
@@ -36,7 +37,9 @@
 
         return $search->orderBy('archived_at', $sort)->paginate(10);
     }
+```
 ### 1.1: with additional conditions 
+```php
     public function searchArchives(array $params)
     {
         $search = Archive::search($query, function ($meilisearch, $query, $options) use ($year, $month, $from, $to) {
@@ -79,7 +82,9 @@
 
         return $search->orderBy('archived_at', $sort)->paginate(10);
     }
+```
 ### 1.2: year + month not working
+```php
     public function searchArchives(array $params)
     {
         $search = Archive::search($query, function ($meilisearch, $query, $options) use ($year, $month, $from, $to) {
@@ -123,7 +128,6 @@
                     $filters[] = "archived_at >= $from AND archived_at <= $to";
                 }
             }
-
             /**
              * takes ["year = 2024", "month = \"05\""] and implode turn it into a single string 
              * "year = 2024 AND month = \"05\""
@@ -133,7 +137,8 @@
             }
 
             return $meilisearch->search($query, $options);
-        });
+        })
 
         return $search->orderBy('archived_at', $sort)->paginate(10);
     }
+    ```

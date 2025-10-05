@@ -1,6 +1,7 @@
 # Scrapped codes in ArticleSeeder
 
 ## initial code
+```php
 class ArticleSeeder extends Seeder
 {
     /**
@@ -15,3 +16,4 @@ class ArticleSeeder extends Seeder
         });
     }
 }
+```

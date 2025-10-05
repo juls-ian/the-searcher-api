@@ -12,6 +12,7 @@
    - support_credentials => true
 5. config: postman
    - script: 
+  ```php
     - pm.sendRequest({
         url: 'http://localhost:8000/sanctum/csrf-cookie',
         method: "GET"

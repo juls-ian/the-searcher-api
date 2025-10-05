@@ -2,6 +2,7 @@
 *similar code applies to bulletin, calendar, and article category seeders
 
 # initial code 
+```php
 class IssueSeeder extends Seeder
 {
     /**
@@ -12,3 +13,4 @@ class IssueSeeder extends Seeder
         Issue::factory()->count(10)->create();
     }
 }
+```

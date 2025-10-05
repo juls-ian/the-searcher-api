@@ -1,6 +1,7 @@
 # Scrapped codes in MultimediaSeeder
 
 ## initial code
+```php
 class MultimediaSeeder extends Seeder
 {
     /**
@@ -17,3 +18,4 @@ class MultimediaSeeder extends Seeder
             });
     }
 }
+```

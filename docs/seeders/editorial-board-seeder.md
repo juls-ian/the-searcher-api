@@ -1,6 +1,7 @@
 # Scrapped codes in EditorialBoardSeeder
 
 ## initial code
+```php
 class EditorialBoardSeeder extends Seeder
 {
     /**
@@ -31,3 +32,4 @@ class EditorialBoardSeeder extends Seeder
         }
     }
 }
+```

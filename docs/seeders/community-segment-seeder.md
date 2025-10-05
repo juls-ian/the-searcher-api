@@ -1,6 +1,7 @@
 # Scrapped codes in CommunitySegmentSeeder
 
 ## initial code
+```php 
 class CommunitySegmentSeeder extends Seeder
 {
     /**
@@ -73,3 +74,4 @@ class CommunitySegmentSeeder extends Seeder
         }
     }
 }
+```

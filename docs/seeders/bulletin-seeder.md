@@ -1,6 +1,7 @@
 # Scrapped codes in BulletinSeeder
 
 ## initial code
+```php
 class BulletinSeeder extends Seeder
 {
     /**
@@ -15,3 +16,4 @@ class BulletinSeeder extends Seeder
         });
     }
 }
+```

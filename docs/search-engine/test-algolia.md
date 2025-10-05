@@ -1,5 +1,5 @@
 # Removed code for testing
-
+```php
 <?php
 
 require_once 'vendor/autoload.php';
@@ -20,3 +20,4 @@ try {
     echo "❌ Connection failed: " . $e->getMessage() . "\n";
     echo "Error type: " . get_class($e) . "\n";
 }
+```

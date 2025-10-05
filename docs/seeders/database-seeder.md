@@ -1,6 +1,7 @@
 # Scrapped codes in DatabaseSeeder
 
 ## Initial code
+```php
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
@@ -19,3 +20,4 @@ class DatabaseSeeder extends Seeder
         ]);
     }
 }
+```

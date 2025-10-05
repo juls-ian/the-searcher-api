@@ -1,6 +1,7 @@
 # Scrapped codes from UserSeeder
 
 ## initial code
+```php
 class UserSeeder extends Seeder
 {
     /**
@@ -47,3 +48,4 @@ class UserSeeder extends Seeder
         User::factory(6)->create();
     }
 }
+```
