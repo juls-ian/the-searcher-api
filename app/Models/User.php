@@ -76,7 +76,15 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Relationship to EditorialBoard 
+     * Relationship to BoardPosition
+     */
+    public function boardPosition()
+    {
+        return $this->hasMany(BoardPosition::class);
+    }
+
+    /**
+     * Relationship to EditorialBoard
      */
     public function editorialBoards()
     {
@@ -154,7 +162,7 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Relationships to Multimedia 
+     * Relationships to Multimedia
      */
     public function multimediaContributions()
     {
@@ -172,7 +180,7 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Relationships to Bulletin 
+     * Relationships to Bulletin
      */
     public function writtenBulletin()
     {
@@ -190,7 +198,7 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Relationship to Issues 
+     * Relationship to Issues
      */
     public function publishedIssue()
     {
@@ -210,7 +218,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Register ResetPassword notification in the model
-     * 
+     *
      */
     public function sendPasswordResetNotification($token)
     {
@@ -218,7 +226,7 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Getting all contributions 
+     * Getting all contributions
      * @return Article
      */
     public function allContributions()
@@ -239,12 +247,12 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Generating Staff Id 
+     * Generating Staff Id
      * Format: [first 3 letters of surname]-[joining year]-[fName 1st letter]-[4 digit increment]
      */
     public static function generateStaffId($firstName, $lastName, $joiningDate = null)
     {
-        // current year if joining date not provided 
+        // current year if joining date not provided
         $year = $joiningDate ? Carbon::parse($joiningDate)->year : Carbon::now()->year;
 
         // get first 3 letters of last name
@@ -263,7 +271,7 @@ class User extends Authenticatable implements MustVerifyEmail
         $increment = 1;
 
         if ($latestUser) {
-            // extracting the last 4 digits and increment 
+            // extracting the last 4 digits and increment
             $lastStaffId = $latestUser->staff_id;
             $lastIncrement = (int) substr($lastStaffId, -4);
             $increment = $lastIncrement + 1;
@@ -271,7 +279,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
         /**
          * Formatting increment as 4-digit number with leading zeros
-         * $increment = 1 
+         * $increment = 1
          * result: 0001
          */
         $incrementFormat = str_pad($increment, 4, '0', STR_PAD_LEFT);
@@ -282,7 +290,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
 
     /**
-     * Auto-generate the id with Boot method when creating user 
+     * Auto-generate the id with Boot method when creating user
      */
     protected static function boot()
     {

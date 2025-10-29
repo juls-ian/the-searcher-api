@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\BoardPosition;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -31,7 +32,7 @@ class UserFactory extends Factory
         $email = $baseEmail;
         $counter = 1;
 
-        // Ensuring email uniqueness 
+        // Ensuring email uniqueness
         while (User::where('email', $email)->exists()) {
             $email = strtolower($firstName . $lastName, $counter) . '@iskolarngbayan.pup.edu.ph';
             $counter++;
@@ -46,7 +47,7 @@ class UserFactory extends Factory
             'year_level' => fake()->randomElement(['1st Year', '2nd Year', '3rd Year', '4th Year']),
             'course' => fake()->word(),
             'phone' => fake()->phoneNumber(),
-            'board_position' => fake()->jobTitle(),
+            'board_position_id' => BoardPosition::inRandomOrder()->value('id'),
             'role' => fake()->randomElement(['admin', 'editor', 'staff']),
             // 'term' => fake()->word(),
             'status' => fake()->randomElement(['active', 'inactive', 'alumni']),

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\BoardPosition;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -23,7 +24,6 @@ return new class extends Migration {
             $table->string('year_level');
             $table->string('course');
             $table->string('phone');
-            $table->string('board_position');
             $table->enum('role', ['admin', 'editor', 'staff'])->default('staff');
             $table->enum('status', ['active', 'inactive', 'alumni'])->default('active');
             $table->date('joined_at');
@@ -36,7 +36,7 @@ return new class extends Migration {
             $table->softDeletes(); // soft delete feature deleted_at column
 
             /**
-             * needs to dropped for normalization 
+             * needs to dropped for normalization
              * 'term' will be present in the ed board table instead
              */
             // $table->string('term');

@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Article;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\ArticleCategory;
+use App\Models\BoardPosition;
 use App\Models\Bulletin;
 use App\Models\Calendar;
 use App\Models\CommunitySegment;
@@ -25,8 +26,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-        // $this->call(ArticleCategorySeeder::class);
+        $this->call(BoardPositionSeeder::class); // must run first before seeder
 
         ArticleCategory::factory()->createCompleteStructure();
         Issue::factory()->count(10)->create();
@@ -72,14 +72,29 @@ class DatabaseSeeder extends Seeder
 
         foreach ($users as $user) {
 
-            // At least one current active term for each user 
+            // Get all positions
+            $positions = BoardPosition::all();
+
+            // Pick based on role
+            $boardPosition = match ($user->role) {
+                'admin' => $positions->where('category', 'executive')->random(),
+                'editor' => $positions->whereIn('category', ['writers (editor)', 'artists (editor)'])->random(),
+                default => $positions->whereIn('category', ['writers (staff)', 'artists (staff)'])->random(),
+            };
+
+            // Assigning board position
+            $user->update([
+                'board_position_id' => $boardPosition->id,
+            ]);
+
+            // At least one current active term for each user
             EditorialBoard::factory()->create([
                 'user_id' => $user->id,
                 'term' => '2025-2026',
                 'is_current' => true
             ]);
 
-            // Optional: additional 1-2 previous terms 
+            // Optional: additional 1-2 previous terms
             $additionalTerms = rand(0, 2);
             for ($i = 0; $i < $additionalTerms; $i++) {
                 $startYear = 2020 + $i;
@@ -101,6 +116,7 @@ class DatabaseSeeder extends Seeder
                 'writer_id' => $user->id
             ]);
 
+
             // Multimedia::factory(3)->create([
             //     'multimedia_artist_id' => $user->id
             // ]);
@@ -114,7 +130,7 @@ class DatabaseSeeder extends Seeder
                 $multimedia->multimediaArtists()->attach($users);
             });
 
-        // Seeding community segments 
+        // Seeding community segments
         $this->seedCommunitySegments($users);
     }
 
@@ -134,7 +150,7 @@ class DatabaseSeeder extends Seeder
                     'title' => 'Existing Series: ' . fake()->sentence(3)
                 ]);
 
-            // Article segments within a series 
+            // Article segments within a series
             CommunitySegment::factory(2)
                 ->article()
                 ->inSeries($parentSeries)
@@ -147,7 +163,7 @@ class DatabaseSeeder extends Seeder
                 ]);
 
 
-            // Article segments in new series 
+            // Article segments in new series
             CommunitySegment::factory(3)
                 ->article()
                 ->inNewSeries()
@@ -159,7 +175,7 @@ class DatabaseSeeder extends Seeder
                     'cover_artist_id' => $user->id
                 ]);
 
-            // Standalone article segments 
+            // Standalone article segments
             CommunitySegment::factory(2)
                 ->article()
                 ->standalone()
@@ -172,7 +188,7 @@ class DatabaseSeeder extends Seeder
                 ]);
 
 
-            // Poll  segments 
+            // Poll  segments
             CommunitySegment::factory(3)
                 ->poll()
                 ->afterCreating(function (CommunitySegment $segment) {
