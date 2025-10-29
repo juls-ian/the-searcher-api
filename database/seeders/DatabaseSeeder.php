@@ -6,7 +6,6 @@ use App\Http\Resources\SegmentArticleResource;
 use App\Models\Archive;
 use App\Models\User;
 use App\Models\Article;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\ArticleCategory;
 use App\Models\BoardPosition;
 use App\Models\Bulletin;
@@ -26,7 +25,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call(BoardPositionSeeder::class); // must run first before seeder
+        BoardPosition::factory()->createDefaultPositions();
+        // $this->call(BoardPositionSeeder::class); // must run first before seeder
 
         ArticleCategory::factory()->createCompleteStructure();
         Issue::factory()->count(10)->create();
@@ -123,7 +123,7 @@ class DatabaseSeeder extends Seeder
         }
 
         Multimedia::factory()
-            ->count(10)
+            ->count(2)
             ->create()
             ->each(function ($multimedia) {
                 $users = User::inRandomOrder()->take(rand(1, 3))->get();
@@ -164,7 +164,7 @@ class DatabaseSeeder extends Seeder
 
 
             // Article segments in new series
-            CommunitySegment::factory(3)
+            CommunitySegment::factory(2)
                 ->article()
                 ->inNewSeries()
                 ->afterCreating(function (CommunitySegment $segment) {
@@ -189,7 +189,7 @@ class DatabaseSeeder extends Seeder
 
 
             // Poll  segments
-            CommunitySegment::factory(3)
+            CommunitySegment::factory(2)
                 ->poll()
                 ->afterCreating(function (CommunitySegment $segment) {
                     SegmentsPoll::factory()->forSegment($segment)->create();

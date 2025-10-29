@@ -21,3 +21,25 @@ class DatabaseSeeder extends Seeder
     }
 }
 ```
+
+## seeding positions 
+### 1.0: using board position seeder instead of factory
+```php
+public function run(): void
+{
+    $this->call(BoardPositionSeeder::class); // must run first before seeder
+
+    foreach ($users as $user) 
+        // Get all positions
+        $positions = BoardPosition::all()
+        // Pick based on role
+        $boardPosition = match ($user->role) {
+            'admin' => $positions->where('category', 'executive')->random(),
+            'editor' => $positions->whereIn('category', ['writers (editor)', 'artists (editor)'])->random(),
+            default => $positions->whereIn('category', ['writers (staff)', 'artists (staff)'])->random(),
+        }
+        // Assigning board position
+        $user->update([
+            'board_position_id' => $boardPosition->id,
+        ]);
+    }

@@ -1,35 +1,23 @@
-# Unused factory
+# Unused factory 
 
+## base factory
+### 1.0: before moving these out to board position factory
+```php
 <?php
 
-namespace Database\Factories;
+namespace Database\Seeders;
 
 use Illuminate\Support\Str;
 use App\Models\BoardPosition;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Seeder;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\BoardPosition>
- */
-class BoardPositionFactory extends Factory
+class BoardPositionSeeder extends Seeder
 {
     /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
+     * Run the database seeds.
      */
-    public function definition(): array
-    {
-        return [
-            'name' =>  'Placeholder',
-            'category' => 'uncategorized'
-        ];
-    }
-
-    /**
-     * Seeds the database with only the fixed board positions.
-     */
-    public function createDefaultPositions(): void
+    public function run(): void
     {
         $positions = [
             // Executives
@@ -62,22 +50,22 @@ class BoardPositionFactory extends Factory
             'Photojournalist',
         ];
 
-        // Clear existing to prevent duplicates (optional but safe)
-        BoardPosition::truncate();
+        foreach ($positions as $index => $name) {
+            $category = $this->determineCategory($name);
 
-        foreach ($positions as $name) {
             BoardPosition::create([
-                'name' => $name,
-                'category' => $this->determineCategory($name),
+                'name' => $name, // field name
+                'category' => $category // field category
             ]);
         }
     }
 
     /**
-     * Determine category automatically based on position name.
+     * Detect category from position name
      */
-    private function determineCategory(string $name): string
+    private function determineCategory(string $name)
     {
+
         $name = Str::lower($name);
 
         // Executives
@@ -130,6 +118,9 @@ class BoardPositionFactory extends Factory
             return 'artists (staff)';
         }
 
+        // Fallback
+        logger("Uncategorized position detected: {$name}");
         return 'uncategorized';
     }
 }
+```
