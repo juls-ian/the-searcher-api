@@ -16,6 +16,7 @@ use App\Models\Issue;
 use App\Models\Multimedia;
 use App\Models\SegmentsArticle;
 use App\Models\SegmentsPoll;
+use Database\Factories\BoardPositionFactory;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -25,7 +26,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        BoardPosition::factory()->createDefaultPositions();
+        (new BoardPositionFactory())->createDefaultPositions();
         // $this->call(BoardPositionSeeder::class); // must run first before seeder
 
         ArticleCategory::factory()->createCompleteStructure();

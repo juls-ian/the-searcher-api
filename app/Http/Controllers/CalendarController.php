@@ -43,6 +43,7 @@ class CalendarController extends Controller
      */
     public function show(Calendar $calendar)
     {
+        $this->authorize('view', $calendar);
         return CalendarResource::make($calendar);
     }
 

@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
 }
 ```
 
-## seeding positions 
+## seeding board position 
 ### 1.0: using board position seeder instead of factory
 ```php
 public function run(): void
@@ -42,4 +42,29 @@ public function run(): void
         $user->update([
             'board_position_id' => $boardPosition->id,
         ]);
+        // existing codes
     }
+```
+### 1.1: using the factory instance
+```php
+public function run(): void
+{
+    BoardPosition::factory()->createDefaultPositions();
+
+    foreach ($users as $user) 
+        // Get all positions
+        $positions = BoardPosition::all()
+        // Pick based on role
+        $boardPosition = match ($user->role) {
+            'admin' => $positions->where('category', 'executive')->random(),
+            'editor' => $positions->whereIn('category', ['writers (editor)', 'artists (editor)'])->random(),
+            default => $positions->whereIn('category', ['writers (staff)', 'artists (staff)'])->random(),
+        }
+        // Assigning board position
+        $user->update([
+            'board_position_id' => $boardPosition->id,
+        ]);
+
+        // existing codes
+    }
+```

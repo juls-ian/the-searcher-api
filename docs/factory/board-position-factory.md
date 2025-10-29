@@ -1,3 +1,7 @@
+# Unused factory 
+
+## before moving the logic to the BoardPosition model 
+```php 
 <?php
 
 namespace Database\Factories;
@@ -66,8 +70,69 @@ class BoardPositionFactory extends Factory
         foreach ($positions as $name) {
             BoardPosition::create([
                 'name' => $name,
-                'category' => BoardPosition::determineCategory($name),
+                'category' => $this->determineCategory($name),
             ]);
         }
     }
+
+    /**
+     * Determine category automatically based on position name.
+     */
+    private function determineCategory(string $name): string
+    {
+        $name = Str::lower($name);
+
+        // Executives
+        if (Str::contains($name, [
+            'editor-in-chief',
+            'managing editor',
+            'associate editor',
+            'assoc. managing editor',
+            'circulation manager',
+        ])) {
+            return 'executive';
+        }
+
+        // Writers (Editor)
+        if (Str::contains($name, [
+            'copy editor',
+            'news editor',
+            'feature editor',
+            'literary editor',
+            'community editor',
+            'sports editor',
+        ])) {
+            return 'writers (editor)';
+        }
+
+        // Artists (Editor)
+        if (Str::contains($name, [
+            'head artist',
+            'head graphics',
+            'head photojournalist',
+        ])) {
+            return 'artists (editor)';
+        }
+
+        // Writers (Staff)
+        if (Str::contains($name, [
+            'writer',
+            'reporter',
+        ])) {
+            return 'writers (staff)';
+        }
+
+        // Artists (Staff)
+        if (Str::contains($name, [
+            'artist',
+            'layout',
+            'photojournalist',
+            'illustrator',
+        ])) {
+            return 'artists (staff)';
+        }
+
+        return 'uncategorized';
+    }
 }
+```
