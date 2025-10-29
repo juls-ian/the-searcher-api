@@ -250,6 +250,17 @@ Initiate **php artisan install:api**
 4. implement slug generation and register it in the AppServiceProvider
 5. define in the api routes
 
+## BoardPosition 
+a last minute addition 
+
+1. php artisan make:model BoardPosition -a
+2. work the relationship between the User and BoardPosition 
+3. revise the existing user's 'board_position' column 
+4. add migration to add board position id foreign key into the user table 
+5. make a BoardPositionSeeder 
+6. use it in the DatabaseSeeder and assign each user a board_position
+
+
 ## Search Feature
 
 ### Dependencies Overview 

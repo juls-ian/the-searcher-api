@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,13 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('editorial_boards', function (Blueprint $table) {
+        Schema::create('board_positions', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class)
-                ->constrained('users')
-                ->onDelete('cascade');
-            $table->string('term');
-            $table->boolean('is_current')->default('false');
+            $table->string('name')->unique();
+            $table->string('category');
             $table->timestamps();
         });
     }
@@ -28,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('editorial_boards');
+        Schema::dropIfExists('board_positions');
     }
 };
