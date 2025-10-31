@@ -10,7 +10,8 @@ However, for future developments or when working when a team migration like this
 - Modifying it won't affect your current database
 - It could cause issues when deploying to other environments 
 
-
+## Code 
+```php 
 <?php
 
 use App\Models\User;
@@ -47,3 +48,4 @@ return new class extends Migration
         });
     }
 };
+```

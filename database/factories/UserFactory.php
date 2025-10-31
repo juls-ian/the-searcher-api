@@ -47,7 +47,7 @@ class UserFactory extends Factory
             'year_level' => fake()->randomElement(['1st Year', '2nd Year', '3rd Year', '4th Year']),
             'course' => fake()->word(),
             'phone' => fake()->phoneNumber(),
-            'board_position_id' => BoardPosition::inRandomOrder()->value('id'),
+            // 'board_position_id' => BoardPosition::inRandomOrder()->value('id'), -- removed due to pivot table
             'role' => fake()->randomElement(['admin', 'editor', 'staff']),
             // 'term' => fake()->word(),
             'status' => fake()->randomElement(['active', 'inactive', 'alumni']),

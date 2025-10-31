@@ -83,10 +83,8 @@ class DatabaseSeeder extends Seeder
                 default => $positions->whereIn('category', ['writers (staff)', 'artists (staff)'])->random(),
             };
 
-            // Assigning board position
-            $user->update([
-                'board_position_id' => $boardPosition->id,
-            ]);
+            // Attaching board position
+            $user->boardPositions()->attach($boardPosition->id);
 
             // At least one current active term for each user
             EditorialBoard::factory()->create([

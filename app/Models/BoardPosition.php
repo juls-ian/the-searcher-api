@@ -18,7 +18,7 @@ class BoardPosition extends Model
 
     public function users()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsToMany(User::class);
     }
 
     public static function booted()
@@ -74,7 +74,8 @@ class BoardPosition extends Model
         // Writers (Staff)
         if (Str::contains($name, [
             'writer',
-            'reporter',
+            'junior writer',
+            'senior writer'
         ])) {
             return 'writers (staff)';
         }
@@ -82,9 +83,12 @@ class BoardPosition extends Model
         // Artists (Staff)
         if (Str::contains($name, [
             'artist',
-            'layout',
+            'graphics and layout artist',
+            'graphics & layout artist',
             'photojournalist',
-            'illustrator',
+            'senior artist',
+            'junior photojournalist',
+            'senior photojournalist'
         ])) {
             return 'artists (staff)';
         }

@@ -78,9 +78,9 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Relationship to BoardPosition
      */
-    public function boardPosition()
+    public function boardPositions()
     {
-        return $this->hasMany(BoardPosition::class);
+        return $this->belongsToMany(BoardPosition::class);
     }
 
     /**
