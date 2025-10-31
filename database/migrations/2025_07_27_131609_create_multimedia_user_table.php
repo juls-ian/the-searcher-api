@@ -11,14 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Pivot table for many to many relationship
         Schema::create('multimedia_user', function (Blueprint $table) {
             $table->id();
             $table->foreignId('multimedia_id')
-            ->constrained()
-            ->onDelete('cascade');
+                ->constrained()
+                ->onDelete('cascade');
             $table->foreignId('user_id')
-            ->constrained()
-            ->onDelete('cascade');
+                ->constrained()
+                ->onDelete('cascade');
             $table->timestamps();
             $table->unique(['multimedia_id', 'user_id']);
         });
