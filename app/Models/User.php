@@ -83,6 +83,15 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsToMany(BoardPosition::class);
     }
 
+    // Helper to get the current positions
+    public function currentBoardPositions()
+    {
+        return $this->editorialBoards()
+            ->where('is_current', true)
+            ->with('boardPositions');
+    }
+
+
     /**
      * Relationship to EditorialBoard
      */

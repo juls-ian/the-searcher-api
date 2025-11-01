@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\BoardPosition;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,10 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->foreignIdFor(BoardPosition::class)
-                ->constrained('board_positions') // must be pluralized
+        Schema::table('editorial_boards', function (Blueprint $table) {
+            $table->foreignId('board_position_id')
+                ->after('user_id')
+                ->constrained()
                 ->onDelete('cascade');
+
+            // A user can hold the same position only once per term
+            $table->unique(['user_id', 'board_position_id', 'term']);
         });
     }
 
@@ -24,10 +27,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            // Drop the foreign key constraint first
+        Schema::table('editorial_boards', function (Blueprint $table) {
             $table->dropForeign(['board_position_id']);
-            // Then drop the column
+            $table->dropUnique(['user_id', 'board_position_id', 'term']);
             $table->dropColumn('board_position_id');
         });
     }

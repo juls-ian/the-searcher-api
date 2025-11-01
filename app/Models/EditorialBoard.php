@@ -11,8 +11,8 @@ class EditorialBoard extends Model
 {
     use HasFactory, Searchable;
     protected $fillable = [
-        'user_id',
         'term',
+        'board_position_id',
         'is_current'
     ];
 
@@ -29,10 +29,15 @@ class EditorialBoard extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function boardPosition()
+    {
+        return $this->belongsTo(BoardPosition::class);
+    }
+
     // Computed attribute 1: is this term current based on year?
     public function getIsAutomaticallyCurrentAttribute()
     {
-        // Term format "2025-2026" 
+        // Term format "2025-2026"
         [$startYear, $endYear] = explode('-', $this->term);
 
         $currentYear = now()->year;
