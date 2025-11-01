@@ -78,22 +78,24 @@ class DatabaseSeeder extends Seeder
             // Get all positions
             $positions = BoardPosition::all();
 
+            $positionCount = (rand(1, 10) <= 2) ? 2 : 1;  // 20% get 2 positions
+
             // Pick based on role
-            $boardPosition = match ($user->role) {
-                'admin' => $positions->where('category', 'executive')->random(),
-                'editor' => $positions->whereIn('category', ['writers (editor)', 'artists (editor)'])->random(),
-                default => $positions->whereIn('category', ['writers (staff)', 'artists (staff)'])->random(),
+            $selectedPositions = match ($user->role) {
+                'admin' => $positions->where('category', 'executive')->random($positionCount),
+                'editor' => $positions->whereIn('category', ['writers (editor)', 'artists (editor)'])->random($positionCount),
+                default => $positions->whereIn('category', ['writers (staff)', 'artists (staff)'])->random($positionCount),
             };
 
-            // Attaching board position
-            $user->boardPositions()->attach($boardPosition->id);
 
-            // At least one current active term for each user
-            EditorialBoard::factory()->create([
-                'user_id' => $user->id,
-                'term' => '2025-2026',
-                'is_current' => true
-            ]);
+            // Create current term entry for each position
+            foreach ($selectedPositions as $position) {
+                $user->editorialBoards()->create([
+                    'term' => '2025-2026',
+                    'board_position_id' => $position->id,
+                    'is_current' => true
+                ]);
+            }
 
             // Optional: additional 1-2 previous terms
             $additionalTerms = rand(0, 2);
@@ -101,26 +103,15 @@ class DatabaseSeeder extends Seeder
                 $startYear = 2020 + $i;
                 $endYear = $startYear + 1;
 
+                // Pick a random position for historical term
+                $historicalPosition = $positions->random();
+
                 EditorialBoard::factory()->create([
-                    'user_id' => $user->id,
                     'term' => "{$startYear}-{$endYear}",
+                    'board_position_id' => $historicalPosition->id,
                     'is_current' => false
                 ]);
             }
-
-
-            // Article::factory()->create([
-            //     'writer_id' => $user->id
-            // ]);
-
-            // Bulletin::factory()->create([
-            //     'writer_id' => $user->id
-            // ]);
-
-
-            // Multimedia::factory(3)->create([
-            //     'multimedia_artist_id' => $user->id
-            // ]);
         }
 
         $existingUserIds = User::pluck('id')->toArray(); // reuse existing users
