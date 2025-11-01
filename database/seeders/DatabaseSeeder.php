@@ -30,9 +30,11 @@ class DatabaseSeeder extends Seeder
         // $this->call(BoardPositionSeeder::class); // must run first before seeder
 
         ArticleCategory::factory()->createCompleteStructure();
-        Issue::factory()->count(10)->create();
-        Calendar::factory()->count(8)->create();
-        Archive::factory()->count(30)->create();
+        Issue::factory()->count(1)->create();
+        Calendar::factory()->count(1)->create();
+        Archive::factory()->count(1)->create();
+        Article::factory()->count(1)->create();
+        Bulletin::factory()->count(1)->create();
 
         $users = [
             User::factory()->create([
@@ -107,13 +109,13 @@ class DatabaseSeeder extends Seeder
             }
 
 
-            Article::factory(2)->create([
-                'writer_id' => $user->id
-            ]);
+            // Article::factory()->create([
+            //     'writer_id' => $user->id
+            // ]);
 
-            Bulletin::factory(2)->create([
-                'writer_id' => $user->id
-            ]);
+            // Bulletin::factory()->create([
+            //     'writer_id' => $user->id
+            // ]);
 
 
             // Multimedia::factory(3)->create([
@@ -121,9 +123,17 @@ class DatabaseSeeder extends Seeder
             // ]);
         }
 
+        $existingUserIds = User::pluck('id')->toArray(); // reuse existing users
+
         Multimedia::factory()
-            ->count(2)
-            ->create()
+            ->count(5)
+            ->create(
+                [
+                    'thumbnail_artist_id' => fake()->randomElement($existingUserIds),
+                    'publisher_id' => fake()->randomElement($existingUserIds)
+                ]
+            )
+            // Attach multimedia artists on pivot table
             ->each(function ($multimedia) {
                 $users = User::inRandomOrder()->take(rand(1, 3))->get();
                 $multimedia->multimediaArtists()->attach($users);
@@ -150,7 +160,7 @@ class DatabaseSeeder extends Seeder
                 ]);
 
             // Article segments within a series
-            CommunitySegment::factory(2)
+            CommunitySegment::factory()
                 ->article()
                 ->inSeries($parentSeries)
                 ->afterCreating(function (CommunitySegment $segment) {
@@ -163,7 +173,7 @@ class DatabaseSeeder extends Seeder
 
 
             // Article segments in new series
-            CommunitySegment::factory(2)
+            CommunitySegment::factory()
                 ->article()
                 ->inNewSeries()
                 ->afterCreating(function (CommunitySegment $segment) {
@@ -175,7 +185,7 @@ class DatabaseSeeder extends Seeder
                 ]);
 
             // Standalone article segments
-            CommunitySegment::factory(2)
+            CommunitySegment::factory()
                 ->article()
                 ->standalone()
                 ->afterCreating(function (CommunitySegment $segment) {
@@ -188,7 +198,7 @@ class DatabaseSeeder extends Seeder
 
 
             // Poll  segments
-            CommunitySegment::factory(2)
+            CommunitySegment::factory()
                 ->poll()
                 ->afterCreating(function (CommunitySegment $segment) {
                     SegmentsPoll::factory()->forSegment($segment)->create();

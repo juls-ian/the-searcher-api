@@ -28,10 +28,10 @@ class MultimediaFactory extends Factory
             'published_at' => fake()->dateTimeBetween('-1 year', 'now'),
             'files' => fake()->imageUrl(300, 400, 'feature'),
             'files_credit_type' => fake()->randomElement(['photo', 'graphics', 'illustration', 'video']),
-            // 'multimedia_artists_id' => User::factory(),
+            // 'multimedia_artists_id' => User::factory(), -- removed due to pivot table
             'thumbnail' => fake()->imageUrl(300, 400, 'feature'),
-            'thumbnail_artist_id' => User::factory(),
-            'publisher_id' => User::factory()
+            'thumbnail_artist_id' => null,
+            'publisher_id' => null
         ];
     }
 }
