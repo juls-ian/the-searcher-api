@@ -34,7 +34,7 @@ class UserFactory extends Factory
 
         // Ensuring email uniqueness
         while (User::where('email', $email)->exists()) {
-            $email = strtolower($firstName . $lastName, $counter) . '@iskolarngbayan.pup.edu.ph';
+            $email = strtolower($firstName . $lastName . $counter) . '@iskolarngbayan.pup.edu.ph';
             $counter++;
         };
 
