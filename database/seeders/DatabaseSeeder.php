@@ -30,11 +30,11 @@ class DatabaseSeeder extends Seeder
         // $this->call(BoardPositionSeeder::class); // must run first before seeder
 
         ArticleCategory::factory()->createCompleteStructure();
-        Issue::factory()->count(1)->create();
-        Calendar::factory()->count(1)->create();
-        Archive::factory()->count(1)->create();
-        Article::factory()->count(1)->create();
-        Bulletin::factory()->count(1)->create();
+        Issue::factory()->count(5)->create();
+        Calendar::factory()->count(5)->create();
+        Archive::factory()->count(5)->create();
+        Article::factory()->count(5)->create();
+        Bulletin::factory()->count(5)->create();
 
         $users = [
             User::factory()->create([

@@ -32,7 +32,7 @@ class ArchiveFactory extends Factory
             'slug' => Str::slug($title),
             'data' => fn(array $attributes) => $this->generateDataByType($attributes['archivable_type']),
             'archived_at' => $this->faker->dateTimeBetween('-2 years', 'now'),
-            'archiver_id' => User::factory(),
+            'archiver_id' => User::inRandomOrder()->first()?->id ?? User::factory(),
         ];
     }
 

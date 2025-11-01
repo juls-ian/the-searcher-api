@@ -33,7 +33,7 @@ class IssueFactory extends Factory
             'contributors' => $this->faker->words(3),
             'file' => 'issues/' . $this->faker->uuid . '.pdf',
             'thumbnail' => 'thumbnails/' . $this->faker->uuid . '.jpg',
-            'publisher_id' => User::factory()
+            'publisher_id' => User::inRandomOrder()->first()?->id ?? User::factory() // use random existing user, else create new user
         ];
     }
 }

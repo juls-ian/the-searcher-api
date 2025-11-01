@@ -45,19 +45,27 @@ class BoardPositionFactory extends Factory
             'Literary Editor',
             'Community Editor',
             'Sports Editor',
+            'Opinion Editor',
 
             // Artists (Editor)
             'Head Artist',
             'Head Graphics and Layout Artist',
             'Head Photojournalist',
+            'Head Videographer',
+            'Chief Illustrator',
+            'Chief Media Artist',
 
             // Writers (Staff)
             'Staff Writer',
-            'Staff Reporter',
 
             // Artists (Staff)
             'Graphics and Layout Artist',
             'Photojournalist',
+            'Senior Illustrator',
+            'Senior Photojournalist',
+            'Senior Media Artist',
+
+
         ];
 
         // Delete all existing records before creating new ones

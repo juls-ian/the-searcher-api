@@ -25,11 +25,11 @@ class BulletinFactory extends Factory
             'slug' => Str::slug($title),
             'published_at' => fake()->dateTimeBetween('-1 year', 'now'),
             'category' => fake()->randomElement(['advisory', 'announcement']),
-            'writer_id' => User::factory(),
+            'writer_id' => User::inRandomOrder()->first()?->id ?? User::factory(),
             'details' => fake()->paragraph(),
             'cover_photo' => fake()->imageUrl('300', '200', 'nature'),
-            'cover_artist_id' => User::factory(),
-            'publisher_id' => User::factory()
+            'cover_artist_id' => User::inRandomOrder()->first()?->id ?? User::factory(),
+            'publisher_id' => User::inRandomOrder()->first()?->id ?? User::factory()
         ];
     }
 }

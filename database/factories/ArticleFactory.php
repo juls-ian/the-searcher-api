@@ -27,7 +27,7 @@ class ArticleFactory extends Factory
             'title' => $title,
             'slug' => Str::slug($title),
             'article_category_id' => ArticleCategory::inRandomOrder()->first()->id, // assign to existing category
-            'writer_id' => User::factory(),
+            'writer_id' => User::inRandomOrder()->first()?->id ??  User::factory(),  // use random existing user, else create new user
             'body' => fake()->paragraphs(rand(3, 8), true),
             'published_at' => fake()->dateTimeBetween('-1 year', 'now'),
             'is_live' => fake()->boolean(30), // 30% chance of being live
@@ -37,15 +37,15 @@ class ArticleFactory extends Factory
             'cover_photo' => fake()->imageUrl(800, 600, 'news'),
             // 'cover_photo' => UploadedFile::fake()->image('cover.jpg', 800, 600),
             'cover_caption' => fake()->optional(0.9)->sentence(),
-            'cover_artist_id' => User::factory(),
+            'cover_artist_id' => User::inRandomOrder()->first()?->id ??  User::factory(),
             'cover_credit_type' => fake()->randomElement(['photo', 'graphics', 'illustration']),
             'thumbnail' => fake()->imageUrl(300, 200, 'news'),
             // 'thumbnail' => UploadedFile::fake()->image('thumbnail.jpg', 800, 600),
-            'thumbnail_artist_id' => User::factory(),
+            'thumbnail_artist_id' => User::inRandomOrder()->first()?->id ??  User::factory(),
             // 'archived_at' => fake()->optional(0.2)->dateTimeBetween('-1 year', 'now'),
             'add_to_ticker' => fake()->boolean(10),
             'ticker_expires_at' => fake()->dateTimeBetween('now', '1 week'),
-            'publisher_id' => User::factory()
+            'publisher_id' => User::inRandomOrder()->first()?->id ??  User::factory()
 
         ];
     }
