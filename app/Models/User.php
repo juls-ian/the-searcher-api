@@ -80,7 +80,9 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function boardPositions()
     {
-        return $this->belongsToMany(BoardPosition::class);
+        return $this->belongsToMany(BoardPosition::class, 'editorial_boards') // intermediate tbl
+            ->withPivot('term', 'is_current') // columns from intermediate tbl
+            ->withTimestamps();     // timestamp columns from intermediate tbl
     }
 
     // Helper to get the current positions
@@ -88,7 +90,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->editorialBoards()
             ->where('is_current', true)
-            ->with('boardPositions');
+            ->with('boardPosition'); // relation to EditorialBoard model
     }
 
 

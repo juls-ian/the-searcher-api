@@ -18,7 +18,10 @@ class BoardPosition extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class);
+        return $this->belongsToMany(User::class, 'editorial_boards') // intermediate tbl
+            ->withPivot('term', 'is_current') // columns from intermediate tbl
+            ->withTimestamps() // timestamp columns from intermediate tbl
+        ;
     }
 
     public static function booted()
@@ -46,6 +49,9 @@ class BoardPosition extends Model
             'associate editor',
             'assoc. managing editor',
             'circulation manager',
+            'circulation',
+            'associate',
+            'managing'
         ])) {
             return 'executive';
         }
@@ -58,6 +64,7 @@ class BoardPosition extends Model
             'literary editor',
             'community editor',
             'sports editor',
+            'opinion editor',
         ])) {
             return 'writers (editor)';
         }
@@ -67,6 +74,9 @@ class BoardPosition extends Model
             'head artist',
             'head graphics',
             'head photojournalist',
+            'chief artist',
+            'head videographer',
+            'chief illustrator'
         ])) {
             return 'artists (editor)';
         }
@@ -83,12 +93,13 @@ class BoardPosition extends Model
         // Artists (Staff)
         if (Str::contains($name, [
             'artist',
-            'graphics and layout artist',
+            'videographer',
             'graphics & layout artist',
             'photojournalist',
             'senior artist',
             'junior photojournalist',
-            'senior photojournalist'
+            'senior photojournalist',
+            'senior illustrator'
         ])) {
             return 'artists (staff)';
         }
