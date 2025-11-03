@@ -30,7 +30,6 @@ class StoreUserRequest extends FormRequest
             'course' => ['required', 'string'],
             // 'phone' => ['required', 'regex:/^(\+63|0)\d{10}$/'],
             'phone' => ['required', 'phone:PH'], # needs proganista/laravel-phone
-            'board_position' => ['required', 'string'],
             'role' => ['required', 'in:admin,editor,staff'],
             'term' => ['required', 'string'],
             'board_position_ids' => 'nullable|array',
