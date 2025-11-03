@@ -329,7 +329,7 @@ class UserController extends Controller
                             'status' => $board->user->status,
                             'role' => $board->user->role,
                         ];
-                    })
+                    })->values() // array might serialize as an object instead of an array if the collection keys aren't sequential (0, 1, 2...).
                 ];
             })
             ->values(); # reset keys so it's clean array 0, 1, 2
