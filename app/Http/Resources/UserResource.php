@@ -21,7 +21,14 @@ class UserResource extends JsonResource
             'pen_name' => $this->pen_name,
             'staff_id' => $this->staff_id,
             'email' => $this->email,
-            'board_position' => $this->board_position,
+            'board_position' => $this->boardPositions->map(function ($boardPosition) { // relationship to Board
+                return [
+                    'board_position_id' => $boardPosition->id,
+                    'position_name' => $boardPosition,
+                    'term' => $boardPosition->pivot->term,
+                    'is_current' => $boardPosition->pivot->is_current
+                ];
+            }),
             'year' => $this->year_level,
             'course' => $this->course,
             'phone' => $this->phone,
@@ -29,7 +36,7 @@ class UserResource extends JsonResource
             'current_term' => $this->currentTerm(),
             // editorialBoards relation must be loaded first in the controller
             'all_terms' => $this->whenLoaded('editorialBoards', function () {
-                return $this->editorialBoards->pluck('term');
+                return $this->editorialBoards->pluck('term'); // 'term' from EdBoard table
             }, []),
             'status' => $this->status,
             'joined_at' => $this->joined_at,

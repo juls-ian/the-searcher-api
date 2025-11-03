@@ -1,7 +1,100 @@
 # Scrapped codes in the UserController 
 
+## store()
+### 1.1: before adding board position 
+```php 
+    public function store(StoreUserRequest $request)
+    {
+        $this->authorize('create', User::class);
+        $validatedData = $request->validated();
+
+        /**
+         * Ensure password is unset in $validatedData when creating user at first (it will be null if not)
+         * because password is set through the email
+         */
+        unset($validatedData['password']);
+        $term = $validatedData['term'] ?? null; # extract 'term' data before creating user
+        unset($validatedData['term']); # remove from user data because it's not a column in the user table  
+
+        // Handler 1: profile pic upload
+        if ($request->hasFile('profile_pic')) {
+            $profilePicPath = $request->file('profile_pic')->store('users/id-pics', 'public');
+            $validatedData['profile_pic'] = $profilePicPath;
+        }
+
+        $user = User::create($validatedData);
+
+        // Insert ed board entry when it's provided 
+        if ($term) {
+            $user->editorialBoards()->create([
+                'term' => $term,
+                'is_current' => true # make first term current by default
+            ]);
+        }
+
+        // Password reset token manual generation because we no longer use Password::sendResetLink()
+        $token = Password::broker()->createToken($user); #createToken requires CanResetPassword in user Model 
+
+        // Send custom set password notification 
+        $user->notify(new SetPasswordNotification($token));
+
+        return response()->json([
+            'message' => 'Successfully registered the staff. An email has been sent to them to set their password. '
+        ]);
+    }
+```
+### 1.2: adding board positions 
+```php
+    public function store(StoreUserRequest $request)
+    {
+        $this->authorize('create', User::class);
+        $validatedData = $request->validated();
+
+        /**
+         * Ensure password is unset in $validatedData when creating user at first (it will be null if not)
+         * because password is set through the email
+         */
+        unset($validatedData['password']);
+        $term = $validatedData['term'] ?? null; # extract 'term' data before creating user
+        unset($validatedData['term']); # remove from user data because it's not a column in the user table
+
+        // Handler 1: profile pic upload
+        if ($request->hasFile('profile_pic')) {
+            $profilePicPath = $request->file('profile_pic')->store('users/id-pics', 'public');
+            $validatedData['profile_pic'] = $profilePicPath;
+        }
+
+        $user = User::create($validatedData);
+
+        // Insert ed board entry when it's provided
+        if ($term && $request->has('board_position_ids')) {
+            foreach ($request->board_position_ids as $positionId) {
+
+                $user->editorialBoards()->create([
+                    'term' => $term,
+                    'board_position_id' => $positionId,
+                    'is_current' => true # make first term current by default
+                ]);
+            }
+        }
+
+        // Password reset token manual generation because we no longer use Password::sendResetLink()
+        $token = Password::broker()->createToken($user); #createToken requires CanResetPassword in user Model
+
+        // Send custom set password notification
+        $user->notify(new SetPasswordNotification($token));
+
+        return response()->json([
+            'message' => 'Successfully registered the staff. An email has been sent to them to set their password. '
+        ]);
+    }
+
+```
+
+
 ## addTerm()
 ### 1.0: simpler version
+```php
     public function addTerm(Request $request, User $user)
     {
 
@@ -31,8 +124,9 @@
             'data' => $editorialBoard
         ]);
     }
-
+```
 ### 1.1: prevents term duplication
+```php
     public function addTerm(Request $request, User $user)
     {
         $this->authorize('create', $user);
@@ -75,8 +169,9 @@
             'data' => $editorialBoard
         ]);
     }
-
+```
 ### 1.3: with logs to debug
+```php
     public function addTerm(Request $request, User $user)
     {
         $this->authorize('create', $user);
@@ -122,10 +217,48 @@
             'data' => $editorialBoard
         ]);
     }
+```
+### 1.4: final version before adding board position id 
+```php 
+    public function addTerm(Request $request, User $user)
+    {
+        $this->authorize('create', $user);
 
+        $request->validate([
+            'term' => 'required|string',
+            'is_current' => 'boolean'
+        ]);
+
+        $isCurrent = $request->input('is_current', false); # if no term is provided defaults to false
+
+        if ($user->editorialBoards()->where('term', $request->term)->exists()) {
+            return response()->json([
+                'message' => 'The term already exists for the user'
+            ], 422);
+        }
+
+
+        // If is_current = true; deactivate other terms
+        if ($isCurrent) {
+            $user->editorialBoards()->update(['is_current' => false]);
+        }
+
+        // Insert the data
+        $editorialBoard = $user->editorialBoards()->create([
+            'term' => $request->term,
+            'is_current' => $isCurrent
+        ]);
+
+        return response()->json([
+            'message' => 'Term added successfully',
+            'data' => $editorialBoard
+        ]);
+    }
+```
 
 ## setCurrentTerm()
 ### 1.0: creation/update of term depends if it exist
+```php
     public function setCurrentTerm(Request $request, User $user)
     {
         $this->authorize('update', $user);
@@ -159,8 +292,9 @@
             'data' => $editorialBoard,
         ]);
     }
-
-## v.3: setActiveTerm - sets an active term (simple)
+```
+## 1.3: setActiveTerm - sets an active term (simple)
+```php
     public function setActiveTerm(Request $request, User $user)
     {
         $this->authorize('update', $user);
@@ -182,7 +316,36 @@
             'data' => $editorialBoard,
         ]);
     }
+```
+### 1.4 final version before adding board_position_id
+```php 
+    public function setCurrentTerm(Request $request, User $user)
+    {
+        $this->authorize('update', $user);
 
+        $request->validate([
+            'editorial_board_id' => 'required|exists:editorial_boards,id'
+        ]);
+
+        // Retrieves record from editorial_boards
+        $selectedBoard = EditorialBoard::findOrFail($request->editorial_board_id);
+
+        // Update existing or create new one
+
+        // Set all user's term to inactive
+        $user->editorialBoards()->update(['is_current' => false]);
+
+        $editorialBoard = $user->editorialBoards()->updateOrCreate(
+            ['term' => $selectedBoard->term], # search criteria
+            ['term' => $selectedBoard->term, 'is_current' => true] # value to update/create
+        );
+
+        return response()->json([
+            'message' => 'Active term updated successfully',
+            'data' => $editorialBoard,
+        ]);
+    }
+```
 
 ## update()
 ## 1.0: also includes the term in the update
@@ -287,6 +450,7 @@ public function restoreTerm(Request $request, User $user)
 
 ## edBoardIndex()
 ### 1.0: initial code
+```php
     public function edBoardIndex(User $user)
     {
         $boards = $user->editorialBoards->map(function ($board) {
@@ -301,7 +465,9 @@ public function restoreTerm(Request $request, User $user)
             'data' => $boards,
         ]);
     }
+```
 ### 1.1: right code
+```php
     public function edBoardIndex()
     {
         $boards = EditorialBoard::with('user')
@@ -319,3 +485,85 @@ public function restoreTerm(Request $request, User $user)
             'data' => $boards,
         ]);
     }
+```
+
+## deleteTerm()
+### 1.0 final version before adding board_position_id
+```php 
+    public function deleteTerm(Request $request, User $user)
+    {
+        $this->authorize('delete', $user);
+
+        $request->validate([
+            'editorial_board_id' => 'required|exists:editorial_boards,id'
+        ]);
+
+        // Retrieve specific ed board record associated with the $user
+        $editorialBoard = $user->editorialBoards()->findOrFail($request->editorial_board_id);
+
+        // Check if it's the only term for the user, hence it cannot be deleted
+        if ($user->editorialBoards()->count() === 1) {
+            return response()->json([
+                'message' => 'Cannot delete the only term for the user'
+            ], 422);
+        }
+
+        // Check if we're trying to delete the current term
+        $isCurrentTerm = $user->currentEditorialBoard->id === $editorialBoard->id;
+
+        $editorialBoard->delete();
+
+        $message = $isCurrentTerm
+            ?   'Current term was deleted, previous term is now the current'
+            : 'Term deleted';
+
+        return response()->json([
+            'message' => $message,
+            'current_term' => $user->fresh()->currentTerm()
+        ]);
+    }
+```
+### 1.1: deleting all positions for a term at once 
+```php 
+    public function deleteTerm(Request $request, User $user)
+    {
+        $this->authorize('delete', $user);
+
+        $request->validate([
+            'editorial_board_id' => 'required|integer|exists:editorial_boards_id' 
+        ]);
+
+        // Get all editorial boards for this term
+        $editorialBoards = $user->editorialBoards()->where('term', $request->term)->get();
+
+        if ($editorialBoards->isEmpty()) {
+            return response()->json([
+                'message' => 'Term not found'
+            ], 404);
+        }
+
+        // Check if it's the only term for the user
+        $distinctTerms = $user->editorialBoards()->distinct('term')->count('term');
+
+        if ($distinctTerms === 1) {
+            return response()->json([
+                'message' => 'Cannot delete the only term for the user'
+            ], 422);
+        }
+
+        // Check if we're trying to delete the current term
+        $isCurrentTerm = $editorialBoards->first()->is_current;
+
+        // Delete all positions for this term
+        $user->editorialBoards()->where('term', $request->term)->delete();
+
+        $message = $isCurrentTerm
+            ? 'Current term was deleted, previous term is now the current'
+            : 'Term deleted';
+
+        return response()->json([
+            'message' => $message,
+            'current_term' => $user->fresh()->editorialBoards()->where('is_current', true)->first()?->term
+        ]);
+    }
+```

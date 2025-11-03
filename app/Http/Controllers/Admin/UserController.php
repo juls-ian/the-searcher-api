@@ -57,7 +57,10 @@ class UserController extends Controller
          */
         unset($validatedData['password']);
         $term = $validatedData['term'] ?? null; # extract 'term' data before creating user
-        unset($validatedData['term']); # remove from user data because it's not a column in the user table  
+        $boardPositionIds = $validatedData['board_positions_ids'] ?? [];
+
+        unset($validatedData['term']); # remove from user data because it's not a column in the user table
+        unset($validatedData['board_position_ids']);
 
         // Handler 1: profile pic upload
         if ($request->hasFile('profile_pic')) {
@@ -67,18 +70,22 @@ class UserController extends Controller
 
         $user = User::create($validatedData);
 
-        // Insert ed board entry when it's provided 
-        if ($term) {
-            $user->editorialBoards()->create([
-                'term' => $term,
-                'is_current' => true # make first term current by default
-            ]);
+        // Insert ed board entry when it's provided
+        if ($term && !empty($boardPositionIds)) {
+            foreach ($boardPositionIds as $positionId) {
+
+                $user->editorialBoards()->create([
+                    'term' => $term,
+                    'board_position_id' => $positionId,
+                    'is_current' => true # make first term current by default
+                ]);
+            }
         }
 
         // Password reset token manual generation because we no longer use Password::sendResetLink()
-        $token = Password::broker()->createToken($user); #createToken requires CanResetPassword in user Model 
+        $token = Password::broker()->createToken($user); #createToken requires CanResetPassword in user Model
 
-        // Send custom set password notification 
+        // Send custom set password notification
         $user->notify(new SetPasswordNotification($token));
 
         return response()->json([
@@ -112,24 +119,24 @@ class UserController extends Controller
         $validatedData = $request->validated();
         $storage = Storage::disk('public');
 
-        unset($validatedData['term']); # remove term from user data 
+        unset($validatedData['term']); # remove term from user data
 
-        // Handler: profile pic upload 
+        // Handler: profile pic upload
         if ($request->hasFile('profile_pic')) {
 
-            # delete previous pic if it exists 
+            # delete previous pic if it exists
             if ($user->profile_pic && $storage->exists($user->profile_pic)) {
                 $storage->delete($user->profile_pic);
             }
 
-            # upload new pic 
+            # upload new pic
             $validatedData['profile_pic'] = $request->file('profile_pic')->store('users/id-pics');
         } else {
             // Exclude profile pic in any subsequent db operation
             unset($validatedData['profile_pic']);
         }
 
-        $user->update($validatedData); # update user 
+        $user->update($validatedData); # update user
         $user->load(['editorialBoards']);
 
         return UserResource::make($user); # return updated data
@@ -141,7 +148,7 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         $this->authorize('delete', $user);
-        // Delete profile pic before deleting user 
+        // Delete profile pic before deleting user
         $storage = Storage::disk('public');
 
         if ($user->profile_pic && $storage->exists($user->profile_pic)) {
@@ -153,7 +160,7 @@ class UserController extends Controller
     }
 
     /**
-     * Add term to user 
+     * Add term to user
      */
     public function addTerm(Request $request, User $user)
     {
@@ -161,10 +168,12 @@ class UserController extends Controller
 
         $request->validate([
             'term' => 'required|string',
-            'is_current' => 'boolean'
+            'is_current' => 'boolean',
+            'board_position_ids' => 'required|array',
+            'board_position_ids.*' => 'exists:board_positions,id'
         ]);
 
-        $isCurrent = $request->input('is_current', false); # if no term is provided defaults to false 
+        $isCurrent = $request->input('is_current', false); # if no term is provided defaults to false
 
         if ($user->editorialBoards()->where('term', $request->term)->exists()) {
             return response()->json([
@@ -173,109 +182,149 @@ class UserController extends Controller
         }
 
 
-        // If is_current = true; deactivate other terms 
+        // If is_current = true; deactivate other terms
         if ($isCurrent) {
             $user->editorialBoards()->update(['is_current' => false]);
         }
 
-        // Insert the data 
-        $editorialBoard = $user->editorialBoards()->create([
-            'term' => $request->term,
-            'is_current' => $isCurrent
-        ]);
+        // Insertion of multiple positions for the term
+        $editorialBoards = [];
+        foreach ($request->board_position_ids as $positionId) {
+            // Insert the data
+            $editorialBoards[] = $user->editorialBoards()->create([
+                'term' => $request->term,
+                'board_position_id' => $positionId,
+                'is_current' => $isCurrent
+            ]);
+        }
+
+
 
         return response()->json([
             'message' => 'Term added successfully',
-            'data' => $editorialBoard
+            'data' => $editorialBoards
         ]);
     }
 
     /**
-     * Hard delete a user's term 
+     * Hard delete a user's term
      */
     public function deleteTerm(Request $request, User $user)
     {
         $this->authorize('delete', $user);
 
         $request->validate([
-            'editorial_board_id' => 'required|exists:editorial_boards,id'
+            'editorial_board_id' => 'required|integer|exists:editorial_boards,id' // Change to term instead of editorial_board_id
         ]);
 
-        // Retrieve specific ed board record associated with the $user 
+        // Retrieve specific ed board record associated with the $user
         $editorialBoard = $user->editorialBoards()->findOrFail($request->editorial_board_id);
+        $term = $editorialBoard->term;
+        $isCurrent = $editorialBoard->is_current;
 
-        // Check if it's the only term for the user, hence it cannot be deleted 
-        if ($user->editorialBoards()->count() === 1) {
+        //  Verify it belongs to this user
+        if ($editorialBoard->user_id !== $user->id) {
+            return response()->json(['message' => 'Editorial board not found for this user']);
+        }
+
+
+
+        // Check if it's the only term for the user, hence it cannot be deleted
+        $totalBoards = $user->editorialBoards()->count();
+
+        if ($totalBoards === 1) {
             return response()->json([
                 'message' => 'Cannot delete the only term for the user'
             ], 422);
         }
 
-        // Check if we're trying to delete the current term 
-        $isCurrentTerm = $user->currentEditorialBoard->id === $editorialBoard->id;
-
+        // Delete the specific entry
         $editorialBoard->delete();
 
-        $message = $isCurrentTerm
-            ?   'Current term was deleted, previous term is now the current'
-            : 'Term deleted';
+        // If current position is deleted, check if there are other positions in the same term
+        if ($isCurrent) {
+            $remainingInTerm = $user->editorialBoards()->where('term', $term)->count();
+
+            // If no more positions in this term, previous term = current
+            if ($remainingInTerm === 0) {
+                // Set most recent previous term as current
+                $previousTerm = $user->editorialBoards()
+                    ->where('term', '<', $term)
+                    ->orderBy('term', 'desc')
+                    ->first();
+
+                if ($previousTerm) {
+                    $user->editorialBoards()
+                        ->where('term', $previousTerm->term)
+                        ->update(['is_current' => true]);
+                }
+            }
+        }
 
         return response()->json([
-            'message' => $message,
-            'current_term' => $user->fresh()->currentTerm()
+            'message' => 'Editorial board position has been deleted successfully',
+            'current_term' => $user->fresh()->editorialBoards()->where('is_current', true)->first()?->term
         ]);
     }
 
     /**
-     * Set an active term 
+     * Set an active term
      */
     public function setCurrentTerm(Request $request, User $user)
     {
         $this->authorize('update', $user);
 
         $request->validate([
-            'editorial_board_id' => 'required|exists:editorial_boards,id'
+            'term' => [
+                'required',
+                'string',
+                function ($attribute, $value, $fail) use ($user) {
+                    if (!$user->editorialBoards()->where('term', $value)->exists()) {
+                        $fail('The selected term does not exist for this user');
+                    }
+                }
+            ]
         ]);
 
-        // Retrieves record from editorial_boards
-        $selectedBoard = EditorialBoard::findOrFail($request->editorial_board_id);
+        // Check if the term exists for this user
+        if (!$user->editorialBoards()->where('term', $request->term)->exists()) {
+            return response()->json(['message' => 'Term not found for this user'], 404);
+        }
 
-        // Update existing or create new one 
-
-        // Set all user's term to inactive
+        // Set all user's terms to inactive
         $user->editorialBoards()->update(['is_current' => false]);
 
-        $editorialBoard = $user->editorialBoards()->updateOrCreate(
-            ['term' => $selectedBoard->term], # search criteria 
-            ['term' => $selectedBoard->term, 'is_current' => true] # value to update/create
-        );
+        // Set the selected term as current
+        $user->editorialBoards()
+            ->where('term', $request->term)
+            ->update(['is_current' => true]);
 
         return response()->json([
             'message' => 'Active term updated successfully',
-            'data' => $editorialBoard,
+            'data' => $user->fresh()->editorialBoards()->where('is_current', true)->get()
         ]);
     }
 
     /**
-     * Show ed boards 
+     * Show ed boards
      */
     public function edBoardIndex()
     {
-        $boards = EditorialBoard::with('user') #fetch the data 
+        $boards = EditorialBoard::with('user') #fetch the data
             ->get()
-            ->groupBy('term') # group by terms 
-            // Map each group | $term = group key, $group = sub collection of ed board that belong to $term 
+            ->groupBy('term') # group by terms
+            // Map each group | $term = group key, $group = sub collection of ed board that belong to $term
             ->map(function ($group, $term) {
                 return [
                     'term' => $term,
                     'current' => $group->first()->is_automatically_current || $group->first()->is_current,
                     'archived' => $group->first()->is_archived,
-                    'members' => $group->map(function ($board) { # loop over all members in the group 
+                    'members' => $group->map(function ($board) { # loop over all members in the group
                         return [
                             'id' => $board->user->id,
                             'full_name' => $board->user->full_name,
                             'pen_name' => $board->user->pen_name,
-                            'board_position' => $board->user->board_position,
+                            'board_position' => $board->boardPosition->name, // from relationship to BoardPosition
                             'profile_pic' => $board->user->profile_pic,
                             'status' => $board->user->status,
                             'role' => $board->user->role,

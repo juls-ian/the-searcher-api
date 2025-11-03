@@ -33,6 +33,8 @@ class StoreUserRequest extends FormRequest
             'board_position' => ['required', 'string'],
             'role' => ['required', 'in:admin,editor,staff'],
             'term' => ['required', 'string'],
+            'board_position_ids' => 'nullable|array',
+            'board_position_ids.*' => 'exists:board_positions,id',
             'status' => ['required', 'string'],
             'joined_at' => ['required', 'date'],
             'left_at' => ['nullable', 'date'],
