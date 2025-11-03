@@ -25,6 +25,9 @@ The User contains the most relationships to other models
 9. writtenBulletin <-hasMany-> Bulletin
 10. bulletinCoverContributions <-hasMany -> Bulletin 
 
+### BoardPosition 
+11. boardPositions <-belongsToMany-> BoardPosition
+
 ## Model Properties:
 
 #### 1. Fillable: 
@@ -53,27 +56,27 @@ Generates the staff_id of the user upon user creation
 This contains these properties: 
 
 - $table->id();
-- $table->string('first_name')
-- $table->string('last_name')
-- $table->string('full_name', 200)->storedAs("first_name || ' ' || last_name")->nullable()
+- $table->string('first_name');
+- $table->string('last_name');
+- $table->string('full_name', 200)->storedAs("first_name || ' ' || last_name")->nullable();
 - $table->string('full_name_slug')->unique();
-- $table->string('pen_name')
+- $table->string('pen_name');
 - $table->string('pen_name_slug')->unique();
-- $table->string('staff_id', 100)->unique()
-- $table->string('email')->unique()
-- $table->string('year_level')
-- $table->string('course')
-- $table->string('phone')
-- $table->string('board_position')
-- $table->enum('role', ['admin', 'editor', 'staff'])->default('staff')
-- $table->enum('status', ['active', 'inactive', 'alumni'])->default('active')
-- $table->date('joined_at')
-- $table->date('left_at')->nullable()
-- $table->string('profile_pic')
-- $table->timestamp('email_verified_at')->nullable()
-- $table->string('password')
-- $table->rememberToken()
-- $table->timestamps()
+- $table->string('staff_id', 100)->unique();
+- $table->string('email')->unique();
+- $table->string('year_level');
+- $table->string('course');
+- $table->string('phone');
+- $table->enum('role', ['admin', 'editor', 'staff'])->default('staff');
+- $table->enum('status', ['active', 'inactive', 'alumni'])->default('active');
+- $table->date('joined_at');
+- $table->date('left_at')->nullable();
+- $table->string('profile_pic');
+- $table->timestamp('email_verified_at')->nullable();
+- $table->string('password')->nullable();
+- $table->rememberToken();
+- $table->timestamps();
+- $table->softDeletes(); // soft delete feature deleted_at column
 
 ## Resource
 The data that will be returned:
@@ -84,20 +87,28 @@ The data that will be returned:
 - 'pen_name' => $this->pen_name,
 - 'staff_id' => $this->staff_id,
 - 'email' => $this->email,
-- 'board_position' => $this->board_position,
+- 'board_position' => $this->boardPositions->map(function ($boardPosition) { // relationship to Board
+     return [
+         'board_position_id' => $boardPosition->id,
+         'position_name' => $boardPosition,
+         'term' => $boardPosition->pivot->term,
+         'is_current' => $boardPosition->pivot->is_current
+     ];
+ }),
 - 'year' => $this->year_level,
 - 'course' => $this->course,
 - 'phone' => $this->phone,
 - 'role' => $this->role,
 - 'current_term' => $this->currentTerm(),
-- // editorialBoards relation must be loaded first in t- controller
-- 'all_terms' => $this->whenLoaded('editorialBoards- function () {
--     return $this->editorialBoards->pluck('term');
+- // editorialBoards relation must be loaded first in the controller
+- 'all_terms' => $this->whenLoaded('editorialBoards', function () {
+-     return $this->editorialBoards->pluck('term'); // 'term' from EdBoard table
 - }, []),
 - 'status' => $this->status,
 - 'joined_at' => $this->joined_at,
 - 'left_at' => $this->left_at,
 - 'profile_pic' => $this->profile_pic,
+
 
 
 

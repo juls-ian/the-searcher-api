@@ -14,3 +14,4 @@ This shall contains all the models of the backend namely:
 10. Newsletter
 11. SegmentsPoll 
 12. SegmentsArticle
+13. BoardPosition 
