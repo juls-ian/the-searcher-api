@@ -47,24 +47,24 @@ class ArticleController extends Controller
         $this->authorize('create', Article::class);
         $validatedArticle = $request->validated();
 
-        // Handler 1: cover photo upload 
+        // Handler 1: cover photo upload
         if ($request->hasFile('cover_photo')) {
             $coverPath = $request->file('cover_photo')->store('articles/covers', 'public');
             $validatedArticle['cover_photo'] = $coverPath;
         }
 
-        // Handler 2: thumbnail_same_as_cover logic 
+        // Handler 2: thumbnail_same_as_cover logic
         if ($request->has('thumbnail_same_as_cover') && $request->thumbnail_same_as_cover) {
 
             # use same file as cover_photo for thumbnail
             $validatedArticle['thumbnail'] = $validatedArticle['cover_photo'] ?? null;
 
-            # copy cover_photo metadata to thumbnail if not provided 
+            # copy cover_photo metadata to thumbnail if not provided
             if (!$request->has('thumbnail_caption') && $request->has('cover_caption')) {
                 $validatedArticle['thumbnail_caption'] = $validatedArticle['cover_caption'];
             }
 
-            # copy cover_artist_id to thumbnail_artist_id if not provided 
+            # copy cover_artist_id to thumbnail_artist_id if not provided
             if (!$request->has('thumbnail_artist_id') && $request->has('cover_artist_id')) {
                 $validatedArticle['thumbnail_artist_id'] = $validatedArticle['cover_artist_id'];
             }
@@ -140,15 +140,15 @@ class ArticleController extends Controller
         }
 
         /**
-         * Handler 2: thumbnail_same_as_cover logic 
+         * Handler 2: thumbnail_same_as_cover logic
          * when thumbnail is the same as cover, copy all cover properties to thumbnail
          */
         if ($request->has('thumbnail_same_as_cover') && $request->thumbnail_same_as_cover) {
 
-            # if same as cover, force thumbnail with adapt cover_photo  
+            # if same as cover, force thumbnail with adapt cover_photo
             $validatedArticle['thumbnail'] = $validatedArticle['cover_photo'] ?? $article->cover_photo;
 
-            # force adapt cover artist 
+            # force adapt cover artist
             if (!$request->has('thumbnail_artist_id')) {
                 $validatedArticle['thumbnail_artist_id'] = $validatedArticle['cover_artist_id'] ?? $article->cover_artist_id;
             }
@@ -185,19 +185,19 @@ class ArticleController extends Controller
         $trashDir = 'articles/trash/';
 
         $destroyFile = function ($filePath) use ($storage, $trashDir) {
-            // Check if is empty, null, falsy 
+            // Check if is empty, null, falsy
             if (!$filePath) return;
 
             $filename = basename($filePath); # cover123.jpg
             $trashPath = $trashDir . $filename; # articles/covers/cover123.jpg
 
-            # if it exists in the original path 
+            # if it exists in the original path
             if ($storage->exists($filePath)) {
                 $storage->move($filePath, $trashPath);
             }
         };
 
-        // Check if trash directory exists 
+        // Check if trash directory exists
         if (!$storage->exists($trashDir)) {
             $storage->makeDirectory($trashDir);
         }
@@ -221,7 +221,7 @@ class ArticleController extends Controller
             $filename = basename($filePath);
             $trashPath = $trashDir . $filename;
 
-            # if it exists in the trash 
+            # if it exists in the trash
             if ($storage->exists($trashPath)) {
                 $storage->delete($trashPath);
             }
@@ -233,7 +233,7 @@ class ArticleController extends Controller
         $article->forceDelete();
         return response()->json([
             'message' => 'Article was permanently deleted'
-        ]);
+        ], 200);
     }
 
     public function restore(Article $article)
@@ -242,7 +242,7 @@ class ArticleController extends Controller
         $storage = Storage::disk('public');
         $trashDir = 'articles/trash/';
 
-        // Anonymous/closure helper function 
+        // Anonymous/closure helper function
         $restoreFile = function ($filePath) use ($storage, $trashDir) {
             if (!$filePath) return;
 
@@ -270,9 +270,9 @@ class ArticleController extends Controller
      */
     public function archive($id)
     {
-        $article = Article::findOrFail($id); # find article or fail 
+        $article = Article::findOrFail($id); # find article or fail
         $this->authorize('archive', $article);
-        $archive = $article->archive(); # calls the trait method to create archive | returns Archive or null 
+        $archive = $article->archive(); # calls the trait method to create archive | returns Archive or null
 
         // If trait didn’t create a new archive because the article was already archived
         if (! $archive) { # if $archive is falsy (null)
@@ -288,12 +288,12 @@ class ArticleController extends Controller
     }
 
     /**
-     * Show all archived articles 
+     * Show all archived articles
      */
     public function archiveIndex()
     {
         $archivedArticles = Archive::where('archivable_type', 'article')
-            ->with(['archiver']) # load archiver relationship 
+            ->with(['archiver']) # load archiver relationship
             ->orderBy('archived_at', 'desc')
             ->get();;
         return ArchiveResource::collection($archivedArticles);
