@@ -92,6 +92,25 @@
 ```
 
 
+## destroy()
+### 1.0: pre soft delete implementation 
+```php 
+    public function destroy(User $user)
+    {
+        $this->authorize('delete', $user);
+        // Delete profile pic before deleting user
+        $storage = Storage::disk('public');
+        $trashDir = 'users/trash';
+
+        if ($user->profile_pic && $storage->exists($user->profile_pic)) {
+            $storage->delete($user->profile_pic);
+        }
+
+        $user->delete();
+        return response()->json(['message' => 'User was deleted'], 200);
+    }
+```
+
 ## addTerm()
 ### 1.0: simpler version
 ```php
@@ -293,7 +312,7 @@
         ]);
     }
 ```
-## 1.3: setActiveTerm - sets an active term (simple)
+### 1.3: setActiveTerm - sets an active term (simple)
 ```php
     public function setActiveTerm(Request $request, User $user)
     {
@@ -348,7 +367,7 @@
 ```
 
 ## update()
-## 1.0: also includes the term in the update
+### 1.0: also includes the term in the update
     public function update(UpdateUserRequest $request, User $user)
     {
         $this->authorize('update', $user);

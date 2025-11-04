@@ -84,5 +84,9 @@ class AppServiceProvider extends ServiceProvider
         Route::bind('board-position', function (string $value) {
             return BoardPosition::withTrashed()->where('id', $value)->firstOrFail();
         });
+
+        Route::bind('user', function (string $value) {
+            return User::withTrashed()->where('id', $value)->firstOrFail();
+        });
     }
 }

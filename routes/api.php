@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\SetPasswordController;
 use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\BoardPositionController;
 use App\Http\Controllers\BulletinController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CommunitySegmentController;
@@ -25,7 +26,7 @@ Route::get('/user', function (Request $request) {
 */
 
 /**
- * Article routes 
+ * Article routes
  */
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('articles', ArticleController::class)->only(['store', 'update', 'destroy']);
@@ -46,21 +47,25 @@ Route::apiResource('articles', ArticleController::class)->only(['index', 'show']
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('users', UserController::class)->only(['store', 'update', 'destroy']);
 
-    // Term/EdBoard management routes 
+    Route::delete('users/{user}/forceDestroy', [UserController::class, 'forceDestroy'])->name('users.forceDestroy');
+    Route::post('users/{user}/restore', [UserController::class, 'restore'])->name('user.restore');
+
+
+    // Term/EdBoard management routes
     Route::post('users/{user}/add-term', [UserController::class, 'addTerm'])->name('users.add-term');
     Route::patch('users/{user}/set-active-term', [UserController::class, 'setCurrentTerm'])->name('users.set-active-term');
     Route::delete('users/{user}/delete-term', [UserController::class, 'deleteTerm'])->name('users.delete-term');
 });
 Route::apiResource('users', UserController::class)->only(['index', 'show']);
 
-/** 
- * Editorial Board route 
+/**
+ * Editorial Board route
  */
 Route::get('editorial-board/', [UserController::class, 'edBoardIndex'])->name('editorial-board-index');
 
 
 /**
- * Article Category routes 
+ * Article Category routes
  */
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('article-categories', ArticleCategoryController::class)->only(['store', 'update', 'destroy']);
@@ -68,7 +73,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::apiResource('article-categories', ArticleCategoryController::class)->only(['index', 'show']);
 
 /**
- * Community Segment routes 
+ * Community Segment routes
  */
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('community-segments', CommunitySegmentController::class)->only(['store', 'update', 'destroy']);
@@ -84,18 +89,18 @@ Route::get('community-segments/archived', [CommunitySegmentController::class, 'a
     ->name('community-segments.archived');
 Route::get('community-segments/{id}/archived', [CommunitySegmentController::class, 'showArchived'])
     ->name('community-segments.show-archived');
-// Public routes  
-Route::apiResource('community-segments', CommunitySegmentController::class)->only(['index', 'show']); # public segment routes 
+// Public routes
+Route::apiResource('community-segments', CommunitySegmentController::class)->only(['index', 'show']); # public segment routes
 
 /**
- * Multimedia routes 
+ * Multimedia routes
  */
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('multimedia', MultimediaController::class)->only(['store', 'update', 'destroy']);
     Route::delete('multimedia/{multimedia}/forceDestroy', [MultimediaController::class, 'forceDestroy'])
         ->name('multimedia.forceDestroy');
     Route::post('multimedia/{multimedia}/restore', [MultimediaController::class, 'restore'])->name('multimedia.restore');
-    // Archive routes 
+    // Archive routes
     Route::post('multimedia/{id}/archive', [MultimediaController::class, 'archive'])->name('multimedia.archive');
 });
 // Public archive routes
@@ -105,7 +110,7 @@ Route::get('multimedia/{id}/archived', [MultimediaController::class, 'showArchiv
 Route::apiResource('multimedia', MultimediaController::class)->only(['index', 'show']); # public multimedia route
 
 /**
- * Issue routes 
+ * Issue routes
  */
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('issues', IssueController::class)->only(['store', 'update', 'destroy']);
@@ -118,7 +123,7 @@ Route::get('issues/{id}/archived', [IssueController::class, 'showArchived'])->na
 Route::apiResource('issues', IssueController::class)->only(['index', 'show']);
 
 /**
- * Bulletin routes 
+ * Bulletin routes
  */
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('bulletins', BulletinController::class)->only(['store', 'update', 'destroy']);
@@ -131,27 +136,39 @@ Route::get('bulletins/{id}/archived', [BulletinController::class, 'showArchived'
 Route::apiResource('bulletins', BulletinController::class)->only(['index', 'show']);
 
 /**
- * Archive routes 
+ * Archive routes
  */
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('archives', ArchiveController::class)->only(['store', 'update', 'destroy']);
 
-    // Additional routes 
+    // Additional routes
     Route::get('archives/trashed/index', [ArchiveController::class, 'showTrashed'])->name('archives.trashed');
     # 'id' because we're not using route model binding
     Route::post('archives/{id}/restore', [ArchiveController::class, 'restore'])->name('archives.restore');
-    Route::delete('archives/{id}/forceDestroy', [ArchiveController::class, 'forceDestroy'])->name('archives.force-destroy');
+    Route::delete('archives/{id}/forceDestroy', [ArchiveController::class, 'forceDestroy'])->name('archives.forceDestroy');
     Route::post('archives/{id}/unarchive', [ArchiveController::class, 'unarchive'])->name('archives.unarchive');
 });
 Route::apiResource('archives', ArchiveController::class)->only(['index', 'show']);
 
 /**
- * Calendar routes 
+ * Calendar routes
  */
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('calendars', CalendarController::class)->only(['store', 'update', 'destroy']);
 });
 Route::apiResource('calendars', CalendarController::class)->only(['index', 'show']);
+
+/**
+ * Board Position routes
+ */
+Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('board-positions', BoardPositionController::class)->only(['store', 'update', 'destroy']);
+
+    // Additional routes
+    Route::delete('board-positions/{board_position}/forceDestroy', [BoardPositionController::class, 'forceDestroy'])->name('board-positions.force-destroy');
+    Route::post('board-positions/{board_position}/restore', [BoardPositionController::class, 'restore'])->name('board-positions.restore');
+});
+Route::apiResource('board-positions', BoardPositionController::class)->only(['index', 'show']);
 
 /**
  * Search
@@ -165,9 +182,9 @@ Route::get('/search/{model}', [SearchController::class, 'model'])->name('search.
  */
 Route::prefix('auth')->group(function () {
 
-    // Login 
+    // Login
     Route::post('/login', [AuthController::class, 'login'])->middleware('guest')->name('login');
-    // Password recovery 
+    // Password recovery
     Route::post('/forgot-password', ForgotPasswordController::class)->middleware('throttle:5,1');
     Route::post('/reset-password', ResetPasswordController::class)->middleware('throttle:5,1');
 
@@ -187,7 +204,7 @@ Route::prefix('auth')->group(function () {
  */
 Route::prefix('email')->middleware('auth:sanctum')->group(function () {
 
-    // Email verification notice 
+    // Email verification notice
     Route::post('/verify', [EmailVerificationController::class, 'send'])
         ->middleware(['throttle:5,1'])
         ->name('verification.notice');
@@ -197,7 +214,7 @@ Route::prefix('email')->middleware('auth:sanctum')->group(function () {
         ->middleware(['signed', 'throttle:6,1'])
         ->name('verification.verify');
 
-    // Resending verification email 
+    // Resending verification email
     Route::post('/verification-notification', [EmailVerificationController::class, 'resend'])
         ->middleware('throttle:6,1')
         ->name('verification.send');

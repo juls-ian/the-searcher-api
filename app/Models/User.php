@@ -177,7 +177,8 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function multimediaContributions()
     {
-        return $this->hasMany(Multimedia::class, 'multimedia_artists_id');
+        // return $this->hasMany(Multimedia::class, 'multimedia_artists_id');
+        return $this->belongsToMany(Multimedia::class);
     }
 
     public function multimediaThumbnailContributions()

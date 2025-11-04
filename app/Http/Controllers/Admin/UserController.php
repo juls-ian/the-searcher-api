@@ -150,13 +150,85 @@ class UserController extends Controller
         $this->authorize('delete', $user);
         // Delete profile pic before deleting user
         $storage = Storage::disk('public');
+        $trashDir = 'users/trash/';
+
+        if (!$storage->exists($trashDir)) {
+            $storage->makeDirectory($trashDir);
+        }
 
         if ($user->profile_pic && $storage->exists($user->profile_pic)) {
-            $storage->delete($user->profile_pic);
+            $filename = basename($user->profile_pic);
+            $storage->move($user->profile_pic, $trashDir . $filename);
         }
 
         $user->delete();
         return response()->json(['message' => 'User was deleted'], 200);
+    }
+
+    public function restore(User $user)
+    {
+        $storage = Storage::disk('public');
+        $trashDir = 'users/trash/';
+
+        if ($user->profile_pic) {
+            $filename = basename($user->profile_pic);
+            $trashPath = $trashDir . $filename;
+
+            if ($storage->exists($trashPath)) {
+                $storage->move($trashPath, $user->profile_pic);
+            }
+        }
+
+        $user->restore();
+        return response()->json([
+            'message' => 'User was restored',
+            'data' => UserResource::make($user)
+        ]);
+    }
+
+    public function forceDestroy(User $user)
+    {
+        $this->authorize('forceDelete', $user);
+
+        // Prevent permanent deletion if user has contributions
+        if (
+            $user->writtenArticles()->exists() ||
+
+            $user->articleCoverContributions()->exists() ||
+            $user->articleThumbnailContributions()->exists() ||
+            $user->publishedArticles()->exists() ||
+            $user->writtenSegments()->exists() ||
+            $user->segmentCoverContributions()->exists() ||
+            $user->publishedSegment()->exists() ||
+            $user->multimediaContributions()->exists() ||
+            $user->multimediaThumbnailContributions()->exists() ||
+            $user->publishedMultimedia()->exists() ||
+            $user->writtenBulletin()->exists() ||
+            $user->bulletinCoverContributions()->exists() ||
+            $user->publishedIssue()->exists() ||
+            $user->archivedEntries()->exists()
+        ) {
+            return response()->json([
+                'message' => 'Cannot permanently user with existing contributions'
+            ], 422);
+        }
+
+        $storage = Storage::disk('public');
+        $trashDir = 'users/trash/';
+
+        if ($user->profile_pic) {
+            $filename = basename($user->profile_pic);
+            $trashPath = $trashDir . $filename;
+
+            if ($storage->exists($trashPath)) {
+                $storage->delete($trashPath);
+            }
+        }
+
+        $user->forceDelete();
+        return response()->json([
+            'message' => 'User was permanently deleted'
+        ]);
     }
 
     /**
