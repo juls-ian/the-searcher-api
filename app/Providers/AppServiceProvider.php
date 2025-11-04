@@ -6,6 +6,7 @@ use App\Models\Archive;
 use App\Models\User;
 use App\Models\Article;
 use App\Models\ArticleCategory;
+use App\Models\BoardPosition;
 use App\Models\Bulletin;
 use App\Models\Calendar;
 use App\Models\CommunitySegment;
@@ -50,7 +51,7 @@ class AppServiceProvider extends ServiceProvider
         Calendar::observe(CalendarObserver::class);
 
 
-        // Shorten the name of the archivable_type 
+        // Shorten the name of the archivable_type
         Relation::enforceMorphMap([
             'article' => 'App\Models\Article',
             'user' => 'App\Models\User',
@@ -61,9 +62,9 @@ class AppServiceProvider extends ServiceProvider
             'multimedia' => 'App\Models\Multimedia'
         ]);
 
-        // By default route model binding does not work on soft deleted models, hence me must customize binding to include trashed models 
+        // By default route model binding does not work on soft deleted models, hence me must customize binding to include trashed models
         Route::bind('article', function (string $value) {
-            return Article::withTrashed()->where('id', $value)->firstOrFail(); # for forceDestroy & restore 
+            return Article::withTrashed()->where('id', $value)->firstOrFail(); # for forceDestroy & restore
         });
         Route::bind('multimedia', function (string $value) {
             return Multimedia::withTrashed()->where('id', $value)->firstOrFail();
@@ -78,6 +79,10 @@ class AppServiceProvider extends ServiceProvider
 
         Route::bind('issue', function (string $value) {
             return Issue::withTrashed()->where('id', $value)->firstOrFail();
+        });
+
+        Route::bind('board-position', function (string $value) {
+            return BoardPosition::withTrashed()->where('id', $value)->firstOrFail();
         });
     }
 }
