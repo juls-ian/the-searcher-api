@@ -64,29 +64,33 @@ class AppServiceProvider extends ServiceProvider
 
         // By default route model binding does not work on soft deleted models, hence me must customize binding to include trashed models
         Route::bind('article', function (string $value) {
-            return Article::withTrashed()->where('id', $value)->firstOrFail(); # for forceDestroy & restore
+            return Article::withTrashed()->findOrFail($value); # for forceDestroy & restore
         });
+        Route::bind('article', function (string $value) {
+            return Article::withTrashed()->findOrFail($value);
+        });
+
         Route::bind('multimedia', function (string $value) {
-            return Multimedia::withTrashed()->where('id', $value)->firstOrFail();
+            return Multimedia::withTrashed()->findOrFail($value);
         });
         Route::bind('community-segment', function (string $value) {
-            return CommunitySegment::withTrashed()->where('id', $value)->firstOrFail();
+            return CommunitySegment::withTrashed()->findOrFail($value);
         });
 
         Route::bind('bulletin', function (string $value) {
-            return Bulletin::withTrashed()->where('id', $value)->firstOrFail();
+            return Bulletin::withTrashed()->findOrFail($value);
         });
 
         Route::bind('issue', function (string $value) {
-            return Issue::withTrashed()->where('id', $value)->firstOrFail();
+            return Issue::withTrashed()->findOrFail($value);
         });
 
         Route::bind('board-position', function (string $value) {
-            return BoardPosition::withTrashed()->where('id', $value)->firstOrFail();
+            return BoardPosition::withTrashed()->findOrFail($value);
         });
 
         Route::bind('user', function (string $value) {
-            return User::withTrashed()->where('id', $value)->firstOrFail();
+            return User::withTrashed()->findOrFail($value);
         });
 
         Route::bind('article-category', function (string $value) {
