@@ -26,7 +26,7 @@ class MultimediaController extends Controller
     {
         $this->authorize('viewAny', Multimedia::class);
 
-        # eager load relationships to User 
+        # eager load relationships to User
         $multimedia = Multimedia::with(['multimediaArtists', 'thumbnailArtist'])->get();
         return MultimediaResource::collection($multimedia);
     }
@@ -47,12 +47,12 @@ class MultimediaController extends Controller
 
         $validatedMultimedia = $request->validated();
 
-        // Handler 1: files upload 
+        // Handler 1: files upload
         if ($request->hasFile('files')) {
-            $filesPaths = []; # array to store the file paths 
+            $filesPaths = []; # array to store the file paths
             $files = $request->file('files');
 
-            # convert non-array files into array if needed 
+            # convert non-array files into array if needed
             if (!is_array($files)) {
                 $files = [$files];
             }
@@ -67,7 +67,7 @@ class MultimediaController extends Controller
             $validatedMultimedia['files'] = json_encode([]);
         }
 
-        // Handler 2: thumbnail upload 
+        // Handler 2: thumbnail upload
         if ($request->hasFile('thumbnail')) {
             $thumbnailPath = $request->file('thumbnail')->store('multimedia/thumbnails', 'public');
             $validatedMultimedia['thumbnail'] = $thumbnailPath;
@@ -75,24 +75,24 @@ class MultimediaController extends Controller
 
         // Handler 3: published_at date/time
         if (isset($validatedMultimedia['published_at']) && $validatedMultimedia['published_at']) {
-            # if date is set, convert it to Carbon instance 
+            # if date is set, convert it to Carbon instance
             $validatedMultimedia['published_at'] = Carbon::parse($validatedMultimedia['published_at']);
         } else {
             $validatedMultimedia['published_at'] = Carbon::now();
         }
 
-        // Handler 4: multiple multimedia_artists 
+        // Handler 4: multiple multimedia_artists
         $artistIds = $validatedMultimedia['multimedia_artists_id'] ?? []; # extract the array
-        unset($validatedMultimedia['multimedia_artists_id']); # remove from the main data 
+        unset($validatedMultimedia['multimedia_artists_id']); # remove from the main data
 
-        $multimedia = Multimedia::create($validatedMultimedia); # create without artist ids  
+        $multimedia = Multimedia::create($validatedMultimedia); # create without artist ids
 
-        # attach artists, connect to pivot table 
+        # attach artists, connect to pivot table
         if (!empty($artistIds)) {
-            $multimedia->multimediaArtists()->attach($artistIds); # use pivot table 
+            $multimedia->multimediaArtists()->attach($artistIds); # use pivot table
         }
 
-        // Eager load relationships to User 
+        // Eager load relationships to User
         $multimedia->load(['multimediaArtists', 'thumbnailArtist']);
         return MultimediaResource::make($multimedia);
     }
@@ -130,7 +130,7 @@ class MultimediaController extends Controller
         // Handler 1: files upload (multiple files as JSON array)
         if ($request->hasFile('files')) {
 
-            # delete old cover if it exists 
+            # delete old cover if it exists
             $oldFiles = json_decode($multimedia->files, true);
             if (is_array($oldFiles)) {
                 foreach ($oldFiles as $oldFile) {
@@ -140,15 +140,15 @@ class MultimediaController extends Controller
                 }
             }
 
-            $filesPaths = []; # path to store the arrays 
+            $filesPaths = []; # path to store the arrays
             $files = $request->file('files'); # gets the files from request
 
-            // Convert non-array files into array if needed 
+            // Convert non-array files into array if needed
             if (!is_array($files)) {
                 $files = [$files];
             }
 
-            # store new files 
+            # store new files
             foreach ($files as $file) {
                 $filePath = $file->store('multimedia/files', 'public');
                 $filesPaths[] = $filePath;
@@ -156,14 +156,14 @@ class MultimediaController extends Controller
 
             $validatedMultimedia['files'] = json_encode($filesPaths);
         } else {
-            // Exclude cover in any subsequent db operation 
+            // Exclude cover in any subsequent db operation
             unset($validatedMultimedia['files']);
         }
 
-        // Handler 2: thumbnail upload 
+        // Handler 2: thumbnail upload
         if ($request->hasFile('thumbnail')) {
 
-            # delete old thumbnails if it exists 
+            # delete old thumbnails if it exists
             if ($multimedia->thumbnail && $storage->exists($multimedia->thumbnail)) {
                 $storage->delete($multimedia->thumbnail);
             }
@@ -172,19 +172,19 @@ class MultimediaController extends Controller
             unset($validatedMultimedia['thumbnail']);
         }
 
-        // Handler 3: multiple multimedia_artists 
+        // Handler 3: multiple multimedia_artists
         if (array_key_exists('multimedia_artists_id', $validatedMultimedia)) {
             $artistIds = $validatedMultimedia['multimedia_artists_id'];
             unset($validatedMultimedia['multimedia_artists_id']); # remove from main data
 
-            // Update artist relationships only when explicitly provided 
+            // Update artist relationships only when explicitly provided
             if (!empty($artistIds)) {
-                $multimedia->multimediaArtists()->sync($artistIds); # sync = replace all ids with new ones 
+                $multimedia->multimediaArtists()->sync($artistIds); # sync = replace all ids with new ones
             }
         }
 
         $multimedia->update($validatedMultimedia);
-        # reload relationships 
+        # reload relationships
         $multimedia->load(['multimediaArtists', 'thumbnailArtist']);
         return MultimediaResource::make($multimedia);
     }
@@ -198,18 +198,18 @@ class MultimediaController extends Controller
         $storage = Storage::disk('public');
         $trashDir = 'multimedia/trash/';
 
-        // Ensure directory exists 
+        // Ensure directory exists
         if (!$storage->exists($trashDir)) {
             $storage->makeDirectory($trashDir);
         }
 
-        // Delete files stored as JSON array 
+        // Delete files stored as JSON array
         if ($multimedia->files) {
             $files = json_decode($multimedia->files, true);
 
             if (is_array($files)) {
                 foreach ($files as $file) {
-                    # deletes the local files 
+                    # deletes the local files
                     if ($storage->exists($file)) {
                         $filename = basename($file);
                         $storage->move($file, $trashDir . $filename);
@@ -232,7 +232,7 @@ class MultimediaController extends Controller
     }
 
     /**
-     * Permanently delete soft deleted models 
+     * Permanently delete soft deleted models
      */
     public function forceDestroy(Multimedia $multimedia)
     {
@@ -240,7 +240,14 @@ class MultimediaController extends Controller
         $storage = Storage::disk('public');
         $trashDir = 'multimedia/trash/';
 
-        // Delete files 
+
+        if (is_null($multimedia->deleted_at)) {
+            return response()->json([
+                'message' => 'You can only permanently delete soft deleted entries'
+            ]);
+        }
+
+        // Delete files
         if ($multimedia->files) {
             $files = json_decode($multimedia->files, true);
 
@@ -318,7 +325,7 @@ class MultimediaController extends Controller
      */
     public function archive($id)
     {
-        $multimedia = Multimedia::findOrFail($id); # find multimedia 
+        $multimedia = Multimedia::findOrFail($id); # find multimedia
         $this->authorize('archive', $multimedia);
         $archive = $multimedia->archive(); # calls the trait method to create archive
 
@@ -341,7 +348,7 @@ class MultimediaController extends Controller
     public function archiveIndex()
     {
         $archivedMultimedia = Archive::where('archivable_type', 'multimedia')
-            ->with(['archiver']) # load archiver relationship 
+            ->with(['archiver']) # load archiver relationship
             ->orderBy('archived_at', 'desc')
             ->get();
         return ArchiveResource::collection($archivedMultimedia);
