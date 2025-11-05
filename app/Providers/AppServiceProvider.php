@@ -88,5 +88,9 @@ class AppServiceProvider extends ServiceProvider
         Route::bind('user', function (string $value) {
             return User::withTrashed()->where('id', $value)->firstOrFail();
         });
+
+        Route::bind('article-category', function (string $value) {
+            return ArticleCategory::withTrashed()->findOrFail($value);
+        });
     }
 }

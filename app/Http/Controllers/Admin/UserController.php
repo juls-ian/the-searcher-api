@@ -210,7 +210,7 @@ class UserController extends Controller
         ) {
             return response()->json([
                 'message' => 'Cannot permanently user with existing contributions'
-            ], 422);
+            ], 409);
         }
 
         $storage = Storage::disk('public');

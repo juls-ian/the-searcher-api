@@ -69,6 +69,9 @@ Route::get('editorial-board/', [UserController::class, 'edBoardIndex'])->name('e
  */
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('article-categories', ArticleCategoryController::class)->only(['store', 'update', 'destroy']);
+
+    Route::delete('article-categories/{article_category}/forceDestroy', [ArticleCategoryController::class, 'forceDestroy'])->name('article-categories.forceDestroy');
+    Route::post('article-categories/{article_category}/restore', [ArticleCategoryController::class, 'restore'])->name('article-categories.restore');
 });
 Route::apiResource('article-categories', ArticleCategoryController::class)->only(['index', 'show']);
 

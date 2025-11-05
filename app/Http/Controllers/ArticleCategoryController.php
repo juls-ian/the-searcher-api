@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\ArticleCategory;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\UpdateArticleCategoryRequest;
 use App\Http\Resources\ArticleCategoryResource;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -18,7 +17,7 @@ class ArticleCategoryController extends Controller
     public function index()
     {
         $this->authorize('viewAny', ArticleCategory::class);
-        // eager load relationship to Article 
+        // eager load relationship to Article
         $articleCategories = ArticleCategory::with(['articles'])->get();
         return ArticleCategoryResource::collection($articleCategories);
         // return ArticleCategoryResource::collection(ArticleCategory::all());
@@ -39,8 +38,8 @@ class ArticleCategoryController extends Controller
     {
         $this->authorize('create', ArticleCategory::class);
         $validatedData = $request->validate([
-            'name' => ['required', 'unique:article_categories'],
-            'parent_id' => ['exists:article_categories,id']
+            'name' => 'required|unique:article_categories',
+            'parent_id' => 'exists:article_categories,id'
         ]);
 
         $category = ArticleCategory::create($validatedData);
@@ -72,11 +71,11 @@ class ArticleCategoryController extends Controller
     {
         $this->authorize('update', $articleCategory);
         $validatedData = $request->validate([
-            'name' => ['required'],
-            'parent_id' => ['exists:article_category,id']
+            'name' => 'required',
+            'parent_id' => 'exists:article_category,id'
         ]);
 
-        $articleCategory->update($validatedData); # update category 
+        $articleCategory->update($validatedData); # update category
         return ArticleCategoryResource::make($articleCategory);
     }
 
@@ -86,7 +85,33 @@ class ArticleCategoryController extends Controller
     public function destroy(ArticleCategory $articleCategory)
     {
         $this->authorize('delete', $articleCategory);
+        if ($articleCategory->articles()->exists()) {
+            return response()->json([
+                'message' => 'Article category with existing articles cannot be permanently deleted'
+            ], 409);
+        }
         $articleCategory->delete();
         return response()->json(['message' => 'Article deleted successfully'], 200);
+    }
+
+    public function restore(ArticleCategory $articleCategory)
+    {
+        $this->authorize('restore', $articleCategory);
+        $articleCategory->restore();
+        return response()->json([
+            'message' => 'Article category was restored',
+            'data' => ArticleCategoryResource::make($articleCategory)
+        ]);
+    }
+
+    public function forceDestroy(ArticleCategory $articleCategory)
+    {
+        $this->authorize('forceDelete', $articleCategory);
+        if ($articleCategory->articles()->exists()) {
+            return response()->json([
+                'message' => 'Article category with existing articles cannot be permanently deleted'
+            ], 409);
+        }
+        $articleCategory->forceDelete();
     }
 }
