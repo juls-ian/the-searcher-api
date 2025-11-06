@@ -21,19 +21,31 @@ class UserResource extends JsonResource
             'pen_name' => $this->pen_name,
             'staff_id' => $this->staff_id,
             'email' => $this->email,
-            'board_position' => $this->boardPositions->map(function ($boardPosition) { // relationship to Board
+            'board_positions' => $this->boardPositions->map(function ($boardPosition) { // relationship to Board
                 return [
                     'board_position_id' => $boardPosition->id,
-                    'position_name' => $boardPosition,
+                    'position_name' => $boardPosition->name,
+                    'category' => $boardPosition->category,
                     'term' => $boardPosition->pivot->term,
                     'is_current' => $boardPosition->pivot->is_current
                 ];
             }),
+            // Current position
+            'current_board_position' => $this->boardPositions
+                ->where('pivot.is_current', true)
+                ->first()
+                ? [
+                    'id' => $this->boardPositions->where('pivot.is_current', true)->first()->id,
+                    'name' => $this->boardPositions->where('pivot.is_current', true)->first()->name,
+                    'category' => $this->boardPositions->where('pivot.is_current', true)->first()->category,
+                    'term' => $this->boardPositions->where('pivot.is_current', true)->first()->pivot->term
+
+                ] : null,
             'year' => $this->year_level,
             'course' => $this->course,
             'phone' => $this->phone,
             'role' => $this->role,
-            'current_term' => $this->currentTerm(),
+            'current_term' => $this->getCurrentTermAttribute(),
             // editorialBoards relation must be loaded first in the controller
             'all_terms' => $this->whenLoaded('editorialBoards', function () {
                 return $this->editorialBoards->pluck('term'); // 'term' from EdBoard table

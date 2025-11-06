@@ -28,8 +28,10 @@ class UserController extends Controller
             'writtenArticles',
             'articleCoverContributions',
             'articleThumbnailContributions',
-            'editorialBoards',
-            'currentEditorialBoard'
+            'editorialBoards.boardPosition', // nested eager loading - loads BoardPosition through EditorialBoard - all records
+            'currentEditorialBoard.boardPosition', // load position for current board
+            'currentBoardRoles',                    // direct current positions
+
         ])
             ->get();
         return UserResource::collection($staffs);

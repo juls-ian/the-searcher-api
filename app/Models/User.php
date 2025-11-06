@@ -75,6 +75,16 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
+
+    /**
+     * Main relationship to EditorialBoard
+     */
+    public function editorialBoards()
+    {
+        return $this->hasMany(EditorialBoard::class);
+    }
+
+
     /**
      * Relationship to BoardPosition
      */
@@ -85,21 +95,15 @@ class User extends Authenticatable implements MustVerifyEmail
             ->withTimestamps();     // timestamp columns from intermediate tbl
     }
 
-    // Helper to get the current positions
-    public function currentBoardPositions()
-    {
-        return $this->editorialBoards()
-            ->where('is_current', true)
-            ->with('boardPosition'); // relation to EditorialBoard model
-    }
 
-
-    /**
-     * Relationship to EditorialBoard
-     */
-    public function editorialBoards()
+    // Direct M:M relationship - returns BoardPosition models (for the roles)
+    public function currentBoardRoles()
     {
-        return $this->hasMany(EditorialBoard::class);
+        return $this->belongsToMany(BoardPosition::class, 'editorial_boards') // pivot/intermediate table
+            ->wherePivot('is_current', true) // filter from pivot table
+            ->withPivot('term', 'is_current') // include the columns
+            ->withTimestamps()
+        ;
     }
 
     public function currentEditorialBoard()
@@ -107,28 +111,26 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(EditorialBoard::class)->where('is_current', true);
     }
 
-    public function currentTerm()
-    {
-        if (!$this->relationLoaded('currentEditorialBoard')) {
-            $this->load('currentEditorialBoard');
-        }
-        return $this->currentEditorialBoard?->term;
-    }
-
-    // Alternatives
+    // Accessor
     public function getCurrentTermAttribute()
     {
-        return $this->editorialBoards()->latest()->value('term');
+        // Use relationship if already loaded, otherwise query
+        if ($this->relationLoaded('currentEditorialBoard')) {
+            return $this->currentEditorialBoard?->term;
+        }
+        return $this->editorialBoards()
+            ->where('is_current', true)
+            ->value('term');
     }
 
-    public function getAllTerms()
-    {
-        return $this->editorialBoards->pluck('term')->toArray();
-    }
 
-    public function getAllTermsCollection()
+    // Get all terms as array
+    public function getAllTermsAttribute()
     {
-        return $this->editorialBoards->pluck('term');
+        if ($this->relationLoaded('editorialBoards')) {
+            return $this->editorialBoards->pluck('term')->toArray();
+        }
+        return $this->editorialBoards()->pluck('term')->toArray();
     }
 
     /**
