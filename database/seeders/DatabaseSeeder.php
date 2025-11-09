@@ -36,7 +36,7 @@ class DatabaseSeeder extends Seeder
         Article::factory()->count(5)->create();
         Bulletin::factory()->count(5)->create();
 
-        $users = [
+        $specificUsers = [
             User::factory()->create([
                 'first_name' => 'Ian',
                 'last_name' => 'Valdez',
@@ -73,6 +73,13 @@ class DatabaseSeeder extends Seeder
             ]),
         ];
 
+
+        // Random additional users
+        $randomUsers = User::factory()->count(15)->create();
+
+        // Combining users
+        $users = collect($specificUsers)->concat($randomUsers);
+
         foreach ($users as $user) {
 
             // Get all positions
@@ -83,10 +90,9 @@ class DatabaseSeeder extends Seeder
             // Pick based on role
             $selectedPositions = match ($user->role) {
                 'admin' => $positions->where('category', 'executive')->random($positionCount),
-                'editor' => $positions->whereIn('category', ['writers (editor)', 'artists (editor)'])->random($positionCount),
-                default => $positions->whereIn('category', ['writers (staff)', 'artists (staff)'])->random($positionCount),
+                'editor' => $positions->whereIn('category', ['writers (editor)', 'artist (editor)'])->random($positionCount),
+                default => $positions->whereIn('category', ['writers (staff)', 'artist (staff)'])->random($positionCount),
             };
-
 
             // Create current term entry for each position
             foreach ($selectedPositions as $position) {
@@ -106,7 +112,7 @@ class DatabaseSeeder extends Seeder
                 // Pick a random position for historical term
                 $historicalPosition = $positions->random();
 
-                EditorialBoard::factory()->create([
+               $user->editorialBoards()->create([
                     'term' => "{$startYear}-{$endYear}",
                     'board_position_id' => $historicalPosition->id,
                     'is_current' => false
@@ -116,6 +122,7 @@ class DatabaseSeeder extends Seeder
 
         $existingUserIds = User::pluck('id')->toArray(); // reuse existing users
 
+        // Seeding multimedia
         Multimedia::factory()
             ->count(5)
             ->create(
@@ -131,7 +138,7 @@ class DatabaseSeeder extends Seeder
             });
 
         // Seeding community segments
-        $this->seedCommunitySegments($users);
+        $this->seedCommunitySegments($users->all());
     }
 
     private function seedCommunitySegments(array $users)

@@ -22,7 +22,7 @@ class EditorialBoardFactory extends Factory
         $endYear = $startYear + 1;
 
         return [
-            'user_id' => User::factory(),
+            'user_id' => User::inRandomOrder()->first()?-> id ?? User::factory(),
             'term' => "{$startYear}-{$endYear}",
             'is_current' => $this->faker->boolean(30) # 30% chance
         ];
