@@ -97,9 +97,9 @@ class User extends Authenticatable implements MustVerifyEmail
 
 
     // Direct M:M relationship - returns BoardPosition models (for the roles)
-    public function currentBoardRoles()
+    public function currentBoardPositions()
     {
-        return $this->belongsToMany(BoardPosition::class, 'editorial_boards') // pivot/intermediate table
+        return $this->belongsToMany(BoardPosition::class, 'editorial_boards') // pivot/intermediate table M:M
             ->wherePivot('is_current', true) // filter from pivot table
             ->withPivot('term', 'is_current') // include the columns
             ->withTimestamps()

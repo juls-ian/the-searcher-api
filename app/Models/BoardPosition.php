@@ -67,7 +67,7 @@ class BoardPosition extends Model
             'sports editor',
             'opinion editor',
         ])) {
-            return 'writers (editor)';
+            return 'writer (editor)';
         }
 
         // Artists (Editor)
@@ -79,7 +79,7 @@ class BoardPosition extends Model
             'head videographer',
             'chief illustrator'
         ])) {
-            return 'artists (editor)';
+            return 'artist (editor)';
         }
 
         // Writers (Staff)
@@ -88,7 +88,7 @@ class BoardPosition extends Model
             'junior writer',
             'senior writer'
         ])) {
-            return 'writers (staff)';
+            return 'writer (staff)';
         }
 
         // Artists (Staff)
@@ -102,7 +102,7 @@ class BoardPosition extends Model
             'senior photojournalist',
             'senior illustrator'
         ])) {
-            return 'artists (staff)';
+            return 'artist (staff)';
         }
 
         return 'uncategorized';

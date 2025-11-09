@@ -30,7 +30,7 @@ class UserController extends Controller
             'articleThumbnailContributions',
             'editorialBoards.boardPosition', // nested eager loading - loads BoardPosition through EditorialBoard - all records
             'currentEditorialBoard.boardPosition', // load position for current board
-            'currentBoardRoles',                    // direct current positions
+            'currentBoardPositions',                    // direct current positions
 
         ])
             ->get();
