@@ -28,7 +28,9 @@ class CommunitySegmentController extends Controller
     public function index()
     {
         $this->authorize('viewAny', CommunitySegment::class);
-        $segments = CommunitySegment::with(['writer', 'coverArtist', 'series', 'segmentArticles', 'segmentPolls'])->get();
+        $segments = CommunitySegment::with(['writer', 'coverArtist', 'series', 'segmentArticles', 'segmentPolls'])
+            ->latest()
+            ->paginate(12);
         return CommunitySegmentResource::collection($segments);
     }
 
@@ -48,18 +50,18 @@ class CommunitySegmentController extends Controller
         $this->authorize('create', CommunitySegment::class);
         $validatedSegment = $request->validated();
 
-        // Handler 1: segment_cover upload 
+        // Handler 1: segment_cover upload
         if ($request->hasFile('segment_cover')) {
             $coverPath = $request->file('segment_cover')->store('community-segments/covers', 'public');
             $validatedSegment['segment_cover'] = $coverPath;
         }
 
-        // Handler 2: published_at date/time 
+        // Handler 2: published_at date/time
         if (isset($validatedSegment['published_at']) && $validatedSegment['published_at']) {
-            # if set, convert it to Carbon instance 
+            # if set, convert it to Carbon instance
             $validatedSegment['published_at'] = Carbon::parse($validatedSegment['published_at']);
         } else {
-            # else set to current time 
+            # else set to current time
             $validatedSegment['published_at'] = Carbon::now();
         }
 
@@ -86,7 +88,7 @@ class CommunitySegmentController extends Controller
         }
 
 
-        // Eager load relationships to User 
+        // Eager load relationships to User
         $segment->load(['writer', 'coverArtist', 'series', 'segmentArticles', 'segmentPolls']);
         return CommunitySegmentResource::make($segment);
     }
@@ -119,7 +121,7 @@ class CommunitySegmentController extends Controller
         $validatedSegment = $request->validated();
         $storage = Storage::disk('public');
 
-        // Handler 1: segment_cover 
+        // Handler 1: segment_cover
         if ($request->hasFile('segment_cover')) {
 
             # delete old cover if it exists
@@ -144,18 +146,18 @@ class CommunitySegmentController extends Controller
         $communitySegment->update($validatedSegment);
 
         if ($communitySegment->segment_type === 'article') {
-            // Access poll data from article_segments key 
+            // Access poll data from article_segments key
             $articleData = $request->input('article_segments'); # for nested data, key is the object key
 
-            // Only update if article data is provided 
+            // Only update if article data is provided
             if ($articleData && isset($articleData['body'])) {
                 SegmentsArticle::where('segment_id', $communitySegment->id)->update([
                     'body' => $articleData['body']
                 ]);
             }
         } else if ($communitySegment->segment_type === 'poll') {
-            // Accessing poll data from poll_segments key 
-            $pollData = $request->input('poll_segments'); # input() for nested data 
+            // Accessing poll data from poll_segments key
+            $pollData = $request->input('poll_segments'); # input() for nested data
 
             SegmentsPoll::where('segment_id', $communitySegment->id)->update([
                 'question' => $pollData['question'],
@@ -196,7 +198,7 @@ class CommunitySegmentController extends Controller
     }
 
     /**
-     * Permanently destroy 
+     * Permanently destroy
      */
     public function forceDestroy(CommunitySegment $communitySegment)
     {
@@ -248,7 +250,7 @@ class CommunitySegmentController extends Controller
     }
 
     /**
-     * Archive a segment 
+     * Archive a segment
      */
     public function archive($id)
     {
@@ -280,7 +282,7 @@ class CommunitySegmentController extends Controller
     public function archiveIndex()
     {
         $archivedIssues = Archive::where('archivable_type', 'community-segment')
-            ->with(['archiver']) # load archiver relationship 
+            ->with(['archiver']) # load archiver relationship
             ->orderBy('archived_at', 'desc')
             ->get();
         return ArchiveResource::collection($archivedIssues);

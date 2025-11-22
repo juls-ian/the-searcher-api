@@ -16,15 +16,15 @@ class ArchiveController extends Controller
 {
     use AuthorizesRequests;
 
-    private function processFiles($data, callable $callback) # callback = a function can be called later 
+    private function processFiles($data, callable $callback) # callback = a function can be called later
     {
 
-        // Base case: strings 
+        // Base case: strings
         if (is_string($data) && str_contains($data, 'archives/')) {
             $callback($data);
             return;
         }
-        // Recursive case: arrays 
+        // Recursive case: arrays
         if (is_array($data)) {
             foreach ($data as $key => $value) {
                 // Handle case where value is ['path' => ..., 'original_dir' => ...]
@@ -45,7 +45,7 @@ class ArchiveController extends Controller
     {
         $this->authorize('viewAny', Archive::class);
         // $archives = Archive::with('archivable')->get();
-        $archives = Archive::get();
+        $archives = Archive::latest()->paginate(12);
         return ArchiveResource::collection($archives);
     }
 
@@ -67,15 +67,15 @@ class ArchiveController extends Controller
         $archivableType = $validatedArchive['archivable_type'];
         $archivableData = $validatedArchive['data'] ?? [];
 
-        #                         'cover' => null 
+        #                         'cover' => null
         foreach ($archivableData as $key => $value) {
             if ($request->hasFile("data.$key")) {
 
-                $files = $request->file("data.$key"); # get uploaded file 
+                $files = $request->file("data.$key"); # get uploaded file
 
-                // Handler 1: multiple files uploaded 
+                // Handler 1: multiple files uploaded
                 if (is_array($files)) {
-                    $archivableData[$key] = []; # reset to hold multiple files 
+                    $archivableData[$key] = []; # reset to hold multiple files
 
 
                     foreach ($files as $file) {
@@ -90,17 +90,17 @@ class ArchiveController extends Controller
                             $dir = 'archives/files';
                         }
 
-                        $filename = $archivableType . '-' . $file->hashName(); # add prefix 
+                        $filename = $archivableType . '-' . $file->hashName(); # add prefix
                         $path = $file->storeAs($dir, $filename, 'public'); # store file with custom name
 
-                        // Replace original value with URL or storage path 
-                        $archivableData[$key][] = [ # multiple file but single file is returned fix 
+                        // Replace original value with URL or storage path
+                        $archivableData[$key][] = [ # multiple file but single file is returned fix
                             'path' => $path,
                             'original_dir' => $dir
                         ];
                     }
                 } else {
-                    // Handler 2: single file upload fallback 
+                    // Handler 2: single file upload fallback
                     $file = $files;
                     $mimeType = $file->getMimeType();
 
@@ -164,7 +164,7 @@ class ArchiveController extends Controller
     {
         $this->authorize('update', $archive);
 
-        // When archivable_id is not null 
+        // When archivable_id is not null
         if (!is_null($archive->archivable_id)) {
             return response()->json([
                 'message' => 'This archive is came from other resource and cannot be updated directly.'
@@ -172,14 +172,14 @@ class ArchiveController extends Controller
         }
 
         $validatedArchive = $request->validated();
-        $archivableData = $validatedArchive['data'] ?? null; # raw validated data 
+        $archivableData = $validatedArchive['data'] ?? null; # raw validated data
         $archivableType = $validatedArchive['archivable_type'] ?? $archive->archivable_type;
 
-        // Convert to array 
+        // Convert to array
         $oldData = is_string($archive->data)
-            # if string (contains JSON), convert to assoc array and return array instead of object 
+            # if string (contains JSON), convert to assoc array and return array instead of object
             ? json_decode($archive->data, true)
-            # if data has value it uses that value hence = empty array 
+            # if data has value it uses that value hence = empty array
             : ($archive->data ?? []);
 
         if (is_array($archivableData)) {
@@ -187,9 +187,9 @@ class ArchiveController extends Controller
                 // Checks if a file was uploaded for this specific field (like data.cover_image or data.video)
                 if ($request->hasFile("data.$key")) {
 
-                    $files = $request->file("data.$key"); # get uploaded file 
+                    $files = $request->file("data.$key"); # get uploaded file
 
-                    // Handler 1: multiple files 
+                    // Handler 1: multiple files
                     if (is_array($files)) {
                         $archivableData[$key] = [];
 
@@ -214,7 +214,7 @@ class ArchiveController extends Controller
                             ];
                         }
 
-                        // Cleanup old files if exists 
+                        // Cleanup old files if exists
                         if (isset($oldData[$key]) && is_array($oldData[$key])) {
                             foreach ($oldData[$key] as $oldFile) {
                                 if (isset($oldFile['path']) && Storage::disk('public')->exists($oldFile['path'])) {
@@ -222,13 +222,13 @@ class ArchiveController extends Controller
                                 }
                             }
                         }
-                        // Handler 2: single file 
+                        // Handler 2: single file
                     } else {
 
                         $file = $files;
                         $mimeType = $file->getMimeType();
 
-                        // Handle different file types storage 
+                        // Handle different file types storage
                         if (str_starts_with($mimeType, 'image/')) {
                             $dir = 'archives/covers';
                         } elseif (str_starts_with($mimeType, 'video/')) {
@@ -237,18 +237,18 @@ class ArchiveController extends Controller
                             $dir = 'archives/files';
                         }
 
-                        // Generating random hash filename with prefix 
+                        // Generating random hash filename with prefix
                         $filename = $archivableType . '-' . $file->hashName();
 
-                        // Store files first 
+                        // Store files first
                         $path = $file->storeAs($dir, $filename, 'public');
 
                         $archivableData[$key] = [
-                            'path' => $path, #replace original value with URL or storage path 
+                            'path' => $path, #replace original value with URL or storage path
                             'original_dir' => $dir # save the original directory
                         ];
 
-                        # delete old file only if it exists for this key/field 
+                        # delete old file only if it exists for this key/field
                         if (isset($oldData[$key])) {
                             $oldPath = is_array($oldData[$key]) ? $oldData[$key]['path'] : $oldData[$key];
                             if ($oldPath && Storage::disk('public')->exists($oldPath)) {
@@ -257,13 +257,13 @@ class ArchiveController extends Controller
                         }
                     }
                 } else {
-                    // if no new file, keep the old files 
+                    // if no new file, keep the old files
                     $archivableData[$key] = $oldData[$key] ?? $value;
                 }
             }
         }
 
-        $updateData = []; # batch of updated data 
+        $updateData = []; # batch of updated data
 
         // Field whitelist
         foreach (['title', 'archivable_type', 'archivable_id'] as $field) {
@@ -273,9 +273,9 @@ class ArchiveController extends Controller
             }
         }
 
-        // Check if data field is submitted 
+        // Check if data field is submitted
         if (isset($validatedArchive['data'])) {
-            $updateData['data'] = $archivableData; # fully processed data ready for storage 
+            $updateData['data'] = $archivableData; # fully processed data ready for storage
         }
 
         $archive->update($updateData);
@@ -292,34 +292,34 @@ class ArchiveController extends Controller
     public function destroy(Archive $archive)
     {
         $this->authorize('delete', $archive);
-        // Convert to array 
+        // Convert to array
         $data = is_string($archive->data)
-            # (assumes string contains JSON), convert to assoc array and return array instead of object 
+            # (assumes string contains JSON), convert to assoc array and return array instead of object
             ? json_decode($archive->data, true)
-            : $archive->data;  # if data has value it uses that value 
+            : $archive->data;  # if data has value it uses that value
 
 
         $storage = Storage::disk('public');
         $storage->makeDirectory('archives/trash');
 
-        // Recursive helper to walk the structure 
+        // Recursive helper to walk the structure
         $moveToTrash = function (&$node) use (&$moveToTrash, $storage) {
             if (is_array($node)) {
 
-                // Case: file info array 
+                // Case: file info array
                 if (isset($node['path'], $node['original_dir'])) {
-                    $currentPath = ltrim($node['path'], '/'); # remove leading slash if any 
+                    $currentPath = ltrim($node['path'], '/'); # remove leading slash if any
                     $newPath = 'archives/trash/' . basename($currentPath);
 
                     if ($storage->exists($currentPath)) {
                         $storage->move($currentPath, $newPath);
                     }
 
-                    // Update path in db 
+                    // Update path in db
                     $node['path'] = $newPath;
                 }
 
-                // Recurse into nested arrays 
+                // Recurse into nested arrays
                 foreach ($node as &$child) {
                     $moveToTrash($child);
                 }
@@ -329,7 +329,7 @@ class ArchiveController extends Controller
         $moveToTrash($data);
 
 
-        // Save updated paths pointing to trash 
+        // Save updated paths pointing to trash
         $archive->update(['data' => $data]);
 
         // Soft delete the archive
@@ -344,7 +344,7 @@ class ArchiveController extends Controller
         $archive = Archive::onlyTrashed()->findOrFail($id);
         $this->authorize('forceDelete', $archive);
 
-        // Decode jason if needed 
+        // Decode jason if needed
         $data = is_string($archive->data)
             ? json_decode($archive->data, true)
             : $archive->data;
@@ -374,14 +374,14 @@ class ArchiveController extends Controller
         $archive = Archive::onlyTrashed()->findOrFail($id);
         $this->authorize('restore', $archive);
 
-        // Decode archive data from db as [] 
+        // Decode archive data from db as []
         $data = is_string($archive->data)
             ? json_decode($archive->data, true)
             : $archive->data;
 
         $storage = Storage::disk('public');
 
-        // Recursive restore closure function 
+        // Recursive restore closure function
         $restoreFiles = function (&$node) use (&$restoreFiles, $storage) {
             if (is_array($node)) {
                 if (isset($node['path'], $node['original_dir'])) {
@@ -399,7 +399,7 @@ class ArchiveController extends Controller
                     }
                 }
 
-                # recurse deeper into the child elements 
+                # recurse deeper into the child elements
                 foreach ($node as &$child) {
                     $restoreFiles($child);
                 }
@@ -413,9 +413,9 @@ class ArchiveController extends Controller
             $archive->archivable()->update(['archived_at' => now()]);
         }
 
-        // Save back modified as json to database 
+        // Save back modified as json to database
         $archive->data = json_encode($data);
-        // Restore archive 
+        // Restore archive
         $archive->restore();
 
 
@@ -426,19 +426,19 @@ class ArchiveController extends Controller
     }
 
     /**
-     * Unarchive 
+     * Unarchive
      */
     public function unarchive($id)
     {
-        $archive = Archive::findOrFail($id); # find the archived article 
+        $archive = Archive::findOrFail($id); # find the archived article
         $this->authorize('unarchive', $archive);
 
         // Only update if the archive has archivable_id
         if ($archive->archivable_id && $archive->archivable) { # polymorph relationship
-            // Set the archived_at in the related model 
+            // Set the archived_at in the related model
             $archive->archivable()->update(['archived_at' => null]);
 
-            $archive->forceDelete(); # permanently delete archived record 
+            $archive->forceDelete(); # permanently delete archived record
 
             return response()->json([
                 'message' => 'Archive was unarchive successfully'

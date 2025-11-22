@@ -24,7 +24,7 @@ class BulletinController extends Controller
     public function index()
     {
         $this->authorize('viewAny', Bulletin::class);
-        $bulletins = Bulletin::with(['writer', 'coverArtist'])->get();
+        $bulletins = Bulletin::with(['writer', 'coverArtist'])->latest()->paginate();
         return BulletinResource::collection($bulletins);
     }
 
@@ -44,7 +44,7 @@ class BulletinController extends Controller
         $this->authorize('create', Bulletin::class);
         $validatedBulletin = $request->validated();
 
-        // Handler 1: cover_photo upload 
+        // Handler 1: cover_photo upload
         if ($request->hasFile('cover_photo')) {
             $coverPath = $request->file('cover_photo')->store('bulletins/covers', 'public');
             $validatedBulletin['cover_photo'] = $coverPath;
@@ -53,7 +53,7 @@ class BulletinController extends Controller
         // Handler 2: date/time for published_at
         if (isset($validatedBulletin['published_at']) && $validatedBulletin['published_at']) {
 
-            # if date is provided parse it into carbon format 
+            # if date is provided parse it into carbon format
             $validatedBulletin['published_at'] = Carbon::parse($validatedBulletin['published_at']);
         } else {
 
@@ -61,7 +61,7 @@ class BulletinController extends Controller
         }
 
         $bulletin = Bulletin::create($validatedBulletin);
-        # lazy eager loading 
+        # lazy eager loading
         $bulletin->load(['writer', 'coverArtist']);
         return BulletinResource::make($bulletin);
     }
@@ -72,7 +72,7 @@ class BulletinController extends Controller
     public function show(Bulletin $bulletin)
     {
         $this->authorize('view', $bulletin);
-        # lazy eager loading 
+        # lazy eager loading
         $bulletin->load(['writer', 'coverArtist']);
         return BulletinResource::make($bulletin);
     }
@@ -94,21 +94,21 @@ class BulletinController extends Controller
         $validatedBulletin = $request->validated();
         $storage = Storage::disk('public');
 
-        // Handler 1: cover_photo upload 
+        // Handler 1: cover_photo upload
         if ($request->hasFile('cover_photo')) {
 
-            # delete existing cover_photo 
+            # delete existing cover_photo
             if ($bulletin->cover_photo && $storage->exists($bulletin->cover_photo)) {
                 $storage->delete($bulletin->cover_photo);
             }
             $validatedBulletin['cover_photo'] = $request->file('cover_photo')->store('bulletins/covers', 'public');
         } else {
-            # exclude cover_photo 
+            # exclude cover_photo
             unset($validatedBulletin['cover_photo']);
         }
 
         $bulletin->update($validatedBulletin);
-        # lazy eager loading 
+        # lazy eager loading
         $bulletin->load(['writer', 'coverArtist']);
         return BulletinResource::make($bulletin);
     }
@@ -126,7 +126,7 @@ class BulletinController extends Controller
             $storage->makeDirectory($trashDir);
         }
 
-        // Handler 1: cover_photo deletion 
+        // Handler 1: cover_photo deletion
         if ($bulletin->cover_photo && $storage->exists($bulletin->cover_photo)) {
             $filename = basename($bulletin->cover_photo);
             $trashPath = $trashDir . $filename;
@@ -201,7 +201,7 @@ class BulletinController extends Controller
     public function archiveIndex()
     {
         $archivedBulletins = Archive::where('archivable_type', 'issue')
-            ->with(['archiver']) # load archiver relationship 
+            ->with(['archiver']) # load archiver relationship
             ->orderBy('archived_at', 'desc')
             ->get();
         return ArchiveResource::collection($archivedBulletins);

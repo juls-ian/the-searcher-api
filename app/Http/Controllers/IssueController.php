@@ -26,7 +26,7 @@ class IssueController extends Controller
     public function index()
     {
         $this->authorize('viewAny', Issue::class);
-        return IssueResource::collection(Issue::all());
+        return IssueResource::collection(Issue::latest()->paginate(12));
     }
 
     /**
@@ -45,22 +45,22 @@ class IssueController extends Controller
         $this->authorize('create', Issue::class);
         $validatedIssue = $request->validated();
 
-        // Handler 1: file upload 
+        // Handler 1: file upload
         if ($request->hasFile('file')) {
             $filePath = $request->file('file')->store('issues/files', 'public');
             $validatedIssue['file'] = $filePath;
         }
 
-        // Handler 2: thumbnail upload 
+        // Handler 2: thumbnail upload
         if ($request->hasFile('thumbnail')) {
             $thumbnailPath = $request->file('thumbnail')->store('issues/thumbnail', 'public');
             $validatedIssue['thumbnail'] = $thumbnailPath;
         }
 
-        // Handler 3: date/time published_at 
+        // Handler 3: date/time published_at
         if (isset($validatedIssue['published_at']) && $validatedIssue['published_at']) {
 
-            # if date is provided 
+            # if date is provided
             $validatedIssue['published_at'] = Carbon::parse($validatedIssue['published_at']);
         } else {
 
@@ -96,24 +96,24 @@ class IssueController extends Controller
         $validatedIssue = $request->validated();
         $storage = Storage::disk('public');
 
-        // Handler 1: file upload 
+        // Handler 1: file upload
         if ($request->hasFile('file')) {
 
-            # delete old file if it exists 
+            # delete old file if it exists
             if ($issue->file && $storage->exists($issue->file)) {
                 $issue->delete($issue->file);
             }
             $validatedIssue['file'] = $request->file('file')->store('issues/files', 'public');
         } else {
 
-            # exclude file in any subsequent db operation 
+            # exclude file in any subsequent db operation
             unset($validatedIssue['file']);
         }
 
         // Handler 2: thumbnail
         if ($request->hasFile('thumbnail')) {
 
-            # delete existing thumbnail 
+            # delete existing thumbnail
             if ($issue->thumbnail && $storage->exists($issue->thumbnail)) {
                 $issue->delete($issue->thumbnail);
             }
@@ -213,13 +213,13 @@ class IssueController extends Controller
     }
 
     /**
-     * Archive an issue 
+     * Archive an issue
      */
     public function archive($id)
     {
         $issue = Issue::findOrFail($id);
         $this->authorize('archive', $issue);
-        $archive = $issue->archive(); # trait method 
+        $archive = $issue->archive(); # trait method
 
         if (!$archive) {
             return response()->json([
@@ -239,7 +239,7 @@ class IssueController extends Controller
     public function archiveIndex()
     {
         $archivedIssues = Archive::where('archivable_type', 'issue')
-            ->with(['archiver']) # load archiver relationship 
+            ->with(['archiver']) # load archiver relationship
             ->orderBy('archived_at', 'desc')
             ->get();
         return ArchiveResource::collection($archivedIssues);

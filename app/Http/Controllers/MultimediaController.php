@@ -27,7 +27,9 @@ class MultimediaController extends Controller
         $this->authorize('viewAny', Multimedia::class);
 
         # eager load relationships to User
-        $multimedia = Multimedia::with(['multimediaArtists', 'thumbnailArtist'])->get();
+        $multimedia = Multimedia::with(['multimediaArtists', 'thumbnailArtist'])
+            ->latest()
+            ->paginate(12);
         return MultimediaResource::collection($multimedia);
     }
     /**

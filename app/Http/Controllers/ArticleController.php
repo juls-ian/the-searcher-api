@@ -2,22 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Article;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreArticleRequest;
 use App\Http\Requests\UpdateArticleRequest;
 use App\Http\Resources\ArchiveResource;
 use App\Http\Resources\ArticleResource;
 use App\Models\Archive;
+use App\Models\Article;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ArticleController extends Controller
 {
     use AuthorizesRequests;
+
     /**
      * Display a listing of the resource.
      */
@@ -25,7 +24,10 @@ class ArticleController extends Controller
     {
         $this->authorize('viewAny', Article::class);
         // eager load Article relationships to User (n+1 problem fix)
-        $articles = Article::with(['category', 'writer', 'coverArtist', 'thumbnailArtist'])->get();
+        $articles = Article::with(['category', 'writer', 'coverArtist', 'thumbnailArtist'])
+            ->latest()
+            ->paginate(12);
+
         return ArticleResource::collection($articles);
 
         // return ArticleResource::collection(Article::all());
@@ -56,16 +58,16 @@ class ArticleController extends Controller
         // Handler 2: thumbnail_same_as_cover logic
         if ($request->has('thumbnail_same_as_cover') && $request->thumbnail_same_as_cover) {
 
-            # use same file as cover_photo for thumbnail
+            // use same file as cover_photo for thumbnail
             $validatedArticle['thumbnail'] = $validatedArticle['cover_photo'] ?? null;
 
-            # copy cover_photo metadata to thumbnail if not provided
-            if (!$request->has('thumbnail_caption') && $request->has('cover_caption')) {
+            // copy cover_photo metadata to thumbnail if not provided
+            if (! $request->has('thumbnail_caption') && $request->has('cover_caption')) {
                 $validatedArticle['thumbnail_caption'] = $validatedArticle['cover_caption'];
             }
 
-            # copy cover_artist_id to thumbnail_artist_id if not provided
-            if (!$request->has('thumbnail_artist_id') && $request->has('cover_artist_id')) {
+            // copy cover_artist_id to thumbnail_artist_id if not provided
+            if (! $request->has('thumbnail_artist_id') && $request->has('cover_artist_id')) {
                 $validatedArticle['thumbnail_artist_id'] = $validatedArticle['cover_artist_id'];
             }
         } else {
@@ -80,7 +82,7 @@ class ArticleController extends Controller
         // Handler 4: date/time for published_at
         if (isset($validatedArticle['published_at']) && $validatedArticle['published_at']) {
 
-            # date provided (either now or past)
+            // date provided (either now or past)
             $validatedArticle['published_at'] = Carbon::parse($validatedArticle['published_at']);
         } else {
 
@@ -91,6 +93,7 @@ class ArticleController extends Controller
         $article = Article::create($validatedArticle);
         // Eager load Article relationships to User (n+1 problem fix)
         $article->load(['category', 'writer', 'coverArtist', 'thumbnailArtist']);
+
         return ArticleResource::make($article);
     }
 
@@ -103,6 +106,7 @@ class ArticleController extends Controller
 
         // Eager load Article relationships to User (n+1 problem fix)
         $article->load(['category', 'writer', 'coverArtist', 'thumbnailArtist']);
+
         return ArticleResource::make($article);
     }
 
@@ -124,11 +128,10 @@ class ArticleController extends Controller
         $validatedArticle = $request->validated();
         $storage = Storage::disk('public');
 
-
         // Handler 1: cover photo upload or URL
         if ($request->hasFile('cover_photo')) {
 
-            # delete old cover if it exists
+            // delete old cover if it exists
             if ($article->cover_photo && $storage->exists($article->cover_photo)) {
                 $storage->delete($article->cover_photo);
             }
@@ -145,11 +148,11 @@ class ArticleController extends Controller
          */
         if ($request->has('thumbnail_same_as_cover') && $request->thumbnail_same_as_cover) {
 
-            # if same as cover, force thumbnail with adapt cover_photo
+            // if same as cover, force thumbnail with adapt cover_photo
             $validatedArticle['thumbnail'] = $validatedArticle['cover_photo'] ?? $article->cover_photo;
 
-            # force adapt cover artist
-            if (!$request->has('thumbnail_artist_id')) {
+            // force adapt cover artist
+            if (! $request->has('thumbnail_artist_id')) {
                 $validatedArticle['thumbnail_artist_id'] = $validatedArticle['cover_artist_id'] ?? $article->cover_artist_id;
             }
         } else {
@@ -157,7 +160,7 @@ class ArticleController extends Controller
             // Handler 3: thumbnail upload (only if not using same as cover)
             if ($request->hasFile('thumbnail')) {
 
-                # delete old thumbnail if it exists and it's not same as cover
+                // delete old thumbnail if it exists and it's not same as cover
                 if ($article->thumbnail && $storage->exists($article->thumbnail)) {
                     $storage->delete($article->thumbnail);
                 }
@@ -172,6 +175,7 @@ class ArticleController extends Controller
         $article->update($validatedArticle);
         // reload relationships
         $article->load(['category', 'writer', 'coverArtist', 'thumbnailArtist']);
+
         return ArticleResource::make($article);
     }
 
@@ -186,19 +190,21 @@ class ArticleController extends Controller
 
         $destroyFile = function ($filePath) use ($storage, $trashDir) {
             // Check if is empty, null, falsy
-            if (!$filePath) return;
+            if (! $filePath) {
+                return;
+            }
 
-            $filename = basename($filePath); # cover123.jpg
-            $trashPath = $trashDir . $filename; # articles/covers/cover123.jpg
+            $filename = basename($filePath); // cover123.jpg
+            $trashPath = $trashDir . $filename; // articles/covers/cover123.jpg
 
-            # if it exists in the original path
+            // if it exists in the original path
             if ($storage->exists($filePath)) {
                 $storage->move($filePath, $trashPath);
             }
         };
 
         // Check if trash directory exists
-        if (!$storage->exists($trashDir)) {
+        if (! $storage->exists($trashDir)) {
             $storage->makeDirectory($trashDir);
         }
 
@@ -206,6 +212,7 @@ class ArticleController extends Controller
         $destroyFile($article->thumbnail);
 
         $article->delete();
+
         return response()->json(['message' => 'Article deleted successfully'], 200);
     }
 
@@ -216,12 +223,14 @@ class ArticleController extends Controller
         $trashDir = 'articles/trash/';
 
         $forceDestroyFile = function ($filePath) use ($storage, $trashDir) {
-            if (!$filePath) return;
+            if (! $filePath) {
+                return;
+            }
 
             $filename = basename($filePath);
             $trashPath = $trashDir . $filename;
 
-            # if it exists in the trash
+            // if it exists in the trash
             if ($storage->exists($trashPath)) {
                 $storage->delete($trashPath);
             }
@@ -231,8 +240,9 @@ class ArticleController extends Controller
         $forceDestroyFile($article->thumbnail);
 
         $article->forceDelete();
+
         return response()->json([
-            'message' => 'Article was permanently deleted'
+            'message' => 'Article was permanently deleted',
         ], 200);
     }
 
@@ -244,7 +254,9 @@ class ArticleController extends Controller
 
         // Anonymous/closure helper function
         $restoreFile = function ($filePath) use ($storage, $trashDir) {
-            if (!$filePath) return;
+            if (! $filePath) {
+                return;
+            }
 
             $filename = basename($filePath);
             $trashPath = $trashDir . $filename;
@@ -261,7 +273,7 @@ class ArticleController extends Controller
 
         return response()->json([
             'message' => 'Article was restored',
-            'data' => ArticleResource::make($article)
+            'data' => ArticleResource::make($article),
         ]);
     }
 
@@ -270,20 +282,20 @@ class ArticleController extends Controller
      */
     public function archive($id)
     {
-        $article = Article::findOrFail($id); # find article or fail
+        $article = Article::findOrFail($id); // find article or fail
         $this->authorize('archive', $article);
-        $archive = $article->archive(); # calls the trait method to create archive | returns Archive or null
+        $archive = $article->archive(); // calls the trait method to create archive | returns Archive or null
 
         // If trait didn’t create a new archive because the article was already archived
-        if (! $archive) { # if $archive is falsy (null)
+        if (! $archive) { // if $archive is falsy (null)
             return response()->json([
-                'message' => 'This article has already been archived'
+                'message' => 'This article has already been archived',
             ], 409);
         }
 
         return response()->json([
             'message' => 'Article archived successfully',
-            'data' => new ArchiveResource($archive)
+            'data' => new ArchiveResource($archive),
         ]);
     }
 
@@ -293,9 +305,10 @@ class ArticleController extends Controller
     public function archiveIndex()
     {
         $archivedArticles = Archive::where('archivable_type', 'article')
-            ->with(['archiver']) # load archiver relationship
+            ->with(['archiver']) // load archiver relationship
             ->orderBy('archived_at', 'desc')
-            ->get();;
+            ->get();
+
         return ArchiveResource::collection($archivedArticles);
         // return view('articles.archived', compact('articles'));
     }
@@ -309,6 +322,7 @@ class ArticleController extends Controller
             $archive = Archive::where('archivable_type', 'article')
                 ->where('id', $id)
                 ->firstOrFail();
+
             return new ArchiveResource($archive);
         } catch (ModelNotFoundException $e) {
             return response()->json(['message' => 'Can only show archived articles']);
