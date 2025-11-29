@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class ArticleResource extends JsonResource
 {
@@ -26,12 +27,12 @@ class ArticleResource extends JsonResource
             'published_at' => $this->published_at,
             'is_live' => $this->is_live,
             'is_header' => $this->is_header,
-            'cover_photo' => $this->cover_photo,
+            'cover_photo' => $this->cover_photo ? Storage::url($this->cover_photo) : null,
             'cover_caption' => $this->cover_caption,
             'cover_artist' => $this->coverArtist->full_name ?? null,
             'credit_type' => $this->cover_credit_type,
             'thumbnail_same_as_cover' => $this->thumbnail_same_as_cover,
-            'thumbnail' => $this->thumbnail,
+            'thumbnail' => $this->thumbnail ? Storage::url($this->thumbnail) : null,
             'thumbnail_artist' => $this->thumbnailArtist->full_name ?? null,
             'published_by' => $this->publisher->full_name ?? null
         ];
