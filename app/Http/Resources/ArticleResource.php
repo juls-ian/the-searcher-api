@@ -24,7 +24,8 @@ class ArticleResource extends JsonResource
                 ? $this->writer->pen_name
                 : $this->writer->full_name,
             'body' => $this->body,
-            'published_at' => $this->published_at,
+            'published_at' => $this->published_at?->toFormattedDateString(),
+            'published_at_full' => $this->published_at?->format('F j, Y'),
             'is_live' => $this->is_live,
             'is_header' => $this->is_header,
             'cover_photo' => $this->cover_photo ? Storage::url($this->cover_photo) : null,
