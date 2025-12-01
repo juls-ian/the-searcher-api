@@ -11,6 +11,7 @@ use App\Models\Article;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class ArticleController extends Controller
@@ -20,13 +21,14 @@ class ArticleController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', Article::class);
+        $perPage = $request->input('per_page', 12); // defaults to 12
         // eager load Article relationships to User (n+1 problem fix)
         $articles = Article::with(['category', 'writer', 'coverArtist', 'thumbnailArtist'])
             ->latest()
-            ->paginate(12);
+            ->paginate($perPage);
 
         return ArticleResource::collection($articles);
 
