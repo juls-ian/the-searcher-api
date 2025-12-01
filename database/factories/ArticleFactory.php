@@ -26,7 +26,10 @@ class ArticleFactory extends Factory
         return [
             'title' => $title,
             'slug' => Str::slug($title),
-            'article_category_id' => ArticleCategory::inRandomOrder()->first()->id, // assign to existing category
+            'article_category_id' => ArticleCategory::where('id', '>', 5)
+                ->inRandomOrder()
+                ->first()
+                ->id, // assign to existing category
             'writer_id' => User::inRandomOrder()->first()?->id ??  User::factory(),  // use random existing user, else create new user
             'body' => fake()->paragraphs(rand(3, 8), true),
             'published_at' => fake()->dateTimeBetween('-1 year', 'now'),
