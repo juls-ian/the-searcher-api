@@ -19,7 +19,11 @@ class ArticleResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'slug' => $this->slug,
-            'category' => $this->category->name ?? null,
+            'category' => [
+                'name' => $this->category?->name ?? null,
+                'parent' => $this->category?->parent?->name ?? null
+            ],
+            // Debug in your resource
             'writer' => in_array($this->category->name, ['Opinion', 'Column', 'Editorial'])
                 ? $this->writer->pen_name
                 : $this->writer->full_name,
