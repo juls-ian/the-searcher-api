@@ -91,6 +91,15 @@ class ArticleController extends Controller
             $validatedArticle['published_at'] = Carbon::now();
         }
 
+        // Handler 5: Ticker
+        if (isset($validatedArticle['add_to_ticker']) && $validatedArticle['add_to_ticker']) {
+            // ticker expiration 7 days after publication
+            $validatedArticle['ticker_expires_at'] = Carbon::parse($validatedArticle['published_at'])
+                ->addDays(7);
+        } else {
+            $validatedArticle['ticker_expires_at'] = null;
+        }
+
         // $validatedArticle['published_at'] = Carbon::now();
         $article = Article::create($validatedArticle);
         // Eager load Article relationships to User (n+1 problem fix)

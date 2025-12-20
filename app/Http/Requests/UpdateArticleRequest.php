@@ -40,7 +40,7 @@ class UpdateArticleRequest extends FormRequest
             // 'thumbnail' => ['required_if:thumbnail_same_as_cover,false'],
             'thumbnail_artist_id' => ['sometimes', 'integer', 'exists:users,id', 'required_if:thumbnail_same_as_cover,false'],
             'archived_at' => ['sometimes', 'nullable', 'date'],
-            'add_to_ticker' => ['sometimes', 'boolean'],
+            'add_to_ticker' => ['sometimes', 'nullable', 'boolean'],
             'ticker_expires_at' => ['sometimes', 'nullable', 'date', 'after:now,required_if:add_to_ticker,true']
 
         ];

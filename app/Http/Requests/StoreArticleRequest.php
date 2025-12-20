@@ -40,8 +40,8 @@ class StoreArticleRequest extends FormRequest
             // 'thumbnail' => 'nullable|required_without:thumbnail_same_as_cover|file|image',
             'thumbnail_artist_id' => ['nullable', 'integer', 'exists:users,id'],
             'archived_at' => ['nullable', 'date'],
-            'add_to_ticker' => ['sometimes', 'boolean'],
-            'ticker_expires_at' => ['nullable', 'required_if:add_to_ticker,true', 'date', 'after:now']
+            'add_to_ticker' => ['nullable', 'sometimes', 'boolean'],
+            'ticker_expires_at' => ['nullable', 'date', 'after:now']
         ];
     }
 
