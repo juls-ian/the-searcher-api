@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreArticleRequest extends FormRequest
 {
@@ -26,21 +27,29 @@ class StoreArticleRequest extends FormRequest
             'article_category_id' => ['required', 'integer', 'exists:article_categories,id'],
             'writer_id' => ['required', 'integer', 'exists:users,id'],
             'body' => ['required', 'string'],
-            'published_at' => ['sometimes', 'date'],
-            'is_live' => ['sometimes', 'boolean'],
-            'is_header' => ['sometimes', 'boolean'],
-            'series_id' => ['sometimes', 'integer', 'exists:articles,id'],
+            'published_at' => ['nullable', 'date'],
+            'is_live' => ['nullable', 'boolean'],
+            'is_header' => ['nullable', 'boolean', 'prohibited_if:is_live,false'],
+            'series_id' => [
+                'nullable',
+                'integer',
+                'prohibited_if:is_header,true',
+                'prohibited_if:is_live,false',
+                Rule::exists('articles', 'id')->where(function ($query) {
+                    $query->where('is_header', true);
+                })
+            ],
             'cover_photo' => ['required', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
             // 'cover_photo' => 'required|file,image',
             'cover_caption' => ['required', 'string'],
             'cover_artist_id' => ['required', 'integer', 'exists:users,id'],
-            'cover_credit_type' => ['sometimes', 'in:photo,graphics,illustration'],
-            'thumbnail_same_as_cover' => ['sometimes', 'boolean'],
-            'thumbnail' => ['sometimes', 'required_if:thumbnail_same_as_cover,false', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
+            'cover_credit_type' => ['nullable', 'in:photo,graphics,illustration'],
+            'thumbnail_same_as_cover' => ['nullable', 'boolean'],
+            'thumbnail' => ['nullable', 'required_if:thumbnail_same_as_cover,false', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
             // 'thumbnail' => 'nullable|required_without:thumbnail_same_as_cover|file|image',
             'thumbnail_artist_id' => ['nullable', 'integer', 'exists:users,id'],
             'archived_at' => ['nullable', 'date'],
-            'add_to_ticker' => ['nullable', 'sometimes', 'boolean'],
+            'add_to_ticker' => ['nullable', 'nullable', 'boolean'],
             'ticker_expires_at' => ['nullable', 'date', 'after:now']
         ];
     }
@@ -56,6 +65,10 @@ class StoreArticleRequest extends FormRequest
             'thumbnail.max' => 'Thumbnail must not exceed 5MB',
             'ticker_expires_at.after' => 'Ticker expiration must be in the future.',
             'ticker_expires_at.required_if' => 'Ticker expiration date is required when adding to ticker.',
+            'is_header.required_if' => 'The header field is required when the article is live.',
+            'is_header.prohibited_if' => 'Cannot set header when article is not live.',
+            'series_id.prohibited_if' => 'The series id cannot be set when the article is a header or when the article is not live.',
+            'series_id.exists' => 'The selected series must be a valid header article.',
         ];
     }
 }

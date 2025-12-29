@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateArticleRequest extends FormRequest
 {
@@ -29,9 +30,17 @@ class UpdateArticleRequest extends FormRequest
             'body' => ['sometimes', 'string'],
             'published_at' => ['sometimes', 'date'],
             'is_live' => ['sometimes', 'boolean'],
-            'is_header' => ['sometimes',  'boolean'],
-            'series_id' => ['sometimes', 'integer', 'nullable', 'exists:articles,id'],
-            'cover_photo' => ['sometimes', 'nullable', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
+            'is_header' => ['sometimes',  'boolean', 'prohibited_if:is_live,false'],
+            'series_id' => [
+                'sometimes',
+                'integer',
+                'prohibited_if:is_header,true',
+                'prohibited_if:is_live,false',
+                Rule::exists('articles', 'id')->where(function ($query) {
+                    $query->where('is_header', true);
+                })
+            ],
+            'cover_photo' => ['sometimes', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
             'cover_caption' => ['sometimes', 'string'],
             'cover_artist_id' => ['sometimes', 'integer', 'exists:users,id'],
             'cover_credit_type' => ['sometimes', 'in:photo,graphics,illustration'],
@@ -39,9 +48,9 @@ class UpdateArticleRequest extends FormRequest
             'thumbnail' => ['sometimes', 'required_if:thumbnail_same_as_cover,false', 'image', 'mimes:jpg,png,jpeg,webp', 'max:5000'],
             // 'thumbnail' => ['required_if:thumbnail_same_as_cover,false'],
             'thumbnail_artist_id' => ['sometimes', 'integer', 'exists:users,id', 'required_if:thumbnail_same_as_cover,false'],
-            'archived_at' => ['sometimes', 'nullable', 'date'],
-            'add_to_ticker' => ['sometimes', 'nullable', 'boolean'],
-            'ticker_expires_at' => ['sometimes', 'nullable', 'date', 'after:now,required_if:add_to_ticker,true']
+            'archived_at' => ['sometimes', 'date'],
+            'add_to_ticker' => ['sometimes', 'boolean'],
+            'ticker_expires_at' => ['sometimes', 'date', 'after:now,required_if:add_to_ticker,true']
 
         ];
     }

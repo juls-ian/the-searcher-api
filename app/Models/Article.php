@@ -22,6 +22,7 @@ class Article extends Model
         'published_at',
         'is_live',
         'is_header',
+        'series_id',
         'is_archived',
         'cover_photo',
         'cover_caption',
@@ -46,7 +47,7 @@ class Article extends Model
         'add_to_ticker' => 'boolean'
     ];
 
-    // Default values 
+    // Default values
     protected $attributes = [
         'is_live' => false,
         'is_header' => false,
@@ -112,7 +113,7 @@ class Article extends Model
     public static function booted()
     {
         /**
-         * To save the publisher_id 
+         * To save the publisher_id
          *  Alternatively we can handle this in the controller:
          * $validatedArticle['publisher_id'] = auth()->id();
          */
