@@ -32,6 +32,8 @@ class ArticleResource extends JsonResource
             'published_at_full' => $this->published_at?->format('F j, Y'),
             'is_live' => $this->is_live,
             'is_header' => $this->is_header,
+            'series_id' => $this->series_id,
+            'live_expires_at' => $this->live_expires_at,
             'cover_photo' => $this->cover_photo ? Storage::url($this->cover_photo) : null,
             'cover_caption' => $this->cover_caption,
             'cover_artist' => $this->coverArtist->full_name ?? null,

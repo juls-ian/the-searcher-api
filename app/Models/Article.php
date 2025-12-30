@@ -23,6 +23,7 @@ class Article extends Model
         'is_live',
         'is_header',
         'series_id',
+        'live_expires_at',
         'is_archived',
         'cover_photo',
         'cover_caption',
@@ -121,6 +122,14 @@ class Article extends Model
             // Only set publisher_id if not already set and user is authenticated
             if (!$article->publisher_id && Auth::id()) {
                 $article->publisher_id = Auth::id();
+            }
+        });
+
+        static::saving(function ($article) {
+            if ($article->is_live) {
+                $article->live_expires_at = $article->published_at->addHours(24);
+            } else {
+                $article->live_expires_at = null;
             }
         });
     }

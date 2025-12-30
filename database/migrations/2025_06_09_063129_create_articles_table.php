@@ -30,6 +30,7 @@ return new class extends Migration {
                 ->nullable()
                 ->constrained('articles')
                 ->onDelete('set null');
+            $table->dateTimeTz('live_expires_at')->nullable();
             // $table->boolean('is_archived')->default(false);
             $table->string('cover_photo'); // filename
             $table->text('cover_caption')->nullable();
